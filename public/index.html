@@ -308,6 +308,14 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
 .g-tag .go{flex:none;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:999px;background:var(--accent-2);color:var(--dark);font-size:13px;font-weight:700}
 .g-num{position:absolute;top:56px;left:12px;z-index:2;font-size:11px;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.7)}
 .rack-floor{height:46px;margin:0 6%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.65),transparent 70%);filter:blur(4px)}
+.rack-row{position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+.rack-row.dragging{cursor:grabbing}
+.rack-row img{-webkit-user-drag:none;user-select:none}
+.rack-row.dragging .garment{transition-duration:.45s}
+.rack-row.dragging .turn{transition-duration:.45s}
+.rack-row.dragging .g-tag{transition-delay:0s}
+.rail-thumb{position:absolute;top:-21px;left:50%;z-index:5;width:58px;height:28px;margin-left:-29px;border-radius:999px;background:var(--accent-2);color:var(--dark);display:grid;place-items:center;font-size:13px;font-weight:800;letter-spacing:.1em;box-shadow:0 8px 20px -6px rgba(0,0,0,.7),0 0 0 4px rgba(215,242,90,.18);transition:left .6s var(--ease-out),transform .3s var(--ease);pointer-events:none}
+.rack-row.dragging .rail-thumb{transition:left .18s linear,transform .3s var(--ease);transform:scale(1.12)}
 .rack-hint{display:flex;justify-content:space-between;gap:16px;margin-top:22px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:rgba(241,237,230,.55)}
 .rack-dots{display:flex;gap:8px}
 .rack-dots i{width:22px;height:3px;border-radius:3px;background:rgba(255,255,255,.2);transition:background .4s,width .4s}
@@ -502,7 +510,7 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
   .hero-ctas .btn{width:100%}
   .rack-row{height:440px;gap:4px;padding:0 4px}
   .garment.active{flex-grow:6}
-  .garment:nth-child(n+7),.rack-dots i:nth-child(n+7){display:none}
+  .garment:nth-of-type(n+7),.rack-dots i:nth-child(n+7){display:none}
   .g-tag{flex-direction:column;align-items:flex-start;min-width:170px}
   .g-num{display:none}
   .rail::before,.rail::after{height:470px}
@@ -595,6 +603,7 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
     <div class="rack-stage" data-reveal="fade">
       <div class="rail" aria-hidden="true"></div>
       <div class="rack-row" role="list" data-allow-overflow>
+        <span class="rail-thumb" aria-hidden="true">‹ ›</span>
         <button class="garment" role="listitem" data-p="hoodie" data-c="Olive Brown" style="--k:0"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/r-hoodie-brown.jpg" alt="Washed zip hoodie in olive brown" loading="lazy"><span class="g-num">01</span><span class="g-tag"><span><b>Washed Zip Hoodie</b><small>Olive Brown · ₹1,299</small></span><span class="go">Order →</span></span></span></span></span></button>
         <button class="garment" role="listitem" data-p="jacket" data-c="Shadow Black" style="--k:1"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/jacket-black.jpg" alt="Black track windbreaker with three white sleeve stripes" loading="lazy"><span class="g-num">02</span><span class="g-tag"><span><b>Track Windbreaker</b><small>Shadow Black · ₹1,499</small></span><span class="go">Order →</span></span></span></span></span></button>
         <button class="garment" role="listitem" data-p="vest" data-c="Maroon" style="--k:2"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/r-vest-maroon.jpg" alt="Maroon knit V-neck vest on a hanger" loading="lazy"><span class="g-num">03</span><span class="g-tag"><span><b>Knit V-Vest</b><small>Maroon · ₹899</small></span><span class="go">Order →</span></span></span></span></span></button>
@@ -605,7 +614,7 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
         <button class="garment" role="listitem" data-p="hoodie" data-c="Washed Black" style="--k:7"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/r-hoodie-black.jpg" alt="Washed black zip hoodie with cream drawcords" loading="lazy"><span class="g-num">08</span><span class="g-tag"><span><b>Washed Zip Hoodie</b><small>Washed Black · ₹1,299</small></span><span class="go">Order →</span></span></span></span></span></button>
       </div>
       <div class="rack-floor" aria-hidden="true"></div>
-      <div class="rack-hint"><span>Hover or tap to pull a piece forward</span><span class="rack-dots" aria-hidden="true"></span></div>
+      <div class="rack-hint"><span id="rackHint">Hover a piece to pull it forward · drag the rail to browse</span><span class="rack-dots" aria-hidden="true"></span></div>
     </div>
   </div>
 </section>
@@ -984,16 +993,36 @@ const row=$(".rack-row"), items=$$(".garment",row), dotsWrap=$(".rack-dots");
 let active=0, auto=null, paused=false, resumeT=null;
 items.forEach(()=>dotsWrap.appendChild(document.createElement("i")));
 const dots=$$("i",dotsWrap);
-const setActive=i=>{ active=i; items.forEach((g,k)=>{ g.classList.toggle("active",k===i); g.classList.toggle("before",k<i); g.classList.toggle("after",k>i); g.setAttribute("aria-current",k===i?"true":"false"); }); dots.forEach((d,k)=>d.classList.toggle("on",k===i)); };
+const setActive=i=>{ active=i; items.forEach((g,k)=>{ g.classList.toggle("active",k===i); g.classList.toggle("before",k<i); g.classList.toggle("after",k>i); g.setAttribute("aria-current",k===i?"true":"false"); }); dots.forEach((d,k)=>d.classList.toggle("on",k===i)); placeThumbSafe(); };
+function placeThumbSafe(){ try{ placeThumb(); }catch(_){} }
 setActive(0);
 const start=()=>{ if(reduced||auto) return; auto=setInterval(()=>{ if(paused) return; const vis=items.filter(g=>g.offsetParent!==null).length||items.length; setActive((active+1)%vis); },1900); };
 const stop=()=>{ clearInterval(auto); auto=null; };
 const hold=ms=>{ paused=true; clearTimeout(resumeT); resumeT=setTimeout(()=>paused=false,ms); };
 const finePtr=matchMedia("(hover:hover) and (pointer:fine)").matches;
+if(!finePtr) $("#rackHint").textContent="Drag across the rack to browse · tap a piece to order";
+/* drag-to-browse: scrub across the rail (touch, pen or mouse) */
+const thumb=$(".rail-thumb",row);
+const visCount=()=>items.filter(g=>g.offsetParent!==null).length||items.length;
+const placeThumb=()=>{ if(!thumb) return; const cs=getComputedStyle(row), pl=parseFloat(cs.paddingLeft)||0, pr=parseFloat(cs.paddingRight)||0, w=row.clientWidth-pl-pr, n=visCount(); thumb.style.left=Math.max(34,Math.min(row.clientWidth-34,pl+(Math.min(active,n-1)+.5)/n*w))+"px"; };
+const idxAt=x=>{ const r=row.getBoundingClientRect(), cs=getComputedStyle(row), pl=parseFloat(cs.paddingLeft)||0, pr=parseFloat(cs.paddingRight)||0, n=visCount(); return Math.max(0,Math.min(n-1,Math.floor((x-r.left-pl)/(r.width-pl-pr)*n))); };
+let drag=null, suppressClick=false;
+row.addEventListener("pointerdown",e=>{ if(e.button>0) return; drag={x:e.clientX,id:e.pointerId,moved:false}; });
+row.addEventListener("pointermove",e=>{
+  if(!drag||e.pointerId!==drag.id) return;
+  if(!drag.moved){ if(Math.abs(e.clientX-drag.x)<8) return; drag.moved=true; row.classList.add("dragging"); try{ row.setPointerCapture(e.pointerId); }catch(_){} hold(60000); }
+  const i=idxAt(e.clientX); if(i!==active){ setActive(i); try{ if(navigator.vibrate) navigator.vibrate(6); }catch(_){} }
+});
+const endDrag=()=>{ if(!drag) return; if(drag.moved){ suppressClick=true; setTimeout(()=>suppressClick=false,80); hold(8000); } drag=null; row.classList.remove("dragging"); };
+row.addEventListener("pointerup",endDrag); row.addEventListener("pointercancel",endDrag); row.addEventListener("lostpointercapture",endDrag);
+$$("img",row).forEach(im=>im.draggable=false);
+addEventListener("resize",placeThumb,{passive:true});
+placeThumb();
 items.forEach((g,i)=>{
-  if(finePtr) g.addEventListener("pointerenter",()=>{ hold(60000); setActive(i); });
+  if(finePtr) g.addEventListener("pointerenter",()=>{ if(drag&&drag.moved) return; hold(60000); setActive(i); });
   g.addEventListener("focus",()=>{ let kb=true; try{ kb=g.matches(":focus-visible"); }catch(e){} if(kb){ hold(8000); setActive(i); } });
   g.addEventListener("click",()=>{
+    if(suppressClick) return;
     if(i!==active && !finePtr){ hold(8000); setActive(i); return; }
     hold(8000); pick(g.dataset.p,g.dataset.c,true);
   });
