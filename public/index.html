@@ -1033,7 +1033,8 @@ if("IntersectionObserver" in window){ new IntersectionObserver(es=>es.forEach(e=
 /* ---------------- ORDER FORM ---------------- */
 const form=$("#orderForm"), sel=$("#product"), sw=$("#swatches"), sz=$("#sizes"), qtyO=$("#qty"), bagEl=$("#bag");
 let qty=1, bag=[];
-const orderId="52A-"+Date.now().toString(36).slice(-5).toUpperCase();
+function newOrderId(){ return "52A-"+crypto.randomUUID(); }
+let orderId=newOrderId();
 $("#oid").textContent="#"+orderId;
 Object.entries(P).forEach(([k,p])=>{ const o=document.createElement("option"); o.value=k; o.textContent=`${p.name} — ${inr(p.price)}`; sel.appendChild(o); });
 
@@ -1143,7 +1144,7 @@ form.addEventListener("submit",e=>{
   $("#doneId").textContent="#"+orderId; $("#reopen").href=lastLink;
   form.style.display="none"; $("#done").classList.add("show");
 });
-$("#newOrder").addEventListener("click",()=>{ form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value="hoodie"; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
+$("#newOrder").addEventListener("click",()=>{ orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value="hoodie"; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
 
 renderOptions(false); renderBag();
 })();
