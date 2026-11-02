@@ -788,7 +788,7 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
     </div>
 
     <div class="oform" data-reveal>
-      <form id="orderForm" novalidate>
+      <form id="orderForm" novalidate data-nowora="manual">
         <h3>Your order <small id="oid"></small></h3>
         <fieldset class="fs">
           <legend class="sr-only">Choose your piece</legend>
@@ -1130,6 +1130,13 @@ form.addEventListener("submit",e=>{
     ``,
     `Please confirm availability. Thank you!`
   ];
+  /* save the order to the shop's NOWORA database (real time) — t.js picks it up even if it loads a moment later */
+  (window.noworaQ=window.noworaQ||[]).push(["Orders",{
+    "Order ID":orderId, "Name":$("#name").value.trim(), "Phone":"+91 "+phone,
+    "Address":$("#address").value.trim().replace(/\s*\n\s*/g,", "), "City":$("#city").value.trim(), "State":$("#state").value.trim(),
+    "PIN code":$("#pin").value.trim(), "Payment":pay, "Note":note
+  }, items.map(b=>({name:P[b.key].name, colour:b.colour, size:b.size, qty:b.qty, price:P[b.key].price}))]);
+
   lastLink="https://wa.me/"+WA+"?text="+encodeURIComponent(lines.join("\n"));
   const w=window.open(lastLink,"_blank","noopener");
   if(!w){ /* popup blocked: the success panel button still works */ }
