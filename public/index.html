@@ -1138,6 +1138,12 @@ form.addEventListener("submit",e=>{
     "PIN code":$("#pin").value.trim(), "Payment":pay, "Note":note
   }, items.map(b=>({name:P[b.key].name, colour:b.colour, size:b.size, qty:b.qty, price:P[b.key].price}))]);
 
+  /* also create the order in Shiprocket (in the background — WhatsApp stays the main flow, a failure here never blocks the customer) */
+  try{ fetch("/api/order",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    orderId, name:$("#name").value.trim(), phone, address:$("#address").value.trim(), city:$("#city").value.trim(), state:$("#state").value.trim(),
+    pin:$("#pin").value.trim(), payment:pay, note, items:items.map(b=>({key:b.key, colour:b.colour, size:b.size, qty:b.qty}))
+  })}).catch(()=>{}); }catch(_){}
+
   lastLink="https://wa.me/"+WA+"?text="+encodeURIComponent(lines.join("\n"));
   const w=window.open(lastLink,"_blank","noopener");
   if(!w){ /* popup blocked: the success panel button still works */ }

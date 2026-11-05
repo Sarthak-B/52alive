@@ -1,9 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "52alive",
+  "main": "src/worker.js",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./public",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true },
+  "vars": {
+    // Pickup location name exactly as it appears in Shiprocket → Settings → Pickup Addresses
+    "SHIPROCKET_PICKUP": "Primary",
+    // Sent as billing_email on every Shiprocket order (the form doesn't collect customer email)
+    "SHIPROCKET_FALLBACK_EMAIL": ""
   }
+  // Secrets (never commit these):
+  //   npx wrangler secret put SHIPROCKET_EMAIL
+  //   npx wrangler secret put SHIPROCKET_PASSWORD
 }
