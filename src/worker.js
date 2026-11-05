@@ -148,7 +148,7 @@ async function createOrder(payload, env) {
   return d;
 }
 
-async function handleOrder(request, env) {
+export async function handleOrder(request, env) {
   if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) return json({ ok: false, error: "Shiprocket not configured" }, 503);
 
   /* only accept submits from this site's own pages */

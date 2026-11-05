@@ -22,6 +22,8 @@ Each order form submit still opens WhatsApp as before, and in the background the
    ```
 5. `npx wrangler deploy`
 
+**The live site runs on Cloudflare Pages** (`52-alive.pages.dev`). Pages uses `functions/api/order.js` (same code) instead of the Worker, so add the same four values in Cloudflare → Workers & Pages → **52-alive** → Settings → Variables and Secrets (`SHIPROCKET_EMAIL` and `SHIPROCKET_PASSWORD` as *Secret*, the other two as plain text), then redeploy.
+
 Until the secrets are set, `/api/order` returns 503 and the site keeps working on WhatsApp only.
 
 ### When you change products

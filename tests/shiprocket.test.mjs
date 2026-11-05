@@ -89,3 +89,9 @@ test('page sends the order to /api/order without blocking WhatsApp', () => {
   assert.ok(html.indexOf('fetch("/api/order"') < html.indexOf('window.open(lastLink'));
   assert.equal(istStamp(new Date('2026-01-01T00:00:00Z')), '2026-01-01 05:30');
 });
+
+test('Pages Function routes POST /api/order to the same handler', async () => {
+  const {onRequestPost} = await import('../functions/api/order.js');
+  const res = await onRequestPost({request: new Request('https://52-alive.pages.dev/api/order', {method: 'POST', body: '{}'}), env: {}});
+  assert.equal(res.status, 503);
+});
