@@ -194,7 +194,9 @@ export async function handleOrder(request, env) {
     let catalog;
     try { catalog = await loadCatalog(request, env); }
     catch (e) { console.error("[shiprocket] catalogue:", e.message); return json({ ok: false, error: "Product list unavailable" }, 503); }
-    const d = await createOrder(buildPayload(input, env, new Date(), catalog), env);
+    const payload = buildPayload(input, env, new Date(), catalog);
+    payload.pickup_location = await resolvePickup(env);
+    const d = await createOrder(payload, env);
     return json({ ok: true, shiprocket_order_id: d.order_id, shipment_id: d.shipment_id });
   } catch (e) {
     console.error("[shiprocket]", e.message);
@@ -202,6 +204,37 @@ export async function handleOrder(request, env) {
   }
 }
 
+
+/* ============================== pickup location ==============================
+ * Shiprocket wants the pickup location's NAME (Settings → Pickup Addresses), e.g. "Home".
+ * SHIPROCKET_PICKUP may hold that name, or an address, or nothing: we read the account's locations
+ * (cached 10 min) and use the one that matches by name, then by address text, then the only/primary one.
+ */
+let pickupCache = { at: 0, list: null };
+export function _resetPickupCache() { pickupCache = { at: 0, list: null }; }
+const norm = t => String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+export function choosePickup(list, wanted) {
+  const names = list.map(x => x.pickup_location).filter(Boolean);
+  if (!names.length) return wanted || "Primary";
+  const w = norm(wanted);
+  if (w) {
+    const byName = list.find(x => norm(x.pickup_location) === w); if (byName) return byName.pickup_location;
+    const byAddr = list.find(x => { const a = norm([x.address, x.address_2, x.city, x.pin_code].join(" ")); return a && (w.includes(norm(x.address)) || a.includes(w)) && norm(x.address).length > 3; });
+    if (byAddr) return byAddr.pickup_location;
+  }
+  const primary = list.find(x => x.is_primary_location == 1 || x.is_primary_location === true);
+  return (primary || list[0]).pickup_location;
+}
+export async function resolvePickup(env) {
+  if (!pickupCache.list || Date.now() - pickupCache.at > 10 * 60000) {
+    try {
+      const p = await srGet("/settings/company/pickup", env);
+      const raw = (p && p.data && (p.data.shipping_address || p.data)) || [];
+      pickupCache = { at: Date.now(), list: Array.isArray(raw) ? raw.filter(x => x && x.pickup_location) : [] };
+    } catch (e) { console.error("[shiprocket] pickup list:", e.message); return env.SHIPROCKET_PICKUP || "Primary"; }
+  }
+  return choosePickup(pickupCache.list, env.SHIPROCKET_PICKUP);
+}
 
 /* ============================== order tracking ==============================
  * POST /api/track {orderId, phone} → where the order is, straight from Shiprocket.
@@ -317,14 +350,16 @@ export async function handleTrack(request, env) {
  * can we log in, does the pickup location name match Shiprocket, and can a given order be found.
  */
 export async function handleHealth(request, env) {
-  const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), pickupConfigured: env.SHIPROCKET_PICKUP || "Primary (default)", fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL };
+  const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL };
   if (!out.secrets) return json(out);
   try { await login(env, true); out.login = true; } catch (e) { out.login = false; out.loginError = String(e.message).slice(0, 160); return json(out); }
   try {
     const p = await srGet("/settings/company/pickup", env);
     const list = (p && p.data && (p.data.shipping_address || p.data)) || [];
-    out.pickupNames = (Array.isArray(list) ? list : []).map(x => x && x.pickup_location).filter(Boolean);
-    out.pickupMatch = out.pickupNames.includes(env.SHIPROCKET_PICKUP || "Primary");
+    const names = (Array.isArray(list) ? list : []).map(x => x && x.pickup_location).filter(Boolean);
+    out.pickupLocations = names.length;
+    out.settingIsAName = names.includes(env.SHIPROCKET_PICKUP || "");
+    _resetPickupCache(); out.pickupUsed = await resolvePickup(env);
   } catch (e) { out.pickupError = String(e.message).slice(0, 160); }
   const id = new URL(request.url).searchParams.get("order") || "";
   if (/^52A-[0-9a-f-]{36}$/i.test(id)) {
@@ -334,8 +369,6 @@ export async function handleHealth(request, env) {
       catch (e) { return { error: String(e.message).slice(0, 160) }; } };
     out.orderByFilter = await look("filter_by=channel_order_id&filter=" + encodeURIComponent(id) + "&per_page=5");
     out.orderBySearch = await look("search=" + encodeURIComponent(id) + "&per_page=5");
-    const recent = await (async () => { try { const d = await srGet("/orders?per_page=10&sort=DESC&sort_by=id", env); return (Array.isArray(d && d.data) ? d.data : []).map(x => String(x.channel_order_id || "").slice(0, 12) + "… " + (x.status || "")); } catch (e) { return String(e.message).slice(0, 120); } })();
-    out.recentOrders = recent;
   }
   return json(out);
 }
