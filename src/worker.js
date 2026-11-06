@@ -311,6 +311,35 @@ export async function handleTrack(request, env) {
   }
 }
 
+
+/* ============================== health check ==============================
+ * GET /api/shiprocket-health[?order=52A-…] → yes/no answers only (no customer details):
+ * can we log in, does the pickup location name match Shiprocket, and can a given order be found.
+ */
+export async function handleHealth(request, env) {
+  const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), pickupConfigured: env.SHIPROCKET_PICKUP || "Primary (default)", fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL };
+  if (!out.secrets) return json(out);
+  try { await login(env, true); out.login = true; } catch (e) { out.login = false; out.loginError = String(e.message).slice(0, 160); return json(out); }
+  try {
+    const p = await srGet("/settings/company/pickup", env);
+    const list = (p && p.data && (p.data.shipping_address || p.data)) || [];
+    out.pickupNames = (Array.isArray(list) ? list : []).map(x => x && x.pickup_location).filter(Boolean);
+    out.pickupMatch = out.pickupNames.includes(env.SHIPROCKET_PICKUP || "Primary");
+  } catch (e) { out.pickupError = String(e.message).slice(0, 160); }
+  const id = new URL(request.url).searchParams.get("order") || "";
+  if (/^52A-[0-9a-f-]{36}$/i.test(id)) {
+    const look = async q => { try { const d = await srGet("/orders?" + q, env); const rows = Array.isArray(d && d.data) ? d.data : [];
+      const hit = rows.find(x => String(x.channel_order_id || "").toLowerCase() === id.toLowerCase());
+      return { rows: rows.length, found: !!hit, status: hit ? hit.status : undefined, hasAwb: hit ? !!((hit.shipments && (hit.shipments[0] || hit.shipments).awb) || "") : undefined }; }
+      catch (e) { return { error: String(e.message).slice(0, 160) }; } };
+    out.orderByFilter = await look("filter_by=channel_order_id&filter=" + encodeURIComponent(id) + "&per_page=5");
+    out.orderBySearch = await look("search=" + encodeURIComponent(id) + "&per_page=5");
+    const recent = await (async () => { try { const d = await srGet("/orders?per_page=10&sort=DESC&sort_by=id", env); return (Array.isArray(d && d.data) ? d.data : []).map(x => String(x.channel_order_id || "").slice(0, 12) + "… " + (x.status || "")); } catch (e) { return String(e.message).slice(0, 120); } })();
+    out.recentOrders = recent;
+  }
+  return json(out);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -318,6 +347,7 @@ export default {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
       return handleOrder(request, env);
     }
+    if (url.pathname === "/api/shiprocket-health") return handleHealth(request, env);
     if (url.pathname === "/api/track") {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
       return handleTrack(request, env);
