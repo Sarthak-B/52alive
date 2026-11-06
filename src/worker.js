@@ -5,7 +5,7 @@
  *   POST /api/order  → creates the order in Shiprocket (Orders → Custom order).
  *
  * The browser only sends what the customer picked (product key, colour, size, qty)
- * and their address. Names and prices come from CATALOG below, never from the
+ * and their address. Names and prices come from the page's product catalogue, never from the
  * browser, so nobody can push a ₹1 order into the Shiprocket panel.
  *
  * Secrets (set once with `npx wrangler secret put <NAME>`):
@@ -16,20 +16,39 @@
  *   SHIPROCKET_FALLBACK_EMAIL  – email sent as billing_email (the form doesn't ask customers for one)
  */
 
-/* Keep in sync with `const P` in public/index.html — tests/shiprocket.test.mjs checks this. */
-export const CATALOG = {
-  hoodie:       { name: "Relaxed Zip Hoodie",        price: 1299, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Stone Beige"] },
-  washedhoodie: { name: "Washed Zip Hoodie",         price: 1299, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Washed Taupe"] },
-  puffer:       { name: "Packable Quilted Puffer",   price: 1999, weight: 0.45, sizes: ["S","M","L","XL","XXL"], colours: ["Blush Pink","Blue Grey","Lavender"] },
-  trackjacket:  { name: "Colour-Block Track Jacket", price: 1799, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Navy / White / Red"] },
-  retrojacket:  { name: "Retro Track Jacket",        price: 1699, weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Tan"] },
-  zipjacket:    { name: "Collared Zip Jacket",       price: 1899, weight: 0.7,  sizes: ["S","M","L","XL","XXL"], colours: ["Grey Marl"] },
-  quarterzip:   { name: "Cable-Knit Quarter Zip",    price: 1599, weight: 0.55, sizes: ["S","M","L","XL","XXL"], colours: ["Oatmeal"] },
-  crewneck:     { name: "Washed Crewneck",           price: 999,  weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Washed Charcoal"] },
-  sweatpants:   { name: "Straight-Leg Sweatpants",   price: 999,  weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Jet Black","Grey Marl"] },
-  trackpants:   { name: "Fleece-Lined Track Pants",  price: 1199, weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Black"] },
-  retropants:   { name: "Retro Track Pants",         price: 1199, weight: 0.45, sizes: ["S","M","L","XL","XXL"], colours: ["Tan"] },
-};
+/* The product list lives in the page itself: <script type="application/json" id="nowora-products"> in
+ * public/index.html, edited from the NOWORA client dashboard. The endpoint reads that block from the
+ * deployed site (cached for a minute), so names and prices always match what customers see and never
+ * come from the browser. */
+const DEFAULT_WEIGHT = 0.5;
+export function catalogFromHtml(html) {
+  const m = /<script[^>]*id=["']nowora-products["'][^>]*>([\s\S]*?)<\/script>/i.exec(String(html || ""));
+  if (!m) throw new Error("Product catalogue not found on the page");
+  const data = JSON.parse(m[1]);
+  const out = {};
+  for (const p of Array.isArray(data.products) ? data.products : []) {
+    if (!p || !/^[\w-]{1,40}$/.test(p.id || "") || p.hidden) continue;
+    const price = Number(p.price);
+    if (!Number.isFinite(price) || price <= 0) continue;
+    const colours = (Array.isArray(p.colours) ? p.colours : []).map(c => c && c.name).filter(Boolean);
+    if (!colours.length) continue;
+    const w = Number(p.weight);
+    out[p.id] = { name: String(p.name || p.id), price, weight: w > 0 && w < 30 ? w : DEFAULT_WEIGHT,
+      sizes: Array.isArray(p.sizes) && p.sizes.length ? p.sizes.map(String) : ["Free size"], colours };
+  }
+  if (!Object.keys(out).length) throw new Error("Product catalogue is empty");
+  return out;
+}
+
+let catalogCache = { at: 0, data: null };
+export function _resetCatalogCache() { catalogCache = { at: 0, data: null }; }
+export async function loadCatalog(request, env) {
+  if (catalogCache.data && Date.now() - catalogCache.at < 60000) return catalogCache.data;
+  const res = await env.ASSETS.fetch(new Request(new URL("/", request.url)));
+  if (!res.ok) throw new Error("Could not read the product catalogue (" + res.status + ")");
+  catalogCache = { at: Date.now(), data: catalogFromHtml(await res.text()) };
+  return catalogCache.data;
+}
 
 /* Box used for every parcel (cm). Height grows with item count. Adjust to your real packaging. */
 const BOX = { length: 32, breadth: 26, heightPerItem: 4, minHeight: 5 };
@@ -69,7 +88,7 @@ export function istStamp(d = new Date()) {
 const slug = s => s.toUpperCase().replace(/[^A-Z0-9]+/g, "");
 
 /* Validate the browser's order and turn it into a Shiprocket payload. Throws on bad input. */
-export function buildPayload(input, env, now = new Date()) {
+export function buildPayload(input, env, now = new Date(), CATALOG = {}) {
   const bad = m => { const e = new Error(m); e.status = 400; throw e; };
   if (!input || typeof input !== "object") bad("Invalid body");
 
@@ -92,7 +111,7 @@ export function buildPayload(input, env, now = new Date()) {
   /* merge duplicate lines, price everything from CATALOG */
   const lines = new Map();
   for (const it of items) {
-    const p = CATALOG[it && it.key];
+    const p = it && Object.prototype.hasOwnProperty.call(CATALOG, it.key) ? CATALOG[it.key] : null;
     if (!p) bad("Unknown product");
     if (!p.colours.includes(it.colour) || !p.sizes.includes(it.size)) bad("Invalid colour/size");
     const q = Number(it.qty);
@@ -172,7 +191,10 @@ export async function handleOrder(request, env) {
   try { input = JSON.parse(raw); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
   try {
-    const d = await createOrder(buildPayload(input, env), env);
+    let catalog;
+    try { catalog = await loadCatalog(request, env); }
+    catch (e) { console.error("[shiprocket] catalogue:", e.message); return json({ ok: false, error: "Product list unavailable" }, 503); }
+    const d = await createOrder(buildPayload(input, env, new Date(), catalog), env);
     return json({ ok: true, shiprocket_order_id: d.order_id, shipment_id: d.shipment_id });
   } catch (e) {
     console.error("[shiprocket]", e.message);

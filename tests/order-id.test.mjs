@@ -12,5 +12,5 @@ test('each new order has a fresh identifier',()=>{
  assert.ok(html.includes('orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset();'));
 });
 for(const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
- if(match[1].trim() && !match[0].includes('application/ld+json')) new vm.Script(match[1]);
+ if(match[1].trim() && !/application\/(ld\+)?json/.test(match[0])) new vm.Script(match[1]);
 }
