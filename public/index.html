@@ -656,6 +656,406 @@ dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
 </style>
 </head>
 <body>
+<script type="application/json" id="nowora-products">
+{
+ "v": 1,
+ "note": "Managed from the NOWORA client dashboard (Shop → Products). Edit there so photos, colours and categories stay in step.",
+ "categories": [
+  {
+   "id": "hoodies",
+   "name": "Hoodies"
+  },
+  {
+   "id": "jackets",
+   "name": "Jackets"
+  },
+  {
+   "id": "puffers",
+   "name": "Puffers"
+  },
+  {
+   "id": "knits",
+   "name": "Knits & sweats"
+  },
+  {
+   "id": "bottoms",
+   "name": "Bottoms"
+  }
+ ],
+ "products": [
+  {
+   "id": "puffer",
+   "name": "Packable Quilted Puffer",
+   "category": "puffers",
+   "price": 1999,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.45,
+   "desc": "A light, slim puffer with narrow horizontal quilting that packs down small.",
+   "details": [
+    "Hood with toggle adjusters",
+    "Narrow horizontal quilting",
+    "Full zip and zip hand pockets",
+    "Lightweight, packable design"
+   ],
+   "colours": [
+    {
+     "name": "Blush Pink",
+     "hex": "#D9AFA4",
+     "family": "Pink",
+     "photos": [
+      "images/puffer-blush.jpg",
+      "images/puffer-blush-zip.jpg"
+     ]
+    },
+    {
+     "name": "Blue Grey",
+     "hex": "#A9B6C4",
+     "family": "Blue",
+     "photos": [
+      "images/puffer-bluegrey.jpg",
+      "images/puffer-bluegrey-quilt.jpg",
+      "images/puffer-bluegrey-chest.jpg"
+     ]
+    },
+    {
+     "name": "Lavender",
+     "hex": "#C9BFD6",
+     "family": "Purple",
+     "photos": [
+      "images/puffer-lavender.jpg",
+      "images/puffer-lavender-pouch.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "trackjacket",
+   "name": "Colour-Block Track Jacket",
+   "category": "jackets",
+   "price": 1799,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.6,
+   "desc": "Navy body with a white and red colour-block yoke and striped rib trims.",
+   "details": [
+    "Stand collar, full zip",
+    "Two zip pockets",
+    "Striped rib cuffs and hem"
+   ],
+   "colours": [
+    {
+     "name": "Navy / White / Red",
+     "hex": "#1F2A44",
+     "family": "Blue",
+     "photos": [
+      "images/track-jacket.jpg",
+      "images/track-jacket-2.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hoodie",
+   "name": "Relaxed Zip Hoodie",
+   "category": "hoodies",
+   "price": 1299,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.6,
+   "desc": "Soft brushed-back fleece in stone beige, cut relaxed with a drop shoulder.",
+   "details": [
+    "Full zip with metal zipper",
+    "Drawcord hood with cream cords",
+    "Two front pockets",
+    "Ribbed cuffs and hem"
+   ],
+   "colours": [
+    {
+     "name": "Stone Beige",
+     "hex": "#CFC6B3",
+     "family": "Beige",
+     "photos": [
+      "images/hoodie-beige.jpg",
+      "images/hoodie-beige-2.jpg",
+      "images/hoodie-beige-lining.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "zipjacket",
+   "name": "Collared Zip Jacket",
+   "category": "jackets",
+   "price": 1899,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.7,
+   "desc": "A clean grey marl jacket with a point collar and brass zip.",
+   "details": [
+    "Point collar",
+    "Brass full zip",
+    "Button cuffs",
+    "Two slant pockets"
+   ],
+   "colours": [
+    {
+     "name": "Grey Marl",
+     "hex": "#9C9A97",
+     "family": "Grey",
+     "photos": [
+      "images/zip-jacket-grey.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "quarterzip",
+   "name": "Cable-Knit Quarter Zip",
+   "category": "knits",
+   "price": 1599,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.55,
+   "desc": "Textured cable knit in oatmeal with a zip mock neck.",
+   "details": [
+    "Textured cable knit",
+    "Quarter-zip mock neck",
+    "Ribbed cuffs and hem"
+   ],
+   "colours": [
+    {
+     "name": "Oatmeal",
+     "hex": "#C8BBA2",
+     "family": "Beige",
+     "photos": [
+      "images/quarterzip-oat.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sweatpants",
+   "name": "Straight-Leg Sweatpants",
+   "category": "bottoms",
+   "price": 999,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.5,
+   "desc": "Straight-leg sweatpants with a soft fleece inside.",
+   "details": [
+    "Elastic waist with drawcord",
+    "Straight leg",
+    "Soft fleece inside",
+    "Back patch pocket"
+   ],
+   "colours": [
+    {
+     "name": "Jet Black",
+     "hex": "#151515",
+     "family": "Black",
+     "photos": [
+      "images/sweatpants-black.jpg",
+      "images/sweatpants-black-fleece.jpg"
+     ]
+    },
+    {
+     "name": "Grey Marl",
+     "hex": "#A7A7A5",
+     "family": "Grey",
+     "photos": [
+      "images/sweatpants-grey.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "retrojacket",
+   "name": "Retro Track Jacket",
+   "category": "jackets",
+   "price": 1699,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.5,
+   "desc": "Tan tricot track jacket with contrast stripes down the sleeves.",
+   "details": [
+    "Stand collar, full zip",
+    "Contrast sleeve stripes",
+    "Pairs with the Retro Track Pants"
+   ],
+   "colours": [
+    {
+     "name": "Tan",
+     "hex": "#B39A72",
+     "family": "Beige",
+     "photos": [
+      "images/retro-jacket-tan.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "retropants",
+   "name": "Retro Track Pants",
+   "category": "bottoms",
+   "price": 1199,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.45,
+   "desc": "Tan track pants with black side stripes.",
+   "details": [
+    "Elastic waist with drawcord",
+    "Contrast side stripes",
+    "Pairs with the Retro Track Jacket"
+   ],
+   "colours": [
+    {
+     "name": "Tan",
+     "hex": "#B39A72",
+     "family": "Beige",
+     "photos": [
+      "images/retro-pants-tan.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "washedhoodie",
+   "name": "Washed Zip Hoodie",
+   "category": "hoodies",
+   "price": 1299,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.6,
+   "desc": "Garment-washed taupe for a faded, broken-in look from day one.",
+   "details": [
+    "Two-way metal zip",
+    "Drawcord hood with cream cords",
+    "Washed finish, so each piece varies slightly",
+    "Ribbed cuffs and hem"
+   ],
+   "colours": [
+    {
+     "name": "Washed Taupe",
+     "hex": "#6E6255",
+     "family": "Brown",
+     "photos": [
+      "images/hoodie-taupe.jpg",
+      "images/hoodie-taupe-zip.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "trackpants",
+   "name": "Fleece-Lined Track Pants",
+   "category": "bottoms",
+   "price": 1199,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.5,
+   "desc": "Black track pants with white piping and a warm fleece lining.",
+   "details": [
+    "Elastic waist",
+    "White side piping",
+    "Fleece-lined"
+   ],
+   "colours": [
+    {
+     "name": "Black",
+     "hex": "#161616",
+     "family": "Black",
+     "photos": [
+      "images/trackpants-black.jpg",
+      "images/trackpants-black-lining.jpg",
+      "images/trackpants-black-waist.jpg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "crewneck",
+   "name": "Washed Crewneck",
+   "category": "knits",
+   "price": 999,
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "weight": 0.5,
+   "desc": "Washed charcoal sweatshirt with a faded, lived-in colour.",
+   "details": [
+    "Ribbed crew neck",
+    "Washed finish",
+    "Pairs with the Straight-Leg Sweatpants"
+   ],
+   "colours": [
+    {
+     "name": "Washed Charcoal",
+     "hex": "#3D3B3A",
+     "family": "Grey",
+     "photos": [
+      "images/crewneck-charcoal.jpg"
+     ]
+    }
+   ]
+  }
+ ]
+}
+</script>
 <script>window.SITE={ whatsapp:"919368986368", brand:"52 Alive", community:"https://chat.whatsapp.com/Hd93P6B4txr5QOmvCSjk65" };</script>
 
 <div class="intro" aria-hidden="true"><div class="intro-inner"><b>52 ALIVE</b><small>The Winter Drop · 2026</small></div></div>
@@ -701,7 +1101,7 @@ dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
       <div class="media hero-main zoom-slow" data-reveal="clip"><img src="images/puffer-blush.jpg" alt="Blush pink hooded quilted puffer jacket" loading="eager" fetchpriority="high"></div>
       <figure class="hero-pol float" data-reveal="scale"><div class="media"><img src="images/puffer-bluegrey.jpg" alt="Blue grey hooded quilted puffer jacket" loading="eager"></div><figcaption>puffers, three ways</figcaption></figure>
       <div class="seal" aria-hidden="true"><svg viewBox="0 0 132 132"><defs><path id="c" d="M66,66 m-50,0 a50,50 0 1,1 100,0 a50,50 0 1,1 -100,0"/></defs><text><textPath href="#c">new drop · stay alive · winter 2026 ·</textPath></text></svg><span class="mark">52</span></div>
-      <div class="hero-price"><b>From ₹999</b>11 pieces · 14 colourways</div>
+      <div class="hero-price"><b>From <span data-stat="from">₹999</span></b><span data-stat="pieces">11</span> pieces · <span data-stat="colours">14</span> colourways</div>
     </div>
   </div>
 </section>
@@ -716,7 +1116,7 @@ dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
   <div class="wrap">
     <div class="sec-head">
       <div><span class="eyebrow">Shop by category</span><h2 data-split>Pick your <em>layer.</em></h2></div>
-      <p class="lead" data-reveal>Five categories, eleven pieces, fourteen colours. Tap one to jump straight into the shop.</p>
+      <p class="lead" data-reveal><span data-stat="cats-words">Five</span> categories, <span data-stat="pieces-words">eleven</span> pieces, <span data-stat="colours-words">fourteen</span> colours. Tap one to jump straight into the shop.</p>
     </div>
     <div class="cat-grid" id="catGrid"></div>
     <div class="colour-strip" id="colourStrip"><span class="lbl">Shop by colour</span></div>
@@ -756,14 +1156,6 @@ dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
       <div class="rail" aria-hidden="true"></div>
       <div class="rack-row" role="list" data-allow-overflow>
         <span class="rail-thumb" aria-hidden="true">‹ ›</span>
-        <button class="garment" role="listitem" data-p="puffer" data-c="Blush Pink" style="--k:0"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/puffer-blush.jpg" alt="Blush pink hooded quilted puffer jacket" loading="lazy"><span class="g-num">01</span><span class="g-tag"><span><b>Packable Quilted Puffer</b><small>Blush Pink · ₹1,999</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="trackjacket" data-c="Navy / White / Red" style="--k:1"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/track-jacket.jpg" alt="Navy, white and red colour-block zip track jacket with striped cuffs" loading="lazy"><span class="g-num">02</span><span class="g-tag"><span><b>Colour-Block Track Jacket</b><small>Navy / White / Red · ₹1,799</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="hoodie" data-c="Stone Beige" style="--k:2"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/hoodie-beige.jpg" alt="Stone beige zip hoodie with cream drawcords" loading="lazy"><span class="g-num">03</span><span class="g-tag"><span><b>Relaxed Zip Hoodie</b><small>Stone Beige · ₹1,299</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="sweatpants" data-c="Jet Black" style="--k:3"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/sweatpants-black.jpg" alt="Black straight-leg sweatpants with drawcord waist" loading="lazy"><span class="g-num">04</span><span class="g-tag"><span><b>Straight-Leg Sweatpants</b><small>Jet Black · ₹999</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="puffer" data-c="Blue Grey" style="--k:4"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/puffer-bluegrey.jpg" alt="Blue grey hooded quilted puffer jacket" loading="lazy"><span class="g-num">05</span><span class="g-tag"><span><b>Packable Quilted Puffer</b><small>Blue Grey · ₹1,999</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="quarterzip" data-c="Oatmeal" style="--k:5"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/quarterzip-oat.jpg" alt="Oatmeal cable-knit quarter-zip sweater" loading="lazy"><span class="g-num">06</span><span class="g-tag"><span><b>Cable-Knit Quarter Zip</b><small>Oatmeal · ₹1,599</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="retrojacket" data-c="Tan" style="--k:6"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/retro-jacket-tan.jpg" alt="Tan zip track jacket with navy stripes" loading="lazy"><span class="g-num">07</span><span class="g-tag"><span><b>Retro Track Jacket</b><small>Tan · ₹1,699</small></span><span class="go">Order →</span></span></span></span></span></button>
-        <button class="garment" role="listitem" data-p="zipjacket" data-c="Grey Marl" style="--k:7"><span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="images/zip-jacket-grey.jpg" alt="Grey marl collared zip jacket with brass zip" loading="lazy"><span class="g-num">08</span><span class="g-tag"><span><b>Collared Zip Jacket</b><small>Grey Marl · ₹1,899</small></span><span class="go">Order →</span></span></span></span></span></button>
       </div>
       <div class="rack-floor" aria-hidden="true"></div>
       <div class="rack-hint"><span id="rackHint">Hover a piece to pull it forward · drag the rail to browse</span><span class="rack-dots" aria-hidden="true"></span></div>
@@ -784,8 +1176,8 @@ dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
       <p class="lead" data-reveal style="margin-top:26px">We stock the pieces you actually reach for — the hoodie you sleep in, the sweatpants you never take off, the puffer that packs into its own pouch.</p>
       <p data-reveal>Every drop is small and picked by hand, piece by piece. Easy to layer over a tee or under a coat. And when it's gone, it's usually gone — that's why the community hears first.</p>
       <div class="stats">
-        <div data-reveal><b data-count="11">11</b><span>pieces this winter</span></div>
-        <div data-reveal><b data-count="14">14</b><span>colourways to choose from</span></div>
+        <div data-reveal><b data-count="11" data-stat="pieces">11</b><span>pieces this winter</span></div>
+        <div data-reveal><b data-count="14" data-stat="colours">14</b><span>colourways to choose from</span></div>
         <div data-reveal><b data-count="48" data-suffix="h">48h</b><span>dispatch after confirmation</span></div>
       </div>
     </div>
@@ -1089,19 +1481,22 @@ const inr=n=>"₹"+n.toLocaleString("en-IN");
 
 /* Keep in sync with CATALOG in src/worker.js (names, prices, sizes, colours) — tests/shiprocket.test.mjs checks it.
    imgs: photo per colour, used for the bag thumbnail. */
-const P={
-  hoodie:{name:"Relaxed Zip Hoodie",price:1299,cat:"hoodies",img:"images/hoodie-beige.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Stone Beige":"#CFC6B3"},gallery:{"Stone Beige":["images/hoodie-beige.jpg","images/hoodie-beige-2.jpg","images/hoodie-beige-lining.jpg"]},desc:"Soft brushed-back fleece in stone beige, cut relaxed with a drop shoulder.",details:["Full zip with metal zipper","Drawcord hood with cream cords","Two front pockets","Ribbed cuffs and hem"]},
-  washedhoodie:{name:"Washed Zip Hoodie",price:1299,cat:"hoodies",img:"images/hoodie-taupe.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Washed Taupe":"#6E6255"},gallery:{"Washed Taupe":["images/hoodie-taupe.jpg","images/hoodie-taupe-zip.jpg"]},desc:"Garment-washed taupe for a faded, broken-in look from day one.",details:["Two-way metal zip","Drawcord hood with cream cords","Washed finish, so each piece varies slightly","Ribbed cuffs and hem"]},
-  puffer:{name:"Packable Quilted Puffer",price:1999,cat:"puffers",img:"images/puffer-blush.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Blush Pink":"#D9AFA4","Blue Grey":"#A9B6C4","Lavender":"#C9BFD6"},gallery:{"Blush Pink":["images/puffer-blush.jpg","images/puffer-blush-zip.jpg"],"Blue Grey":["images/puffer-bluegrey.jpg","images/puffer-bluegrey-quilt.jpg","images/puffer-bluegrey-chest.jpg"],"Lavender":["images/puffer-lavender.jpg","images/puffer-lavender-pouch.jpg"]},desc:"A light, slim puffer with narrow horizontal quilting that packs down small.",details:["Hood with toggle adjusters","Narrow horizontal quilting","Full zip and zip hand pockets","Lightweight, packable design"]},
-  trackjacket:{name:"Colour-Block Track Jacket",price:1799,cat:"jackets",img:"images/track-jacket.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Navy / White / Red":"#1F2A44"},gallery:{"Navy / White / Red":["images/track-jacket.jpg","images/track-jacket-2.jpg"]},desc:"Navy body with a white and red colour-block yoke and striped rib trims.",details:["Stand collar, full zip","Two zip pockets","Striped rib cuffs and hem"]},
-  retrojacket:{name:"Retro Track Jacket",price:1699,cat:"jackets",img:"images/retro-jacket-tan.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Tan":"#B39A72"},gallery:{"Tan":["images/retro-jacket-tan.jpg"]},desc:"Tan tricot track jacket with contrast stripes down the sleeves.",details:["Stand collar, full zip","Contrast sleeve stripes","Pairs with the Retro Track Pants"]},
-  zipjacket:{name:"Collared Zip Jacket",price:1899,cat:"jackets",img:"images/zip-jacket-grey.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Grey Marl":"#9C9A97"},gallery:{"Grey Marl":["images/zip-jacket-grey.jpg"]},desc:"A clean grey marl jacket with a point collar and brass zip.",details:["Point collar","Brass full zip","Button cuffs","Two slant pockets"]},
-  quarterzip:{name:"Cable-Knit Quarter Zip",price:1599,cat:"knits",img:"images/quarterzip-oat.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Oatmeal":"#C8BBA2"},gallery:{"Oatmeal":["images/quarterzip-oat.jpg"]},desc:"Textured cable knit in oatmeal with a zip mock neck.",details:["Textured cable knit","Quarter-zip mock neck","Ribbed cuffs and hem"]},
-  crewneck:{name:"Washed Crewneck",price:999,cat:"knits",img:"images/crewneck-charcoal.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Washed Charcoal":"#3D3B3A"},gallery:{"Washed Charcoal":["images/crewneck-charcoal.jpg"]},desc:"Washed charcoal sweatshirt with a faded, lived-in colour.",details:["Ribbed crew neck","Washed finish","Pairs with the Straight-Leg Sweatpants"]},
-  sweatpants:{name:"Straight-Leg Sweatpants",price:999,cat:"bottoms",img:"images/sweatpants-black.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Jet Black":"#151515","Grey Marl":"#A7A7A5"},gallery:{"Jet Black":["images/sweatpants-black.jpg","images/sweatpants-black-fleece.jpg"],"Grey Marl":["images/sweatpants-grey.jpg"]},desc:"Straight-leg sweatpants with a soft fleece inside.",details:["Elastic waist with drawcord","Straight leg","Soft fleece inside","Back patch pocket"]},
-  trackpants:{name:"Fleece-Lined Track Pants",price:1199,cat:"bottoms",img:"images/trackpants-black.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Black":"#161616"},gallery:{"Black":["images/trackpants-black.jpg","images/trackpants-black-lining.jpg","images/trackpants-black-waist.jpg"]},desc:"Black track pants with white piping and a warm fleece lining.",details:["Elastic waist","White side piping","Fleece-lined"]},
-  retropants:{name:"Retro Track Pants",price:1199,cat:"bottoms",img:"images/retro-pants-tan.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Tan":"#B39A72"},gallery:{"Tan":["images/retro-pants-tan.jpg"]},desc:"Tan track pants with black side stripes.",details:["Elastic waist with drawcord","Contrast side stripes","Pairs with the Retro Track Jacket"]}
-};
+/* Products come from the catalogue block (#nowora-products) — the NOWORA dashboard edits it, and the
+   Shiprocket endpoint reads the same block from the live page, so prices are always checked server-side. */
+const DATA=(()=>{ try{ return JSON.parse(document.getElementById("nowora-products").textContent); }catch(e){ return {categories:[],products:[]}; } })();
+const P={};
+(DATA.products||[]).forEach(p=>{
+  if(!p||!p.id||p.hidden||!(+p.price>0)||!Array.isArray(p.colours)) return;
+  const colours={}, gallery={}, family={};
+  p.colours.forEach(c=>{ if(!c||!c.name) return; colours[c.name]=c.hex||"#999999"; gallery[c.name]=(c.photos||[]).filter(Boolean); family[c.name]=c.family||"Other"; });
+  const first=Object.keys(colours)[0]; if(!first) return;
+  P[p.id]={name:p.name,price:+p.price,cat:p.category||"other",img:(gallery[first]||[])[0]||"",sizes:(p.sizes&&p.sizes.length?p.sizes:["Free size"]),colours,gallery,family,desc:p.desc||"",details:p.details||[]};
+});
+const FIRST_KEY=Object.keys(P)[0]||"";
+(()=>{ const ps=Object.values(P), nCol=ps.reduce((a,p)=>a+Object.keys(p.colours).length,0), nCat=new Set(ps.map(p=>p.cat)).size;
+  const W=["No","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty"], word=n=>W[n]||String(n);
+  const v={from:ps.length?"₹"+Math.min(...ps.map(p=>p.price)).toLocaleString("en-IN"):"—",pieces:ps.length,colours:nCol,"cats-words":word(nCat),"pieces-words":word(ps.length).toLowerCase(),"colours-words":word(nCol).toLowerCase()};
+  document.querySelectorAll("[data-stat]").forEach(el=>{ const k=el.dataset.stat; if(!(k in v)) return; el.textContent=v[k]; if(el.dataset.count!==undefined) el.dataset.count=v[k]; }); })();
 const imgFor=(k,c)=>((P[k].gallery[c]||[])[0])||P[k].img;
 
 /* colour dots on collection cards */
@@ -1111,7 +1506,13 @@ $$("[data-dots]").forEach(el=>{ Object.entries(P[el.dataset.dots].colours).forEa
 const toastEl=$(".toast"); let tt;
 const toast=m=>{ toastEl.textContent=m; toastEl.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>toastEl.classList.remove("show"),2600); };
 
-/* ---------------- THE RACK ---------------- */
+/* ---------------- THE RACK (first 8 pieces from the catalogue) ---------------- */
+(()=>{ const host=$(".rack-row"); if(!host) return; const keys=Object.keys(P), tiles=[]; const max=Math.max(0,...keys.map(k=>Object.keys(P[k].colours).length));
+  for(let ci=0;ci<max&&tiles.length<8;ci++) keys.forEach(k=>{ const c=Object.keys(P[k].colours)[ci]; if(c&&tiles.length<8) tiles.push([k,c]); });
+  const e=t=>String(t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+  tiles.forEach(([k,c],i)=>{ const p=P[k], b=document.createElement("button"); b.className="garment"; b.setAttribute("role","listitem"); b.dataset.p=k; b.dataset.c=c; b.style.setProperty("--k",i);
+    b.innerHTML=`<span class="swing"><span class="turn"><span class="hook" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M13 34V22c0-3 7-4 7-11a7 7 0 0 0-14 0" stroke="#C9A063" stroke-width="2.6" stroke-linecap="round"/></svg></span><span class="bar" aria-hidden="true"></span><span class="g-card"><img src="${e((p.gallery[c]||[p.img])[0])}" alt="${e(p.name+" in "+c)}" loading="lazy"><span class="g-num">${String(i+1).padStart(2,"0")}</span><span class="g-tag"><span><b>${e(p.name)}</b><small>${e(c)} · ${inr(p.price)}</small></span><span class="go">Order →</span></span></span></span></span>`;
+    host.insertBefore(b,host.querySelector(".rack-floor")); }); })();
 const row=$(".rack-row"), items=$$(".garment",row), dotsWrap=$(".rack-dots");
 let active=0, auto=null, paused=false, resumeT=null;
 items.forEach(()=>dotsWrap.appendChild(document.createElement("i")));
@@ -1273,16 +1674,18 @@ form.addEventListener("submit",e=>{
   $("#doneId").textContent="#"+orderId; $("#reopen").href=lastLink;
   form.style.display="none"; $("#done").classList.add("show");
 });
-$("#newOrder").addEventListener("click",()=>{ orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value="hoodie"; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
+$("#newOrder").addEventListener("click",()=>{ orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value=FIRST_KEY; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
 
 /* ---------------- SHOP: category tiles, filters, grid, product page ---------------- */
-const CATS={hoodies:"Hoodies",jackets:"Jackets",puffers:"Puffers",knits:"Knits & sweats",bottoms:"Bottoms"};
-const CAT_IMG={hoodies:"images/hoodie-beige.jpg",jackets:"images/track-jacket.jpg",puffers:"images/puffer-bluegrey.jpg",knits:"images/quarterzip-oat.jpg",bottoms:"images/sweatpants-black.jpg"};
-const FAMS={Beige:"#CDBE9F",Brown:"#6E6255",Pink:"#D9AFA4",Blue:"#7F93AE",Purple:"#C2B6D6",Grey:"#9C9A97",Black:"#151515"};
-const FAM={"Stone Beige":"Beige","Oatmeal":"Beige","Tan":"Beige","Washed Taupe":"Brown","Blush Pink":"Pink","Blue Grey":"Blue","Navy / White / Red":"Blue","Lavender":"Purple","Grey Marl":"Grey","Washed Charcoal":"Grey","Jet Black":"Black","Black":"Black"};
+const CATS={}; (DATA.categories||[]).forEach(c=>{ if(c&&c.id) CATS[c.id]=c.name||c.id; }); Object.values(P).forEach(p=>{ if(!CATS[p.cat]) CATS[p.cat]=p.cat.replace(/(^|[-_ ])\w/g,m=>m.replace(/[-_]/," ").toUpperCase()); });
+Object.keys(CATS).forEach(id=>{ if(!Object.values(P).some(p=>p.cat===id)) delete CATS[id]; });
+const CAT_IMG={}; Object.keys(CATS).forEach(id=>{ const p=Object.values(P).find(x=>x.cat===id); CAT_IMG[id]=p?p.img:""; });
+const FAMS_ALL={Black:"#151515",White:"#F2F0EA",Grey:"#9C9A97",Beige:"#CDBE9F",Brown:"#6E5A48",Red:"#B3261E",Pink:"#D9AFA4",Orange:"#D9822B",Yellow:"#E3C34A",Green:"#4F7A4A",Blue:"#7F93AE",Purple:"#C2B6D6",Multi:"linear-gradient(135deg,#1F2A44,#F2F0EA,#B3261E)",Other:"#BBBBBB"};
+const FAM={}; Object.values(P).forEach(p=>Object.keys(p.colours).forEach(c=>{ FAM[c]=p.family[c]||"Other"; }));
+const FAMS={}; Object.keys(FAMS_ALL).forEach(f=>{ if(Object.values(FAM).includes(f)) FAMS[f]=FAMS_ALL[f]; }); Object.values(FAM).forEach(f=>{ if(!FAMS[f]) FAMS[f]=FAMS_ALL.Other; });
 const PRICES=[["lt1300","Under ₹1,300",x=>x<1300],["1300","₹1,300 – ₹1,799",x=>x>=1300&&x<1800],["1800","₹1,800 and above",x=>x>=1800]];
-const SIZES=["S","M","L","XL","XXL"];
-const REC=["puffer|Blush Pink","trackjacket|Navy / White / Red","hoodie|Stone Beige","puffer|Blue Grey","zipjacket|Grey Marl","quarterzip|Oatmeal","sweatpants|Jet Black","retrojacket|Tan","retropants|Tan","puffer|Lavender","washedhoodie|Washed Taupe","sweatpants|Grey Marl","trackpants|Black","crewneck|Washed Charcoal"];
+const SIZE_ORDER=["XXS","XS","S","M","L","XL","XXL","3XL","4XL"]; const SIZES=[...new Set(Object.values(P).flatMap(p=>p.sizes))].sort((x,y)=>{ const i=SIZE_ORDER.indexOf(x), j=SIZE_ORDER.indexOf(y); if(i>=0&&j>=0) return i-j; if(i>=0) return -1; if(j>=0) return 1; return (parseFloat(x)||1e9)-(parseFloat(y)||1e9)||String(x).localeCompare(y); });
+const REC=[]; (()=>{ const keys=Object.keys(P), max=Math.max(0,...keys.map(k=>Object.keys(P[k].colours).length)); for(let ci=0;ci<max;ci++) keys.forEach(k=>{ const c=Object.keys(P[k].colours)[ci]; if(c) REC.push(k+"|"+c); }); })();
 const TILES=[]; Object.entries(P).forEach(([k,p])=>Object.keys(p.colours).forEach(c=>TILES.push({k,c,p,fam:FAM[c]||"Other",rank:(i=>i<0?99:i)(REC.indexOf(k+"|"+c))})));
 const esc=t=>String(t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 const F={cat:new Set(),fam:new Set(),size:new Set(),price:new Set()};
@@ -1303,7 +1706,7 @@ const checkRow=(group,val,label,n,swatch)=>{ const l=document.createElement("lab
   const cb=l.querySelector("input"); cb.addEventListener("change",()=>{ cb.checked?F[group].add(val):F[group].delete(val); renderShop(); }); return l; };
 Object.entries(CATS).forEach(([id,label])=>$("#fCat").appendChild(checkRow("cat",id,label,TILES.filter(t=>t.p.cat===id).length)));
 Object.entries(FAMS).forEach(([f,h])=>$("#fCol").appendChild(checkRow("fam",f,f,TILES.filter(t=>t.fam===f).length,h)));
-PRICES.forEach(([id,label,fn])=>$("#fPrice").appendChild(checkRow("price",id,label,TILES.filter(t=>fn(t.p.price)).length)));
+PRICES.forEach(([id,label,fn])=>{ const n=TILES.filter(t=>fn(t.p.price)).length; if(n) $("#fPrice").appendChild(checkRow("price",id,label,n)); });
 SIZES.forEach(sz=>{ const b=document.createElement("button"); b.type="button"; b.textContent=sz; b.setAttribute("aria-pressed","false");
   b.addEventListener("click",()=>{ F.size.has(sz)?F.size.delete(sz):F.size.add(sz); renderShop(); }); $("#fSize").appendChild(b); });
 const clearF=()=>{ Object.values(F).forEach(x=>x.clear()); };
@@ -1352,7 +1755,7 @@ function openPDP(k,c){
   const sz=$("#pdpSizes"); sz.innerHTML=""; sz.classList.remove("bad");
   p.sizes.forEach(z=>{ const b=document.createElement("button"); b.type="button"; b.textContent=z; b.setAttribute("role","radio"); b.setAttribute("aria-checked",String(z===cur.size)); b.setAttribute("aria-pressed",String(z===cur.size));
     b.addEventListener("click",()=>{ cur.size=z; sz.classList.remove("bad"); $$("button",sz).forEach(x=>{ const on=x.textContent===z; x.setAttribute("aria-pressed",String(on)); x.setAttribute("aria-checked",String(on)); }); }); sz.appendChild(b); });
-  $("#pdpDesc").textContent=p.desc; $("#pdpDet").innerHTML=p.details.map(d=>`<li>${esc(d)}</li>`).join("");
+  $("#pdpDesc").textContent=p.desc; $("#pdpDet").innerHTML=p.details.map(d=>`<li>${esc(d)}</li>`).join(""); $(".pdp-det",pdp).hidden=!(p.desc||p.details.length);
   const seen=new Set([k]); const sim=[...TILES.filter(t=>t.p.cat===p.cat),...TILES].filter(t=>!seen.has(t.k)&&seen.add(t.k)).slice(0,4);
   $("#pdpSim").innerHTML=""; sim.forEach(t=>{ const b=document.createElement("button"); b.type="button";
     b.innerHTML=`<img src="${(t.p.gallery[t.c]||[t.p.img])[0]}" alt="" loading="lazy"><b>${esc(t.p.name)}</b><span>${inr(t.p.price)}</span>`;
