@@ -18,10 +18,17 @@
 
 /* Keep in sync with `const P` in public/index.html — tests/shiprocket.test.mjs checks this. */
 export const CATALOG = {
-  hoodie:  { name: "Washed Zip Hoodie",    price: 1299, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Olive Brown","Washed Black","Charcoal Blue","Bottle Green","Mocha Brown","Slate Grey"] },
-  jacket:  { name: "Track Windbreaker",    price: 1499, weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Shadow Black","Ash Grey"] },
-  joggers: { name: "Polar Fleece Joggers", price: 999,  weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Jet Black","Cloud Grey","Taupe","Mocha","Camel","Steel Blue"] },
-  vest:    { name: "Knit V-Vest",          price: 899,  weight: 0.35, sizes: ["S","M","L","XL","XXL"], colours: ["Forest Green","Midnight Navy","Grey Melange","Ivory","Maroon"] },
+  hoodie:       { name: "Relaxed Zip Hoodie",        price: 1299, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Stone Beige"] },
+  washedhoodie: { name: "Washed Zip Hoodie",         price: 1299, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Washed Taupe"] },
+  puffer:       { name: "Packable Quilted Puffer",   price: 1999, weight: 0.45, sizes: ["S","M","L","XL","XXL"], colours: ["Blush Pink","Blue Grey","Lavender"] },
+  trackjacket:  { name: "Colour-Block Track Jacket", price: 1799, weight: 0.6,  sizes: ["S","M","L","XL","XXL"], colours: ["Navy / White / Red"] },
+  retrojacket:  { name: "Retro Track Jacket",        price: 1699, weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Tan"] },
+  zipjacket:    { name: "Collared Zip Jacket",       price: 1899, weight: 0.7,  sizes: ["S","M","L","XL","XXL"], colours: ["Grey Marl"] },
+  quarterzip:   { name: "Cable-Knit Quarter Zip",    price: 1599, weight: 0.55, sizes: ["S","M","L","XL","XXL"], colours: ["Oatmeal"] },
+  crewneck:     { name: "Washed Crewneck",           price: 999,  weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Washed Charcoal"] },
+  sweatpants:   { name: "Straight-Leg Sweatpants",   price: 999,  weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Jet Black","Grey Marl"] },
+  trackpants:   { name: "Fleece-Lined Track Pants",  price: 1199, weight: 0.5,  sizes: ["S","M","L","XL","XXL"], colours: ["Black"] },
+  retropants:   { name: "Retro Track Pants",         price: 1199, weight: 0.45, sizes: ["S","M","L","XL","XXL"], colours: ["Tan"] },
 };
 
 /* Box used for every parcel (cm). Height grows with item count. Adjust to your real packaging. */

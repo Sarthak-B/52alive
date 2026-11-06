@@ -10,7 +10,7 @@ const order = (over = {}) => ({
   orderId: '52A-' + crypto.randomUUID(), name: 'Riya Kumar Singh', phone: '9876543210',
   address: '12 MG Road, near park', city: 'Dehradun', state: 'Uttarakhand', pin: '248001',
   payment: 'Cash on Delivery', note: 'gift wrap',
-  items: [{key: 'hoodie', colour: 'Washed Black', size: 'L', qty: 2}, {key: 'vest', colour: 'Ivory', size: 'M', qty: 1}],
+  items: [{key: 'hoodie', colour: 'Stone Beige', size: 'L', qty: 2}, {key: 'puffer', colour: 'Blue Grey', size: 'M', qty: 1}],
   ...over,
 });
 
@@ -30,7 +30,7 @@ test('worker catalog matches the products on the page', () => {
 });
 
 test('builds a Shiprocket payload priced from the catalog', () => {
-  const p = buildPayload(order({items: [{key: 'hoodie', colour: 'Washed Black', size: 'L', qty: 2, price: 1}]}), env, new Date('2026-11-05T20:00:00Z'));
+  const p = buildPayload(order({items: [{key: 'hoodie', colour: 'Stone Beige', size: 'L', qty: 2, price: 1}]}), env, new Date('2026-11-05T20:00:00Z'));
   assert.equal(p.order_date, '2026-11-06 01:30');
   assert.equal(p.pickup_location, 'Home');
   assert.equal(p.billing_customer_name, 'Riya');
@@ -38,25 +38,29 @@ test('builds a Shiprocket payload priced from the catalog', () => {
   assert.equal(p.billing_email, 'orders@shop.in');
   assert.equal(p.payment_method, 'COD');
   assert.equal(p.order_items[0].selling_price, 1299);
-  assert.equal(p.order_items[0].sku, '52A-HOODIE-WASHEDBLACK-L');
+  assert.equal(p.order_items[0].sku, '52A-HOODIE-STONEBEIGE-L');
   assert.equal(p.sub_total, 2598);
   assert.equal(p.weight, 1.2);
 });
 
 test('merges duplicate lines and maps prepaid', () => {
-  const it = {key: 'joggers', colour: 'Taupe', size: 'S', qty: 1};
+  const it = {key: 'sweatpants', colour: 'Grey Marl', size: 'S', qty: 1};
   const p = buildPayload(order({payment: 'UPI (prepaid)', items: [it, it]}), env);
   assert.equal(p.order_items.length, 1);
   assert.equal(p.order_items[0].units, 2);
   assert.equal(p.payment_method, 'Prepaid');
 });
 
+test('removed products are rejected', () => {
+  for (const key of ['jacket', 'joggers', 'vest']) assert.throws(() => buildPayload(order({items: [{key, colour: 'Ash Grey', size: 'M', qty: 1}]}), env), e => e.status === 400);
+});
+
 test('rejects bad input', () => {
   for (const o of [
     order({orderId: 'abc'}), order({phone: '12345'}), order({pin: '012345'}),
     order({items: [{key: 'hat', colour: 'Red', size: 'M', qty: 1}]}),
-    order({items: [{key: 'vest', colour: 'Neon', size: 'M', qty: 1}]}),
-    order({items: [{key: 'vest', colour: 'Ivory', size: 'M', qty: 99}]}),
+    order({items: [{key: 'puffer', colour: 'Neon', size: 'M', qty: 1}]}),
+    order({items: [{key: 'puffer', colour: 'Lavender', size: 'M', qty: 99}]}),
     order({items: []}),
   ]) assert.throws(() => buildPayload(o, env), e => e.status === 400);
 });
