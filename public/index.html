@@ -625,7 +625,9 @@ dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
 .pdp-sizes button[aria-pressed=true]{background:var(--ink);color:var(--bg);box-shadow:none}
 .pdp-sizes.bad button{box-shadow:inset 0 0 0 1.5px #B3261E}
 .pdp-err{color:#B3261E;font-size:13px;margin-top:8px;display:none}
-.pdp-sizes.bad+.pdp-err{display:block}
+.pdp-sizes.bad~.pdp-err{display:block}
+.pdp-left{color:var(--accent);font-weight:700;font-size:13.5px;margin-top:8px}
+.pdp-left:empty{display:none}
 .pdp-acts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pdp-acts .btn{min-height:56px}
 .pdp-del{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:8px;font-size:14px;color:var(--ink-2)}
@@ -1412,7 +1414,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
       <div><p class="crumb" id="pdpCrumb"></p><span class="br">52 Alive</span><h3 id="pdpName"></h3></div>
       <p class="pdp-price" id="pdpPrice"></p>
       <div><p class="pdp-h"><span>Colour <span class="muted" id="pdpColName"></span></span></p><div class="pdp-cols" id="pdpCols"></div></div>
-      <div><p class="pdp-h"><span>Select size</span><a href="#fit" data-close-pdp>Size chart ›</a></p><div class="pdp-sizes" id="pdpSizes" role="radiogroup" aria-label="Size"></div><p class="pdp-err">Please select a size</p></div>
+      <div><p class="pdp-h"><span>Select size</span><a href="#fit" data-close-pdp>Size chart ›</a></p><div class="pdp-sizes" id="pdpSizes" role="radiogroup" aria-label="Size"></div><p class="pdp-left" id="pdpLeft" aria-live="polite"></p><p class="pdp-err">Please select a size</p></div>
       <div class="pdp-acts"><button type="button" class="btn" id="pdpAdd">Add to bag</button><button type="button" class="btn btn-ghost" id="pdpBuy">Buy now</button></div>
       <div class="pdp-del"><span>Cash on delivery available across India</span><span>Dispatch within 48 hours of confirmation</span><span>Easy size exchange within 7 days</span></div>
       <div class="pdp-det"><p class="pdp-h">Product details</p><p id="pdpDesc"></p><ul id="pdpDet"></ul></div>
@@ -1538,12 +1540,22 @@ const DATA=(()=>{ try{ return JSON.parse(document.getElementById("nowora-product
 const P={};
 (DATA.products||[]).forEach(p=>{
   if(!p||!p.id||p.hidden||!(+p.price>0)||!Array.isArray(p.colours)) return;
-  const colours={}, gallery={}, family={};
-  p.colours.forEach(c=>{ if(!c||!c.name) return; colours[c.name]=c.hex||"#999999"; gallery[c.name]=(c.photos||[]).filter(Boolean); family[c.name]=c.family||"Other"; });
+  const colours={}, gallery={}, family={}, sizesBy={}, left={};
+  const base=(p.sizes&&p.sizes.length?p.sizes:["Free size"]).map(String);
+  p.colours.forEach(c=>{ if(!c||!c.name) return;
+    /* stock: {size: count} per colour. No stock object = not tracked (always available). A size at 0 is
+       hidden, a colour with nothing left is hidden, a product with nothing left is hidden. */
+    const st=c.stock&&typeof c.stock==="object"?c.stock:null, avail=st?base.filter(z=>+st[z]>0):base.slice();
+    if(!avail.length) return;
+    colours[c.name]=c.hex||"#999999"; gallery[c.name]=(c.photos||[]).filter(Boolean); family[c.name]=c.family||"Other";
+    sizesBy[c.name]=avail; left[c.name]=st?Object.fromEntries(avail.map(z=>[z,+st[z]])):null; });
   const first=Object.keys(colours)[0]; if(!first) return;
-  P[p.id]={name:p.name,price:+p.price,cat:p.category||"other",img:(gallery[first]||[])[0]||"",sizes:(p.sizes&&p.sizes.length?p.sizes:["Free size"]),colours,gallery,family,desc:p.desc||"",details:p.details||[]};
+  const sizes=base.filter(z=>Object.values(sizesBy).some(a=>a.includes(z)));
+  P[p.id]={name:p.name,price:+p.price,cat:p.category||"other",img:(gallery[first]||[])[0]||"",sizes,sizesBy,left,colours,gallery,family,desc:p.desc||"",details:p.details||[]};
 });
 const FIRST_KEY=Object.keys(P)[0]||"";
+const sizesFor=(k,c)=>(P[k]&&P[k].sizesBy[c])||[];
+const leftFor=(k,c,z)=>{ const l=P[k]&&P[k].left[c]; return l&&z in l?l[z]:null; };
 (()=>{ const ps=Object.values(P), nCol=ps.reduce((a,p)=>a+Object.keys(p.colours).length,0), nCat=new Set(ps.map(p=>p.cat)).size;
   const W=["No","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty"], word=n=>W[n]||String(n);
   const v={from:ps.length?"₹"+Math.min(...ps.map(p=>p.price)).toLocaleString("en-IN"):"—",pieces:ps.length,colours:nCol,"cats-words":word(nCat),"pieces-words":word(ps.length).toLowerCase(),"colours-words":word(nCol).toLowerCase()};
@@ -1617,12 +1629,17 @@ const renderOptions=(keepSize)=>{
   const p=P[sel.value], prevSize=keepSize?(form.querySelector("input[name=size]:checked")||{}).value:null;
   sw.innerHTML=""; sz.innerHTML="";
   Object.entries(p.colours).forEach(([n,h],i)=>{ const l=document.createElement("label"); l.innerHTML=`<input type="radio" name="colour" value="${n}"${i===0?" checked":""}><span><i style="background:${h}"></i>${n}</span>`; sw.appendChild(l); });
-  p.sizes.forEach(s=>{ const l=document.createElement("label"); l.innerHTML=`<input type="radio" name="size" value="${s}"${s===prevSize?" checked":""}><span>${s}</span>`; sz.appendChild(l); });
+  renderSizes(prevSize);
   updateColourName(); updateTotal();
 };
+function renderSizes(keep){
+  const c=form.querySelector("input[name=colour]:checked"), prev=keep!==undefined?keep:(form.querySelector("input[name=size]:checked")||{}).value;
+  sz.innerHTML="";
+  sizesFor(sel.value,c&&c.value).forEach(s=>{ const l=document.createElement("label"); l.innerHTML=`<input type="radio" name="size" value="${s}"${s===prev?" checked":""}><span>${s}</span>`; sz.appendChild(l); });
+}
 const updateColourName=()=>{ const c=form.querySelector("input[name=colour]:checked"); $("#colourName").textContent=c?"· "+c.value:""; };
 sel.addEventListener("change",()=>renderOptions(true));
-sw.addEventListener("change",()=>{ updateColourName(); $("#f-colour").classList.remove("bad"); });
+sw.addEventListener("change",()=>{ updateColourName(); renderSizes(); $("#f-colour").classList.remove("bad"); });
 sz.addEventListener("change",()=>{ $("#f-size").classList.remove("bad"); updateTotal(); });
 $("#qMinus").addEventListener("click",()=>{ qty=Math.max(1,qty-1); qtyO.textContent=qty; updateTotal(); });
 $("#qPlus").addEventListener("click",()=>{ qty=Math.min(10,qty+1); qtyO.textContent=qty; updateTotal(); });
@@ -1656,7 +1673,7 @@ $("#addBag").addEventListener("click",()=>{
 /* preselect from rack / collection */
 function pick(key,colour,scroll){
   sel.value=key; renderOptions(true);
-  if(colour){ const r=[...form.querySelectorAll("input[name=colour]")].find(x=>x.value===colour); if(r){ r.checked=true; updateColourName(); } }
+  if(colour){ const r=[...form.querySelectorAll("input[name=colour]")].find(x=>x.value===colour); if(r){ r.checked=true; updateColourName(); renderSizes(); } }
   if(scroll){ const target=$(".oform"); window.scrollTo({top:target.getBoundingClientRect().top+scrollY-90,behavior:reduced?"auto":"smooth"}); }
   toast(`${P[key].name}${colour?" · "+colour:""} selected — now pick your size`);
 }
@@ -1770,7 +1787,7 @@ const filt=$("#filters"); $("summary",filt).addEventListener("click",e=>{ if(inn
 if(innerWidth<=1000) filt.open=false;
 sortSel.addEventListener("change",()=>renderShop());
 
-const match=t=>(!F.cat.size||F.cat.has(t.p.cat))&&(!F.fam.size||F.fam.has(t.fam))&&(!F.size.size||[...F.size].some(z=>t.p.sizes.includes(z)))&&(!F.price.size||PRICES.some(([id,,fn])=>F.price.has(id)&&fn(t.p.price)));
+const match=t=>(!F.cat.size||F.cat.has(t.p.cat))&&(!F.fam.size||F.fam.has(t.fam))&&(!F.size.size||[...F.size].some(z=>sizesFor(t.k,t.c).includes(z)))&&(!F.price.size||PRICES.some(([id,,fn])=>F.price.has(id)&&fn(t.p.price)));
 function renderShop(){
   /* sync controls */
   $$("#fCat input,#fCol input,#fPrice input").forEach(cb=>{ const g=cb.closest("#fCat")?"cat":cb.closest("#fCol")?"fam":"price"; cb.checked=F[g].has(cb.value); });
@@ -1788,7 +1805,7 @@ function renderShop(){
   list.forEach((t,i)=>{ const g=t.p.gallery[t.c]||[t.p.img], cols=Object.keys(t.p.colours);
     const b=document.createElement("button"); b.type="button"; b.className="tile"; b.style.animationDelay=Math.min(i,8)*40+"ms";
     b.setAttribute("aria-label",`${t.p.name}, ${t.c}, ${inr(t.p.price)}`);
-    b.innerHTML=`<span class="ti"><img src="${g[0]}" alt="${esc(t.p.name+" in "+t.c)}" loading="lazy">${g[1]?`<img class="alt" src="${g[1]}" alt="" loading="lazy">`:""}${cols.length>1?`<span class="more">${cols.length} colours</span>`:""}<span class="qv"><b>Quick view</b><span>Sizes: ${t.p.sizes.join("  ")}</span></span></span>`+
+    b.innerHTML=`<span class="ti"><img src="${g[0]}" alt="${esc(t.p.name+" in "+t.c)}" loading="lazy">${g[1]?`<img class="alt" src="${g[1]}" alt="" loading="lazy">`:""}${cols.length>1?`<span class="more">${cols.length} colours</span>`:""}<span class="qv"><b>Quick view</b><span>Sizes: ${sizesFor(t.k,t.c).join("  ")}</span></span></span>`+
       `<span class="tb"><span class="br">52 Alive</span><span class="nm">${esc(t.p.name)} · ${esc(t.c)}</span><span class="pr">${inr(t.p.price)}</span><span class="sw">${cols.map(c=>`<i class="${c===t.c?"on":""}" style="background:${t.p.colours[c]}" title="${esc(c)}"></i>`).join("")}</span></span>`;
     b.addEventListener("click",()=>openPDP(t.k,t.c)); grid.appendChild(b); });
 }
@@ -1808,8 +1825,11 @@ function openPDP(k,c){
   Object.keys(p.colours).forEach(col=>{ const b=document.createElement("button"); b.type="button"; b.title=col; b.setAttribute("aria-label",col); b.setAttribute("aria-pressed",String(col===c));
     b.innerHTML=`<img src="${(p.gallery[col]||[p.img])[0]}" alt="">`; b.addEventListener("click",()=>openPDP(k,col)); cols.appendChild(b); });
   const sz=$("#pdpSizes"); sz.innerHTML=""; sz.classList.remove("bad");
-  p.sizes.forEach(z=>{ const b=document.createElement("button"); b.type="button"; b.textContent=z; b.setAttribute("role","radio"); b.setAttribute("aria-checked",String(z===cur.size)); b.setAttribute("aria-pressed",String(z===cur.size));
-    b.addEventListener("click",()=>{ cur.size=z; sz.classList.remove("bad"); $$("button",sz).forEach(x=>{ const on=x.textContent===z; x.setAttribute("aria-pressed",String(on)); x.setAttribute("aria-checked",String(on)); }); }); sz.appendChild(b); });
+  if(cur.size&&!sizesFor(k,c).includes(cur.size)) cur.size="";
+  const showLeft=()=>{ const n=cur.size?leftFor(k,c,cur.size):null; $("#pdpLeft").textContent=n!==null&&n<=3?`Only ${n} left in ${cur.size}`:""; };
+  sizesFor(k,c).forEach(z=>{ const b=document.createElement("button"); b.type="button"; b.textContent=z; b.setAttribute("role","radio"); b.setAttribute("aria-checked",String(z===cur.size)); b.setAttribute("aria-pressed",String(z===cur.size));
+    b.addEventListener("click",()=>{ cur.size=z; showLeft(); sz.classList.remove("bad"); $$("button",sz).forEach(x=>{ const on=x.textContent===z; x.setAttribute("aria-pressed",String(on)); x.setAttribute("aria-checked",String(on)); }); }); sz.appendChild(b); });
+  showLeft();
   $("#pdpDesc").textContent=p.desc; $("#pdpDet").innerHTML=p.details.map(d=>`<li>${esc(d)}</li>`).join(""); $(".pdp-det",pdp).hidden=!(p.desc||p.details.length);
   const seen=new Set([k]); const sim=[...TILES.filter(t=>t.p.cat===p.cat),...TILES].filter(t=>!seen.has(t.k)&&seen.add(t.k)).slice(0,4);
   $("#pdpSim").innerHTML=""; sim.forEach(t=>{ const b=document.createElement("button"); b.type="button";
