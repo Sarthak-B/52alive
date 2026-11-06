@@ -202,12 +202,125 @@ export async function handleOrder(request, env) {
   }
 }
 
+
+/* ============================== order tracking ==============================
+ * POST /api/track {orderId, phone} → where the order is, straight from Shiprocket.
+ * No customer accounts: the long random order ID plus the phone number the order was placed with
+ * act as the key. A wrong ID and a wrong phone get the same "not found" answer, so nobody can probe
+ * other people's orders, and each visitor gets a limited number of lookups.
+ */
+async function srGet(path, env) {
+  const send = token => fetch(SR + path, { headers: { Authorization: "Bearer " + token } });
+  let r = await send(await login(env));
+  if (r.status === 401) r = await send(await login(env, true));
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 404) return null;
+  if (!r.ok) { const e = new Error("Shiprocket " + r.status + ": " + JSON.stringify(d.message || d).slice(0, 200)); e.status = 502; throw e; }
+  return d;
+}
+
+/* Customer-facing step for a Shiprocket status: 0 placed · 1 confirmed · 2 shipped · 3 out for delivery · 4 delivered */
+export function trackStep(status) {
+  const s = String(status || "").toUpperCase().replace(/_/g, " ");
+  if (/CANCEL/.test(s)) return { step: -1, label: "Cancelled", problem: "cancelled" };
+  if (/RTO|RETURN/.test(s)) return { step: -1, label: "Being returned to us", problem: "returned" };
+  if (/UNDELIVERED|NDR|FAILED|LOST|DAMAGED|DESTROYED/.test(s)) return { step: 3, label: "Delivery attempt failed — we'll contact you", problem: "attempt" };
+  if (/DELIVERED/.test(s)) return { step: 4, label: "Delivered" };
+  if (/OUT FOR DELIVERY/.test(s)) return { step: 3, label: "Out for delivery" };
+  if (/SHIPPED|TRANSIT|PICKED|REACHED|DESTINATION|DISPATCH|MISROUTED|DELAYED/.test(s)) return { step: 2, label: "On the way" };
+  if (/PICKUP|READY|INVOICED|MANIFEST|PACKED|AWB|CONFIRMED|PROCESSING/.test(s)) return { step: 1, label: "Confirmed — being packed" };
+  return { step: 0, label: "Order received" };
+}
+
+const cleanPhone = v => String(v || "").replace(/\D/g, "").slice(-10);
+const lookups = new Map();                          /* per-visitor lookup counter (per isolate) */
+function tooMany(ip) {
+  const now = Date.now(), k = ip || "?", e = lookups.get(k);
+  if (!e || now - e.t > 10 * 60000) { lookups.set(k, { t: now, n: 1 }); if (lookups.size > 5000) lookups.clear(); return false; }
+  e.n++; return e.n > 20;
+}
+export function _resetLookups() { lookups.clear(); }
+
+export async function trackOrder(input, env) {
+  const orderId = String(input && input.orderId || "").trim();
+  const phone = cleanPhone(input && input.phone);
+  if (!/^52A-[0-9a-f-]{36}$/i.test(orderId)) { const e = new Error("Check your order ID — it starts with 52A-"); e.status = 400; throw e; }
+  if (!/^[6-9]\d{9}$/.test(phone)) { const e = new Error("Enter the 10-digit mobile number you ordered with"); e.status = 400; throw e; }
+
+  const list = await srGet("/orders?filter_by=channel_order_id&filter=" + encodeURIComponent(orderId) + "&per_page=5", env);
+  const orders = Array.isArray(list && list.data) ? list.data : [];
+  const o = orders.find(x => String(x.channel_order_id || "").toLowerCase() === orderId.toLowerCase());
+  if (!o || cleanPhone(o.customer_phone) !== phone) return null;
+
+  const shipments = Array.isArray(o.shipments) ? o.shipments : o.shipments ? [o.shipments] : [];
+  const sh = shipments.find(x => x && (x.awb || x.awb_code)) || shipments[0] || {};
+  const awb = String(sh.awb || sh.awb_code || "").trim();
+
+  let tracking = null;
+  if (awb) {
+    try {
+      const t = await srGet("/courier/track/awb/" + encodeURIComponent(awb), env);
+      const td = t && (t.tracking_data || (t[awb] && t[awb].tracking_data)) || null;
+      if (td) {
+        const st = (Array.isArray(td.shipment_track) ? td.shipment_track[0] : null) || {};
+        const acts = Array.isArray(td.shipment_track_activities) ? td.shipment_track_activities : [];
+        tracking = {
+          status: st.current_status || "",
+          courier: st.courier_name || sh.courier || "",
+          etd: td.etd || st.edd || "",
+          delivered: st.delivered_date || "",
+          url: /^https:\/\//.test(td.track_url || "") ? td.track_url : "",
+          activities: acts.slice(0, 25).map(a => ({ date: String(a.date || ""), status: String(a["sr-status-label"] || a.activity || a.status || ""), detail: String(a.activity || ""), location: String(a.location || "") }))
+        };
+      }
+    } catch (e) { console.error("[track] awb", e.message); }       /* the order status below still answers */
+  }
+
+  const status = (tracking && tracking.status) || o.status || "";
+  const products = Array.isArray(o.products) ? o.products : [];
+  return {
+    orderId: orderId,
+    placed: o.created_at || o.channel_created_at || "",
+    payment: /cod/i.test(o.payment_method || "") ? "Cash on delivery" : o.payment_method ? "Prepaid" : "",
+    total: Number(o.total) || 0,
+    items: products.slice(0, 20).map(p => ({ name: String(p.name || ""), qty: Number(p.quantity || p.units || 1) || 1 })),
+    city: o.customer_city || "",
+    ...trackStep(status),
+    status: status,
+    awb: awb,
+    courier: (tracking && tracking.courier) || sh.courier || "",
+    tracking: tracking
+  };
+}
+
+export async function handleTrack(request, env) {
+  if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) return json({ ok: false, error: "Order tracking isn't switched on yet — message us on WhatsApp." }, 503);
+  const origin = request.headers.get("Origin");
+  if (origin) { let host = ""; try { host = new URL(origin).host; } catch {} if (host !== new URL(request.url).host) return json({ ok: false, error: "Forbidden" }, 403); }
+  if (tooMany(request.headers.get("CF-Connecting-IP"))) return json({ ok: false, error: "Too many lookups — try again in a few minutes." }, 429);
+  const raw = await request.text();
+  if (raw.length > 2000) return json({ ok: false, error: "Too large" }, 413);
+  let input; try { input = JSON.parse(raw); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
+  try {
+    const order = await trackOrder(input, env);
+    if (!order) return json({ ok: false, error: "We couldn't find that order. Check the order ID and use the phone number you ordered with." }, 404);
+    return json({ ok: true, order: order });
+  } catch (e) {
+    console.error("[track]", e.message);
+    return json({ ok: false, error: e.status === 400 ? e.message : "Tracking is busy right now — please try again in a minute." }, e.status === 400 ? 400 : 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/order") {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
       return handleOrder(request, env);
+    }
+    if (url.pathname === "/api/track") {
+      if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
+      return handleTrack(request, env);
     }
     return env.ASSETS.fetch(request);
   },
