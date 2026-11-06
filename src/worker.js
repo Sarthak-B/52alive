@@ -30,11 +30,19 @@ export function catalogFromHtml(html) {
     if (!p || !/^[\w-]{1,40}$/.test(p.id || "") || p.hidden) continue;
     const price = Number(p.price);
     if (!Number.isFinite(price) || price <= 0) continue;
-    const colours = (Array.isArray(p.colours) ? p.colours : []).map(c => c && c.name).filter(Boolean);
+    const base = Array.isArray(p.sizes) && p.sizes.length ? p.sizes.map(String) : ["Free size"];
+    const avail = {};                    /* colour → sizes in stock (no stock object = not tracked = all sizes) */
+    for (const c of Array.isArray(p.colours) ? p.colours : []) {
+      if (!c || !c.name) continue;
+      const st = c.stock && typeof c.stock === "object" ? c.stock : null;
+      const a = st ? base.filter(z => Number(st[z]) > 0) : base.slice();
+      if (a.length) avail[c.name] = a;
+    }
+    const colours = Object.keys(avail);
     if (!colours.length) continue;
     const w = Number(p.weight);
     out[p.id] = { name: String(p.name || p.id), price, weight: w > 0 && w < 30 ? w : DEFAULT_WEIGHT,
-      sizes: Array.isArray(p.sizes) && p.sizes.length ? p.sizes.map(String) : ["Free size"], colours };
+      sizes: base.filter(z => colours.some(c => avail[c].includes(z))), colours, avail };
   }
   if (!Object.keys(out).length) throw new Error("Product catalogue is empty");
   return out;
@@ -113,7 +121,7 @@ export function buildPayload(input, env, now = new Date(), CATALOG = {}) {
   for (const it of items) {
     const p = it && Object.prototype.hasOwnProperty.call(CATALOG, it.key) ? CATALOG[it.key] : null;
     if (!p) bad("Unknown product");
-    if (!p.colours.includes(it.colour) || !p.sizes.includes(it.size)) bad("Invalid colour/size");
+    if (!(p.avail ? (p.avail[it.colour] || []) : p.colours.includes(it.colour) ? p.sizes : []).includes(it.size)) bad("Sold out or not available: " + p.name + " " + String(it.colour || "").slice(0, 40) + " " + String(it.size || "").slice(0, 12));
     const q = Number(it.qty);
     if (!Number.isInteger(q) || q < 1 || q > MAX_QTY) bad("Invalid quantity");
     const sku = `52A-${slug(it.key)}-${slug(it.colour)}-${it.size}`;
@@ -350,7 +358,9 @@ export async function handleTrack(request, env) {
  * can we log in, does the pickup location name match Shiprocket, and can a given order be found.
  */
 export async function handleHealth(request, env) {
-  const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL };
+  const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL,
+    stockSync: { webhookToken: !!env.SHIPROCKET_WEBHOOK_TOKEN, githubToken: !!env.GITHUB_TOKEN } };
+  if (env.GITHUB_TOKEN) { try { const r = await gh(env, "GET", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive")); const d = await r.json().catch(() => ({})); out.stockSync.githubCanWrite = r.ok && !!(d.permissions && d.permissions.push); } catch (e) { out.stockSync.githubCanWrite = false; } }
   if (!out.secrets) return json(out);
   try { await login(env, true); out.login = true; } catch (e) { out.login = false; out.loginError = String(e.message).slice(0, 160); return json(out); }
   try {
@@ -373,14 +383,106 @@ export async function handleHealth(request, env) {
   return json(out);
 }
 
+
+/* ============================== stock: dispatch → website ==============================
+ * Shiprocket calls POST /api/courier-updates on every tracking event (Settings → API → Webhooks,
+ * security token = SHIPROCKET_WEBHOOK_TOKEN, sent as x-api-key; the URL must not contain "shiprocket",
+ * "sr" or "kr"). When an order is first picked up / shipped, its items come off the stock in the
+ * product catalogue (public/index.html), the change is committed to GitHub and the site redeploys:
+ * a size at 0 disappears from the shop. Each order counts once — the catalogue keeps a list of
+ * dispatched order IDs, and the commit is retried if the file changed in between.
+ * Needs GITHUB_TOKEN (fine-grained, Contents: read & write on this repo). Optional GITHUB_REPO,
+ * GITHUB_BRANCH, CATALOGUE_PATH.
+ */
+const GH = "https://api.github.com";
+const b64encode = text => { const bytes = new TextEncoder().encode(text); let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); };
+const b64decode = b64 => { const bin = atob(String(b64).replace(/\s/g, "")); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); };
+const CAT_BLOCK = /(<script[^>]*id=["']nowora-products["'][^>]*>)([\s\S]*?)(<\/script>)/i;
+const SLUG = t => String(t).toUpperCase().replace(/[^A-Z0-9]+/g, "");
+const DISPATCH_STEP = s => /PICKED|SHIPPED|TRANSIT|OUT FOR DELIVERY|DELIVERED|REACHED|DESTINATION/i.test(s) && !/RTO|RETURN|CANCEL|UNDELIVERED|NOT PICKED|PICKUP EXCEPTION/i.test(s);
+
+function gh(env, method, path, body) {
+  return fetch(GH + path, { method, headers: { Authorization: "Bearer " + env.GITHUB_TOKEN, Accept: "application/vnd.github+json", "User-Agent": "52alive-stock", "X-GitHub-Api-Version": "2022-11-28", ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+}
+
+/** Takes an order's items off the catalogue stock. Pure: returns {data, changes} or null if already counted. */
+export function applyDispatch(data, orderId, items) {
+  data.dispatched = Array.isArray(data.dispatched) ? data.dispatched : [];
+  if (data.dispatched.includes(orderId)) return null;
+  const bySku = {};
+  for (const p of data.products || []) for (const c of p.colours || []) for (const z of (p.sizes && p.sizes.length ? p.sizes : ["Free size"]))
+    bySku["52A-" + SLUG(p.id) + "-" + SLUG(c.name) + "-" + z] = { p, c, z: String(z) };
+  const changes = [];
+  for (const it of items) {
+    const hit = bySku[String(it.sku || "").trim()];
+    if (!hit) { changes.push({ sku: it.sku, skipped: "unknown product" }); continue; }
+    const st = hit.c.stock;
+    if (!st || typeof st !== "object") { changes.push({ sku: it.sku, skipped: "stock not tracked" }); continue; }
+    const before = Math.max(0, Number(st[hit.z]) || 0), qty = Math.max(1, Number(it.qty) || 1);
+    st[hit.z] = Math.max(0, before - qty);
+    changes.push({ sku: it.sku, name: hit.p.name + " " + hit.c.name + " " + hit.z, from: before, to: st[hit.z] });
+  }
+  data.dispatched.push(orderId);
+  if (data.dispatched.length > 400) data.dispatched = data.dispatched.slice(-400);
+  return { data, changes };
+}
+
+export async function recordDispatch(orderId, env) {
+  /* the order's line items (SKUs) from Shiprocket */
+  const list = await srGet("/orders?filter_by=channel_order_id&filter=" + encodeURIComponent(orderId) + "&per_page=5", env);
+  const o = (Array.isArray(list && list.data) ? list.data : []).find(x => String(x.channel_order_id || "").toLowerCase() === orderId.toLowerCase());
+  if (!o) return { ok: false, reason: "order not in Shiprocket" };
+  const items = (Array.isArray(o.products) ? o.products : []).map(p => ({ sku: p.channel_sku || p.sku, qty: p.quantity || p.units }));
+  if (!items.length) return { ok: false, reason: "no items" };
+  const repo = env.GITHUB_REPO || "Sarthak-B/52alive", branch = env.GITHUB_BRANCH || "main", path = env.CATALOGUE_PATH || "public/index.html";
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const r = await gh(env, "GET", "/repos/" + repo + "/contents/" + path + "?ref=" + encodeURIComponent(branch));
+    if (!r.ok) throw new Error("GitHub read " + r.status);
+    const f = await r.json();
+    const html = f.content && f.encoding === "base64" ? b64decode(f.content) : await (await gh(env, "GET", "/repos/" + repo + "/git/blobs/" + f.sha)).json().then(b => b64decode(b.content));
+    const m = CAT_BLOCK.exec(html); if (!m) throw new Error("catalogue block not found");
+    const res = applyDispatch(JSON.parse(m[2]), orderId, items);
+    if (!res) return { ok: true, already: true };
+    const json = JSON.stringify(res.data, null, 1).replace(/<\//g, "<\\/");
+    const next = html.replace(CAT_BLOCK, (_, a, __, c) => a + "\n" + json + "\n" + c);
+    const moved = res.changes.filter(c => c.to !== undefined);
+    const msg = "Stock: order " + orderId.slice(0, 12) + " dispatched" + (moved.length ? " — " + moved.map(c => c.name + " " + c.from + "→" + c.to).join(", ").slice(0, 160) : " (no tracked stock)");
+    const put = await gh(env, "PUT", "/repos/" + repo + "/contents/" + path, { message: msg, content: b64encode(next), sha: f.sha, branch });
+    if (put.ok) return { ok: true, changes: res.changes };
+    if (put.status !== 409 && put.status !== 422) throw new Error("GitHub write " + put.status);
+    await new Promise(z => setTimeout(z, 400 * (attempt + 1)));          /* someone else changed the file: read again */
+  }
+  throw new Error("GitHub write kept conflicting");
+}
+
+function sameToken(a, b) { a = String(a || ""); b = String(b || ""); if (!a || !b || a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
+
+export async function handleCourierUpdate(request, env, ctx) {
+  const done = extra => json({ ok: true, ...extra });                    /* Shiprocket only accepts 200 */
+  if (!sameToken(request.headers.get("x-api-key"), env.SHIPROCKET_WEBHOOK_TOKEN)) return done({ ignored: "token" });
+  let b; try { b = JSON.parse(await request.text()); } catch { return done({ ignored: "body" }); }
+  const status = String(b.shipment_status || b.current_status || "");
+  if (b.is_return == 1 || b.is_return === true || !DISPATCH_STEP(status)) return done({ ignored: "status" });
+  const m = /52A-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.exec(String(b.order_id || ""));
+  if (!m) return done({ ignored: "not a website order" });
+  if (!env.GITHUB_TOKEN || !env.SHIPROCKET_EMAIL) { console.warn("[stock] GITHUB_TOKEN or Shiprocket login missing — stock not updated for", m[0]); return done({ ignored: "not configured" }); }
+  const work = recordDispatch(m[0], env).then(r => console.log("[stock]", m[0], JSON.stringify(r).slice(0, 300))).catch(e => console.error("[stock]", m[0], e.message));
+  if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(work); else await work;
+  return done({ queued: true });
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === "/api/order") {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
       return handleOrder(request, env);
     }
     if (url.pathname === "/api/shiprocket-health") return handleHealth(request, env);
+    if (url.pathname === "/api/courier-updates") {
+      if (request.method !== "POST") return json({ ok: true });
+      return handleCourierUpdate(request, env, ctx);
+    }
     if (url.pathname === "/api/track") {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
       return handleTrack(request, env);
