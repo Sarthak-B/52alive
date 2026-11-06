@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {test, beforeEach} from 'node:test';
-import worker, {catalogFromHtml, buildPayload, istStamp, _resetTokenCache, _resetCatalogCache} from '../src/worker.js';
+import worker, {catalogFromHtml, buildPayload, istStamp, _resetTokenCache, _resetCatalogCache, _resetPickupCache} from '../src/worker.js';
 
 const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
 const CATALOG = catalogFromHtml(html);
@@ -15,7 +15,7 @@ const order = (over = {}) => ({
   ...over,
 });
 
-beforeEach(() => { _resetTokenCache(); _resetCatalogCache(); });
+beforeEach(() => { _resetTokenCache(); _resetCatalogCache(); _resetPickupCache(); });
 
 test('page shows exactly the products Shiprocket prices from', () => {
   const src = html.match(/const DATA=[\s\S]*?\nconst FIRST_KEY=[^\n]*/)[0];
@@ -83,10 +83,12 @@ test('rejects bad input', () => {
 
 test('POST /api/order logs in, creates the order and refreshes an expired token', async () => {
   const calls = [];
-  let logins = 0, creates = 0;
+  let logins = 0, creates = 0, lastBody;
   globalThis.fetch = async (url, init) => {
     calls.push(url);
     if (url.endsWith('/auth/login')) return Response.json({token: 'T' + (++logins)});
+    if (url.endsWith('/settings/company/pickup')) return Response.json({data: {shipping_address: [{pickup_location: 'Home', address: '77 Anjali Garments', is_primary_location: 1}]}});
+    lastBody = JSON.parse(init.body);
     creates++;
     if (creates === 1 && init.headers.Authorization === 'Bearer T1') return new Response('{}', {status: 401});
     return Response.json({order_id: 111, shipment_id: 222, status: 'NEW'});
@@ -95,6 +97,7 @@ test('POST /api/order logs in, creates the order and refreshes an expired token'
   assert.deepEqual(await res.json(), {ok: true, shiprocket_order_id: 111, shipment_id: 222});
   assert.equal(logins, 2);
   assert.equal(calls.filter(u => u.endsWith('/orders/create/adhoc')).length, 2);
+  assert.equal(lastBody.pickup_location, 'Home');
 });
 
 test('blocks other origins and works without secrets', async () => {
@@ -115,4 +118,17 @@ test('Pages Function routes POST /api/order to the same handler', async () => {
   const {onRequestPost} = await import('../functions/api/order.js');
   const res = await onRequestPost({request: new Request('https://52-alive.pages.dev/api/order', {method: 'POST', body: '{}'}), env: {}});
   assert.equal(res.status, 503);
+});
+
+import {choosePickup} from '../src/worker.js';
+test('pickup location: name, then address text, then the primary or only one', () => {
+  const list = [{pickup_location: 'Home', address: '77, Anjali Garments, Nanda Devi Loadge', city: 'Chamoli', pin_code: '246444', is_primary_location: 1},
+                {pickup_location: 'Warehouse', address: 'Plot 5 Industrial Area', city: 'Dehradun', pin_code: '248001', is_primary_location: 0}];
+  assert.equal(choosePickup(list, 'Warehouse'), 'Warehouse');
+  assert.equal(choosePickup(list, 'home'), 'Home');
+  assert.equal(choosePickup(list, '77, Anjali Garments, Nanda Devi Loadge, Near Uma Devi tirah, karanprayag Chamoli uttarakhand, Chamoli, Uttarakhand, India, 246444'), 'Home');
+  assert.equal(choosePickup(list, 'Plot 5 Industrial Area, Dehradun'), 'Warehouse');
+  assert.equal(choosePickup(list, ''), 'Home');
+  assert.equal(choosePickup(list, 'Primary'), 'Home');
+  assert.equal(choosePickup([], 'Shop'), 'Shop');
 });
