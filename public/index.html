@@ -536,6 +536,123 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
   .toast{white-space:normal;width:calc(100% - 32px);text-align:center;border-radius:16px}
 }
 @media (prefers-reduced-motion:reduce){ .garment .swing{animation:none} }
+
+/* ============================== SHOP: categories, filters, grid, product page ============================== */
+.cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.4vw,20px)}
+.cat-tile{position:relative;display:block;border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--line);text-align:left;transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.cat-tile:hover{transform:translateY(-4px);box-shadow:0 26px 50px -30px rgba(0,0,0,.45)}
+.cat-tile .ci{display:block;aspect-ratio:4/5;overflow:hidden;background:#fff}
+.cat-tile img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease-out)}
+.cat-tile:hover img{transform:scale(1.06)}
+.cat-tile .cb{padding:14px 16px 16px;display:grid;gap:2px}
+.cat-tile b{font-family:var(--display);font-size:22px;letter-spacing:-.03em}
+.cat-tile small{font-size:13px;color:var(--muted)}
+.colour-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px;align-items:center}
+.colour-strip .lbl{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-right:6px}
+.cchip{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 8px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font-size:14px;font-weight:500;transition:box-shadow .25s}
+.cchip:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.cchip i,.fcheck i,.tb .sw i{border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.cchip i{width:24px;height:24px}
+.shop{background:var(--bg-2)}
+.shop-head{margin-bottom:clamp(26px,3.5vw,44px)}
+.shop-layout{display:grid;grid-template-columns:250px 1fr;gap:clamp(20px,3vw,44px);align-items:start}
+.filters{position:sticky;top:96px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 20px 18px;max-height:calc(100svh - 120px);overflow:auto}
+.filters>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:16px 0 12px;font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;cursor:default}
+.filters>summary::-webkit-details-marker{display:none}
+.filters>summary button{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:700;text-transform:uppercase}
+.fgroup{border-top:1px solid var(--line);padding:16px 0 8px}
+.fgroup h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.fcheck{display:flex;align-items:center;gap:10px;min-height:34px;font-size:14.5px;cursor:pointer}
+.fcheck input{width:17px;height:17px;accent-color:var(--ink);flex:none}
+.fcheck i{width:16px;height:16px;flex:none}
+.fcheck .n{margin-left:auto;color:var(--muted);font-size:13px}
+.fsizes{display:flex;flex-wrap:wrap;gap:8px}
+.fsizes button{min-width:48px;height:40px;border-radius:10px;box-shadow:inset 0 0 0 1.5px var(--line);font-weight:700;font-size:14px;transition:all .2s}
+.fsizes button[aria-pressed=true]{background:var(--ink);color:var(--bg);box-shadow:none}
+.shop-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.shop-bar .count{font-size:15px;color:var(--ink-2)}
+.sort{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-2)}
+.sort select{height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);padding:0 12px;font:inherit;font-weight:600;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chips:empty{display:none}
+.chips button{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-size:13px;font-weight:600}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.4vw,20px)}
+.tile{background:var(--surface);border-radius:16px;overflow:hidden;border:1px solid var(--line);text-align:left;display:flex;flex-direction:column;transition:box-shadow .4s var(--ease),transform .4s var(--ease);animation:panel-in .5s var(--ease) both}
+.tile:hover{box-shadow:0 24px 50px -30px rgba(0,0,0,.5);transform:translateY(-3px)}
+.tile .ti{position:relative;display:block;aspect-ratio:4/5;background:#fff;overflow:hidden}
+.tile .ti img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .5s,transform 1s var(--ease-out)}
+.tile .ti img.alt{opacity:0}
+.tile:hover .ti img.alt{opacity:1}
+.tile:hover .ti img{transform:scale(1.04)}
+.tile .more{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.94);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:999px}
+.tile .qv{position:absolute;left:10px;right:10px;bottom:10px;background:rgba(255,255,255,.96);border-radius:12px;padding:10px 12px;font-size:12.5px;transform:translateY(calc(100% + 12px));transition:transform .45s var(--ease-out);display:grid;gap:3px}
+.tile:hover .qv,.tile:focus-visible .qv{transform:none}
+.qv b{font-size:13px}.qv span{color:var(--muted);letter-spacing:.04em}
+.tile .tb{padding:12px 14px 16px;display:grid;gap:3px}
+.tb .br{font-weight:700;font-size:15px}
+.tb .nm{font-size:14px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb .pr{font-weight:700;font-size:15px;margin-top:4px}
+.tb .sw{display:flex;gap:6px;margin-top:6px}
+.tb .sw i{width:14px;height:14px}
+.tb .sw i.on{box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--ink)}
+.empty{grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--ink-2);display:grid;gap:16px;justify-items:center}
+.bag-btn{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px currentColor;color:inherit}
+.bag-btn svg{width:19px;height:19px}
+.bag-btn b{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;transform:scale(0);transition:transform .3s var(--ease)}
+.bag-btn b.on{transform:scale(1)}
+dialog.pdp{width:min(1180px,calc(100vw - 32px));overflow:hidden}
+.pdp-in{display:grid;grid-template-columns:1.15fr .85fr;height:min(820px,calc(100svh - 48px))}
+.pdp-gal{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;overflow:auto;background:#fff;align-content:start}
+.pdp-gal img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;background:#fff}
+.pdp-gal img:first-child{grid-column:span 2;aspect-ratio:1}
+.pdp-gal img:nth-child(2):last-child{grid-column:span 2;aspect-ratio:1}
+.pdp-info{padding:clamp(24px,3vw,40px);overflow:auto;display:grid;gap:22px;align-content:start}
+.crumb{font-size:12.5px;color:var(--muted)}
+.pdp-info h3{font-size:clamp(26px,2.4vw,34px);margin-top:4px}
+.pdp-info .br{font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--accent)}
+.pdp-price{font-size:26px;font-weight:700}
+.pdp-price small{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:2px}
+.pdp-h{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;display:flex;justify-content:space-between;gap:12px;margin-bottom:10px}
+.pdp-h a{color:var(--accent);letter-spacing:.08em}
+.pdp-h .muted{font-weight:500;letter-spacing:.04em;text-transform:none;color:var(--ink-2);font-size:14px}
+.pdp-cols{display:flex;gap:10px;flex-wrap:wrap}
+.pdp-cols button{width:64px;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1.5px var(--line);background:#fff}
+.pdp-cols button img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
+.pdp-cols button[aria-pressed=true]{box-shadow:0 0 0 2px var(--ink)}
+.pdp-sizes{display:flex;gap:10px;flex-wrap:wrap}
+.pdp-sizes button{width:54px;height:54px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);font-weight:700;font-size:14.5px;transition:all .2s}
+.pdp-sizes button:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.pdp-sizes button[aria-pressed=true]{background:var(--ink);color:var(--bg);box-shadow:none}
+.pdp-sizes.bad button{box-shadow:inset 0 0 0 1.5px #B3261E}
+.pdp-err{color:#B3261E;font-size:13px;margin-top:8px;display:none}
+.pdp-sizes.bad+.pdp-err{display:block}
+.pdp-acts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pdp-acts .btn{min-height:56px}
+.pdp-del{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:8px;font-size:14px;color:var(--ink-2)}
+.pdp-del span::before{content:"✓";color:var(--accent);font-weight:700;margin-right:8px}
+.pdp-det p{font-size:15px;color:var(--ink-2);margin-bottom:10px}
+.pdp-det ul{display:grid;gap:6px;padding-left:18px;font-size:14.5px;color:var(--ink-2)}
+.pdp-sim{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pdp-sim button{text-align:left;font-size:12.5px;display:grid;gap:4px;color:var(--ink-2)}
+.pdp-sim img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.pdp-sim b{font-size:13px;color:var(--ink)}
+@media (max-width:1000px){
+  .cat-grid{grid-template-columns:repeat(3,1fr)}
+  .shop-layout{grid-template-columns:1fr}
+  .filters{position:static;max-height:none}
+  .filters>summary{cursor:pointer}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .pdp-in{grid-template-columns:1fr;height:auto;max-height:calc(100svh - 48px);overflow:auto}
+  .pdp-gal{overflow:visible}
+  .pdp-info{overflow:visible}
+}
+@media (max-width:640px){
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .pgrid{gap:10px}
+  .tile .qv{display:none}
+  .pdp-sim{grid-template-columns:repeat(2,1fr)}
+  .pdp-acts{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -551,16 +668,17 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
   <div class="wrap">
     <a href="#top" class="logo"><span>52 <b>ALIVE</b></span><small>Streetwear · India</small></a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#rack">The Rack</a><a href="#collection">Collection</a><a href="#fit">Size guide</a><a href="#community">Community</a><a href="#faq">Questions</a>
+      <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="#fit">Size guide</a><a href="#faq">Questions</a>
     </nav>
     <div style="display:flex;gap:10px;align-items:center">
+      <button type="button" class="bag-btn" id="bagBtn" aria-label="Bag, 0 items"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><b id="bagCount">0</b></button>
       <a class="btn btn-wa" href="#order">Order on WhatsApp</a>
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><i></i><i></i></button>
     </div>
   </div>
 </header>
 <nav class="mobile-menu" aria-label="Mobile">
-  <a href="#rack">The Rack</a><a href="#collection">Collection</a><a href="#fit">Size guide</a><a href="#community">Community</a><a href="#order">Order on WhatsApp</a>
+  <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="#fit">Size guide</a><a href="#order">Your bag &amp; order</a>
 </nav>
 
 <main id="top">
@@ -572,9 +690,9 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
     <div>
       <span class="eyebrow" data-reveal>The Winter Drop / 2026</span>
       <h1 data-split>Layer up. Stay <em>alive.</em></h1>
-      <p class="lead" data-reveal>Zip hoodies, packable quilted puffers, track jackets, knits and fleece sweatpants — built for cold mornings and late nights. Pick your colour, pick your size, order on WhatsApp.</p>
+      <p class="lead" data-reveal>Zip hoodies, packable quilted puffers, track jackets, knits and fleece sweatpants — built for cold mornings and late nights. Pick your piece, colour and size, then order on WhatsApp.</p>
       <div class="hero-ctas" data-reveal>
-        <a class="btn" href="#order">Order on WhatsApp <span class="arr">→</span></a>
+        <a class="btn" href="#shop">Shop the drop <span class="arr">→</span></a>
         <a class="btn btn-ghost" href="https://chat.whatsapp.com/Hd93P6B4txr5QOmvCSjk65" target="_blank" rel="noopener">Join the drop list</a>
       </div>
       <div class="chip-row" data-reveal><span>Cash on delivery</span><span>Dispatch in 48h</span><span>Easy size exchange</span></div>
@@ -593,12 +711,46 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
   <span>Zip hoodies</span><span>Quilted puffers</span><span><i>stay alive</i></span><span>Track jackets</span><span>Cable knits</span><span>Fleece sweatpants</span><span>COD across India</span>
 </div></div>
 
+<!-- SHOP BY CATEGORY -->
+<section class="cats" id="categories">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Shop by category</span><h2 data-split>Pick your <em>layer.</em></h2></div>
+      <p class="lead" data-reveal>Five categories, eleven pieces, fourteen colours. Tap one to jump straight into the shop.</p>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+    <div class="colour-strip" id="colourStrip"><span class="lbl">Shop by colour</span></div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section class="shop" id="shop">
+  <div class="wrap">
+    <div class="shop-head"><span class="eyebrow">01 / Shop the drop</span><h2 data-split>Everything, <em>one rail.</em></h2></div>
+    <div class="shop-layout">
+      <details class="filters" id="filters" open>
+        <summary><span>Filters</span><button type="button" id="clearAll">Clear all</button></summary>
+        <div class="fgroup"><h4>Category</h4><div id="fCat"></div></div>
+        <div class="fgroup"><h4>Colour</h4><div id="fCol"></div></div>
+        <div class="fgroup"><h4>Size</h4><div class="fsizes" id="fSize"></div></div>
+        <div class="fgroup"><h4>Price</h4><div id="fPrice"></div></div>
+      </details>
+      <div>
+        <div class="shop-bar"><p class="count" id="shopCount"></p>
+          <label class="sort">Sort by <select id="sortBy"><option value="rec">Recommended</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option><option value="az">Name: A–Z</option></select></label></div>
+        <div class="chips" id="chips"></div>
+        <div class="pgrid" id="pgrid" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- THE RACK -->
 <section class="rack-sec" id="rack">
   <div class="wrap">
     <div class="sec-head" style="margin-bottom:0">
-      <div><span class="eyebrow">01 / The Rack</span><h2 data-split>Walk the rail. <em>Pick one.</em></h2></div>
-      <p class="lead" data-reveal>Hover or tap a piece to pull it forward. Click it again and it drops straight into your order.</p>
+      <div><span class="eyebrow">02 / The Rack</span><h2 data-split>Walk the rail. <em>Pick one.</em></h2></div>
+      <p class="lead" data-reveal>Hover or tap a piece to pull it forward. Click it again to see every photo, colour and size.</p>
     </div>
     <div class="rack-stage" data-reveal="fade">
       <div class="rail" aria-hidden="true"></div>
@@ -627,7 +779,7 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
       <div class="tag-card" data-reveal="scale"><img src="images/tag.png" alt="The 52 Alive swing tag" loading="lazy"></div>
     </div>
     <div>
-      <span class="eyebrow" data-reveal>02 / Why 52 Alive</span>
+      <span class="eyebrow" data-reveal>03 / Why 52 Alive</span>
       <h2 data-split>Not loud. Just <em>alive.</em></h2>
       <p class="lead" data-reveal style="margin-top:26px">We stock the pieces you actually reach for — the hoodie you sleep in, the sweatpants you never take off, the puffer that packs into its own pouch.</p>
       <p data-reveal>Every drop is small and picked by hand, piece by piece. Easy to layer over a tee or under a coat. And when it's gone, it's usually gone — that's why the community hears first.</p>
@@ -636,108 +788,6 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
         <div data-reveal><b data-count="14">14</b><span>colourways to choose from</span></div>
         <div data-reveal><b data-count="48" data-suffix="h">48h</b><span>dispatch after confirmation</span></div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- COLLECTION -->
-<section class="collection" id="collection">
-  <div class="wrap">
-    <div class="col-head">
-      <div><span class="eyebrow">03 / The Collection</span><h2 data-split>Eleven pieces. <em>Every mood.</em></h2></div>
-      <div class="tabs" data-tabs role="tablist" aria-label="Filter collection">
-        <button data-tab="all">All</button><button data-tab="hoodies">Hoodies</button><button data-tab="jackets">Jackets</button><button data-tab="knits">Knits &amp; sweats</button><button data-tab="bottoms">Bottoms</button>
-      </div>
-    </div>
-    <div class="grid">
-      <article class="p-card big" data-panel="jackets" data-tilt data-cursor="Order">
-        <div class="media"><span class="p-badge">Bestseller</span><img src="images/puffer-blush.jpg" alt="Blush pink hooded quilted puffer jacket" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Packable Quilted Puffer</h3><span class="price">₹1,999</span></div>
-          <p>Lightweight puffer with narrow horizontal quilting, hood with toggles and zip hand pockets. Packs down into its own pouch. Blush pink, blue grey or lavender.</p>
-          <div class="p-foot"><span class="dots" data-dots="puffer"></span><button class="btn btn-wa" data-order="puffer">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="jackets" data-tilt data-cursor="Order">
-        <div class="media"><span class="p-badge">New</span><img src="images/track-jacket.jpg" alt="Navy, white and red colour-block zip track jacket" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Colour-Block Track Jacket</h3><span class="price">₹1,799</span></div>
-          <p>Navy body with a white and red yoke, stand collar, full zip and striped rib cuffs and hem.</p>
-          <div class="p-foot"><span class="dots" data-dots="trackjacket"></span><button class="btn btn-wa" data-order="trackjacket">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="hoodies" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/hoodie-beige.jpg" alt="Stone beige zip hoodie with cream drawcords" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Relaxed Zip Hoodie</h3><span class="price">₹1,299</span></div>
-          <p>Soft brushed-back fleece in stone beige. Relaxed drop-shoulder fit, full zip, cream drawcords.</p>
-          <div class="p-foot"><span class="dots" data-dots="hoodie"></span><button class="btn btn-wa" data-order="hoodie">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="jackets" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/zip-jacket-grey.jpg" alt="Grey marl collared zip jacket" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Collared Zip Jacket</h3><span class="price">₹1,899</span></div>
-          <p>Grey marl jacket with a point collar, brass zip, button cuffs and slant pockets.</p>
-          <div class="p-foot"><span class="dots" data-dots="zipjacket"></span><button class="btn btn-wa" data-order="zipjacket">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="knits" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/quarterzip-oat.jpg" alt="Oatmeal cable-knit quarter-zip sweater" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Cable-Knit Quarter Zip</h3><span class="price">₹1,599</span></div>
-          <p>Textured cable knit with a zip mock neck and ribbed cuffs and hem.</p>
-          <div class="p-foot"><span class="dots" data-dots="quarterzip"></span><button class="btn btn-wa" data-order="quarterzip">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="bottoms" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/sweatpants-black.jpg" alt="Black straight-leg sweatpants" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Straight-Leg Sweatpants</h3><span class="price">₹999</span></div>
-          <p>Fleece-backed, straight leg, elastic waist with drawcord. Jet black or grey marl.</p>
-          <div class="p-foot"><span class="dots" data-dots="sweatpants"></span><button class="btn btn-wa" data-order="sweatpants">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="jackets" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/retro-jacket-tan.jpg" alt="Tan zip track jacket with navy stripes" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Retro Track Jacket</h3><span class="price">₹1,699</span></div>
-          <p>Tan tricot track jacket with contrast stripes down the sleeves and a stand collar.</p>
-          <div class="p-foot"><span class="dots" data-dots="retrojacket"></span><button class="btn btn-wa" data-order="retrojacket">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="bottoms" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/retro-pants-tan.jpg" alt="Tan track pants with black side stripes" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Retro Track Pants</h3><span class="price">₹1,199</span></div>
-          <p>Matching tan track pants with side stripes, elastic waist and drawcord.</p>
-          <div class="p-foot"><span class="dots" data-dots="retropants"></span><button class="btn btn-wa" data-order="retropants">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="hoodies" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/hoodie-taupe.jpg" alt="Washed taupe zip hoodie with cream drawcords" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Washed Zip Hoodie</h3><span class="price">₹1,299</span></div>
-          <p>Garment-washed taupe for a faded, broken-in look. Two-way zip, cream drawcords.</p>
-          <div class="p-foot"><span class="dots" data-dots="washedhoodie"></span><button class="btn btn-wa" data-order="washedhoodie">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="bottoms" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/trackpants-black.jpg" alt="Black track pants with white piping" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Fleece-Lined Track Pants</h3><span class="price">₹1,199</span></div>
-          <p>Black track pants with white piping, warm fleece lining and an elastic waist.</p>
-          <div class="p-foot"><span class="dots" data-dots="trackpants"></span><button class="btn btn-wa" data-order="trackpants">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
-      <article class="p-card" data-panel="knits" data-tilt data-cursor="Order">
-        <div class="media"><img src="images/crewneck-charcoal.jpg" alt="Washed charcoal crewneck sweatshirt neckline" loading="lazy"></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Washed Crewneck</h3><span class="price">₹999</span></div>
-          <p>Washed charcoal sweatshirt with a ribbed crew neck. Faded, lived-in colour.</p>
-          <div class="p-foot"><span class="dots" data-dots="crewneck"></span><button class="btn btn-wa" data-order="crewneck">Order this <span class="arr">→</span></button></div>
-        </div>
-      </article>
     </div>
   </div>
 </section>
@@ -911,6 +961,23 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
   </div>
 </footer>
 
+<dialog class="sheet pdp" id="pdp" aria-labelledby="pdpName">
+  <button class="sheet-close" aria-label="Close">×</button>
+  <div class="pdp-in">
+    <div class="pdp-gal" id="pdpGal"></div>
+    <div class="pdp-info">
+      <div><p class="crumb" id="pdpCrumb"></p><span class="br">52 Alive</span><h3 id="pdpName"></h3></div>
+      <p class="pdp-price" id="pdpPrice"></p>
+      <div><p class="pdp-h"><span>Colour <span class="muted" id="pdpColName"></span></span></p><div class="pdp-cols" id="pdpCols"></div></div>
+      <div><p class="pdp-h"><span>Select size</span><a href="#fit" data-close-pdp>Size chart ›</a></p><div class="pdp-sizes" id="pdpSizes" role="radiogroup" aria-label="Size"></div><p class="pdp-err">Please select a size</p></div>
+      <div class="pdp-acts"><button type="button" class="btn" id="pdpAdd">Add to bag</button><button type="button" class="btn btn-ghost" id="pdpBuy">Buy now</button></div>
+      <div class="pdp-del"><span>Cash on delivery available across India</span><span>Dispatch within 48 hours of confirmation</span><span>Easy size exchange within 7 days</span></div>
+      <div class="pdp-det"><p class="pdp-h">Product details</p><p id="pdpDesc"></p><ul id="pdpDet"></ul></div>
+      <div><p class="pdp-h">You may also like</p><div class="pdp-sim" id="pdpSim"></div></div>
+    </div>
+  </div>
+</dialog>
+
 <a class="fab" data-wa="Hi 52 Alive! I'd like to know more about the winter drop." aria-label="Chat on WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.2c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg></a>
 
 <script>
@@ -1023,19 +1090,19 @@ const inr=n=>"₹"+n.toLocaleString("en-IN");
 /* Keep in sync with CATALOG in src/worker.js (names, prices, sizes, colours) — tests/shiprocket.test.mjs checks it.
    imgs: photo per colour, used for the bag thumbnail. */
 const P={
-  hoodie:{name:"Relaxed Zip Hoodie",price:1299,img:"images/hoodie-beige.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Stone Beige":"#CFC6B3"}},
-  washedhoodie:{name:"Washed Zip Hoodie",price:1299,img:"images/hoodie-taupe.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Washed Taupe":"#6E6255"}},
-  puffer:{name:"Packable Quilted Puffer",price:1999,img:"images/puffer-blush.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Blush Pink":"#D9AFA4","Blue Grey":"#A9B6C4","Lavender":"#C9BFD6"},imgs:{"Blush Pink":"images/puffer-blush.jpg","Blue Grey":"images/puffer-bluegrey.jpg","Lavender":"images/puffer-lavender.jpg"}},
-  trackjacket:{name:"Colour-Block Track Jacket",price:1799,img:"images/track-jacket.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Navy / White / Red":"#1F2A44"}},
-  retrojacket:{name:"Retro Track Jacket",price:1699,img:"images/retro-jacket-tan.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Tan":"#B39A72"}},
-  zipjacket:{name:"Collared Zip Jacket",price:1899,img:"images/zip-jacket-grey.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Grey Marl":"#9C9A97"}},
-  quarterzip:{name:"Cable-Knit Quarter Zip",price:1599,img:"images/quarterzip-oat.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Oatmeal":"#C8BBA2"}},
-  crewneck:{name:"Washed Crewneck",price:999,img:"images/crewneck-charcoal.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Washed Charcoal":"#3D3B3A"}},
-  sweatpants:{name:"Straight-Leg Sweatpants",price:999,img:"images/sweatpants-black.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Jet Black":"#151515","Grey Marl":"#A7A7A5"},imgs:{"Jet Black":"images/sweatpants-black.jpg","Grey Marl":"images/sweatpants-grey.jpg"}},
-  trackpants:{name:"Fleece-Lined Track Pants",price:1199,img:"images/trackpants-black.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Black":"#161616"}},
-  retropants:{name:"Retro Track Pants",price:1199,img:"images/retro-pants-tan.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Tan":"#B39A72"}}
+  hoodie:{name:"Relaxed Zip Hoodie",price:1299,cat:"hoodies",img:"images/hoodie-beige.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Stone Beige":"#CFC6B3"},gallery:{"Stone Beige":["images/hoodie-beige.jpg","images/hoodie-beige-2.jpg","images/hoodie-beige-lining.jpg"]},desc:"Soft brushed-back fleece in stone beige, cut relaxed with a drop shoulder.",details:["Full zip with metal zipper","Drawcord hood with cream cords","Two front pockets","Ribbed cuffs and hem"]},
+  washedhoodie:{name:"Washed Zip Hoodie",price:1299,cat:"hoodies",img:"images/hoodie-taupe.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Washed Taupe":"#6E6255"},gallery:{"Washed Taupe":["images/hoodie-taupe.jpg","images/hoodie-taupe-zip.jpg"]},desc:"Garment-washed taupe for a faded, broken-in look from day one.",details:["Two-way metal zip","Drawcord hood with cream cords","Washed finish, so each piece varies slightly","Ribbed cuffs and hem"]},
+  puffer:{name:"Packable Quilted Puffer",price:1999,cat:"puffers",img:"images/puffer-blush.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Blush Pink":"#D9AFA4","Blue Grey":"#A9B6C4","Lavender":"#C9BFD6"},gallery:{"Blush Pink":["images/puffer-blush.jpg","images/puffer-blush-zip.jpg"],"Blue Grey":["images/puffer-bluegrey.jpg","images/puffer-bluegrey-quilt.jpg","images/puffer-bluegrey-chest.jpg"],"Lavender":["images/puffer-lavender.jpg","images/puffer-lavender-pouch.jpg"]},desc:"A light, slim puffer with narrow horizontal quilting that packs down small.",details:["Hood with toggle adjusters","Narrow horizontal quilting","Full zip and zip hand pockets","Lightweight, packable design"]},
+  trackjacket:{name:"Colour-Block Track Jacket",price:1799,cat:"jackets",img:"images/track-jacket.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Navy / White / Red":"#1F2A44"},gallery:{"Navy / White / Red":["images/track-jacket.jpg","images/track-jacket-2.jpg"]},desc:"Navy body with a white and red colour-block yoke and striped rib trims.",details:["Stand collar, full zip","Two zip pockets","Striped rib cuffs and hem"]},
+  retrojacket:{name:"Retro Track Jacket",price:1699,cat:"jackets",img:"images/retro-jacket-tan.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Tan":"#B39A72"},gallery:{"Tan":["images/retro-jacket-tan.jpg"]},desc:"Tan tricot track jacket with contrast stripes down the sleeves.",details:["Stand collar, full zip","Contrast sleeve stripes","Pairs with the Retro Track Pants"]},
+  zipjacket:{name:"Collared Zip Jacket",price:1899,cat:"jackets",img:"images/zip-jacket-grey.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Grey Marl":"#9C9A97"},gallery:{"Grey Marl":["images/zip-jacket-grey.jpg"]},desc:"A clean grey marl jacket with a point collar and brass zip.",details:["Point collar","Brass full zip","Button cuffs","Two slant pockets"]},
+  quarterzip:{name:"Cable-Knit Quarter Zip",price:1599,cat:"knits",img:"images/quarterzip-oat.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Oatmeal":"#C8BBA2"},gallery:{"Oatmeal":["images/quarterzip-oat.jpg"]},desc:"Textured cable knit in oatmeal with a zip mock neck.",details:["Textured cable knit","Quarter-zip mock neck","Ribbed cuffs and hem"]},
+  crewneck:{name:"Washed Crewneck",price:999,cat:"knits",img:"images/crewneck-charcoal.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Washed Charcoal":"#3D3B3A"},gallery:{"Washed Charcoal":["images/crewneck-charcoal.jpg"]},desc:"Washed charcoal sweatshirt with a faded, lived-in colour.",details:["Ribbed crew neck","Washed finish","Pairs with the Straight-Leg Sweatpants"]},
+  sweatpants:{name:"Straight-Leg Sweatpants",price:999,cat:"bottoms",img:"images/sweatpants-black.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Jet Black":"#151515","Grey Marl":"#A7A7A5"},gallery:{"Jet Black":["images/sweatpants-black.jpg","images/sweatpants-black-fleece.jpg"],"Grey Marl":["images/sweatpants-grey.jpg"]},desc:"Straight-leg sweatpants with a soft fleece inside.",details:["Elastic waist with drawcord","Straight leg","Soft fleece inside","Back patch pocket"]},
+  trackpants:{name:"Fleece-Lined Track Pants",price:1199,cat:"bottoms",img:"images/trackpants-black.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Black":"#161616"},gallery:{"Black":["images/trackpants-black.jpg","images/trackpants-black-lining.jpg","images/trackpants-black-waist.jpg"]},desc:"Black track pants with white piping and a warm fleece lining.",details:["Elastic waist","White side piping","Fleece-lined"]},
+  retropants:{name:"Retro Track Pants",price:1199,cat:"bottoms",img:"images/retro-pants-tan.jpg",sizes:["S","M","L","XL","XXL"],colours:{"Tan":"#B39A72"},gallery:{"Tan":["images/retro-pants-tan.jpg"]},desc:"Tan track pants with black side stripes.",details:["Elastic waist with drawcord","Contrast side stripes","Pairs with the Retro Track Jacket"]}
 };
-const imgFor=(k,c)=>(P[k].imgs&&P[k].imgs[c])||P[k].img;
+const imgFor=(k,c)=>((P[k].gallery[c]||[])[0])||P[k].img;
 
 /* colour dots on collection cards */
 $$("[data-dots]").forEach(el=>{ Object.entries(P[el.dataset.dots].colours).forEach(([n,h])=>{ const i=document.createElement("i"); i.style.background=h; i.title=n; el.appendChild(i); }); });
@@ -1080,7 +1147,7 @@ items.forEach((g,i)=>{
   g.addEventListener("click",()=>{
     if(suppressClick) return;
     if(i!==active && !finePtr){ hold(8000); setActive(i); return; }
-    hold(8000); pick(g.dataset.p,g.dataset.c,true);
+    hold(8000); openPDP(g.dataset.p,g.dataset.c);
   });
 });
 if(finePtr) row.addEventListener("pointerleave",()=>hold(1200));
@@ -1120,7 +1187,7 @@ const renderBag=()=>{
     d.innerHTML=`<img src="${imgFor(b.key,b.colour)}" alt=""><span><b>${p.name}</b><small>${b.colour} · ${b.size} · Qty ${b.qty}</small></span><span class="amt">${inr(p.price*b.qty)}</span><button type="button" aria-label="Remove ${p.name}">×</button>`;
     d.querySelector("button").addEventListener("click",()=>{ bag.splice(i,1); renderBag(); });
     bagEl.appendChild(d); });
-  updateTotal();
+  updateTotal(); updateBagCount();
 };
 const checkPick=()=>{ const c=current(); let ok=true;
   if(!c.colour){ $("#f-colour").classList.add("bad"); ok=false; }
@@ -1207,6 +1274,101 @@ form.addEventListener("submit",e=>{
   form.style.display="none"; $("#done").classList.add("show");
 });
 $("#newOrder").addEventListener("click",()=>{ orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value="hoodie"; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
+
+/* ---------------- SHOP: category tiles, filters, grid, product page ---------------- */
+const CATS={hoodies:"Hoodies",jackets:"Jackets",puffers:"Puffers",knits:"Knits & sweats",bottoms:"Bottoms"};
+const CAT_IMG={hoodies:"images/hoodie-beige.jpg",jackets:"images/track-jacket.jpg",puffers:"images/puffer-bluegrey.jpg",knits:"images/quarterzip-oat.jpg",bottoms:"images/sweatpants-black.jpg"};
+const FAMS={Beige:"#CDBE9F",Brown:"#6E6255",Pink:"#D9AFA4",Blue:"#7F93AE",Purple:"#C2B6D6",Grey:"#9C9A97",Black:"#151515"};
+const FAM={"Stone Beige":"Beige","Oatmeal":"Beige","Tan":"Beige","Washed Taupe":"Brown","Blush Pink":"Pink","Blue Grey":"Blue","Navy / White / Red":"Blue","Lavender":"Purple","Grey Marl":"Grey","Washed Charcoal":"Grey","Jet Black":"Black","Black":"Black"};
+const PRICES=[["lt1300","Under ₹1,300",x=>x<1300],["1300","₹1,300 – ₹1,799",x=>x>=1300&&x<1800],["1800","₹1,800 and above",x=>x>=1800]];
+const SIZES=["S","M","L","XL","XXL"];
+const REC=["puffer|Blush Pink","trackjacket|Navy / White / Red","hoodie|Stone Beige","puffer|Blue Grey","zipjacket|Grey Marl","quarterzip|Oatmeal","sweatpants|Jet Black","retrojacket|Tan","retropants|Tan","puffer|Lavender","washedhoodie|Washed Taupe","sweatpants|Grey Marl","trackpants|Black","crewneck|Washed Charcoal"];
+const TILES=[]; Object.entries(P).forEach(([k,p])=>Object.keys(p.colours).forEach(c=>TILES.push({k,c,p,fam:FAM[c]||"Other",rank:(i=>i<0?99:i)(REC.indexOf(k+"|"+c))})));
+const esc=t=>String(t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const F={cat:new Set(),fam:new Set(),size:new Set(),price:new Set()};
+const grid=$("#pgrid"), sortSel=$("#sortBy");
+
+/* category tiles + colour strip */
+Object.entries(CATS).forEach(([id,label])=>{ const ps=Object.values(P).filter(p=>p.cat===id); const from=Math.min(...ps.map(p=>p.price)); const n=TILES.filter(t=>t.p.cat===id).length;
+  const b=document.createElement("button"); b.type="button"; b.className="cat-tile";
+  b.innerHTML=`<span class="ci"><img src="${CAT_IMG[id]}" alt="" loading="lazy"></span><span class="cb"><b>${esc(label)}</b><small>${n} style${n>1?"s":""} · from ${inr(from)}</small></span>`;
+  b.addEventListener("click",()=>{ clearF(); F.cat.add(id); renderShop(); goShop(); }); $("#catGrid").appendChild(b); });
+Object.entries(FAMS).forEach(([f,h])=>{ const b=document.createElement("button"); b.type="button"; b.className="cchip"; b.innerHTML=`<i style="background:${h}"></i>${f}`;
+  b.addEventListener("click",()=>{ clearF(); F.fam.add(f); renderShop(); goShop(); }); $("#colourStrip").appendChild(b); });
+const goShop=()=>{ const t=$("#shop"); window.scrollTo({top:t.getBoundingClientRect().top+scrollY-70,behavior:reduced?"auto":"smooth"}); };
+
+/* filter controls */
+const checkRow=(group,val,label,n,swatch)=>{ const l=document.createElement("label"); l.className="fcheck";
+  l.innerHTML=`<input type="checkbox" value="${esc(val)}">${swatch?`<i style="background:${swatch}"></i>`:""}<span>${esc(label)}</span><span class="n">${n}</span>`;
+  const cb=l.querySelector("input"); cb.addEventListener("change",()=>{ cb.checked?F[group].add(val):F[group].delete(val); renderShop(); }); return l; };
+Object.entries(CATS).forEach(([id,label])=>$("#fCat").appendChild(checkRow("cat",id,label,TILES.filter(t=>t.p.cat===id).length)));
+Object.entries(FAMS).forEach(([f,h])=>$("#fCol").appendChild(checkRow("fam",f,f,TILES.filter(t=>t.fam===f).length,h)));
+PRICES.forEach(([id,label,fn])=>$("#fPrice").appendChild(checkRow("price",id,label,TILES.filter(t=>fn(t.p.price)).length)));
+SIZES.forEach(sz=>{ const b=document.createElement("button"); b.type="button"; b.textContent=sz; b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",()=>{ F.size.has(sz)?F.size.delete(sz):F.size.add(sz); renderShop(); }); $("#fSize").appendChild(b); });
+const clearF=()=>{ Object.values(F).forEach(x=>x.clear()); };
+$("#clearAll").addEventListener("click",e=>{ e.preventDefault(); e.stopPropagation(); clearF(); renderShop(); });
+const filt=$("#filters"); $("summary",filt).addEventListener("click",e=>{ if(innerWidth>1000) e.preventDefault(); });
+if(innerWidth<=1000) filt.open=false;
+sortSel.addEventListener("change",()=>renderShop());
+
+const match=t=>(!F.cat.size||F.cat.has(t.p.cat))&&(!F.fam.size||F.fam.has(t.fam))&&(!F.size.size||[...F.size].some(z=>t.p.sizes.includes(z)))&&(!F.price.size||PRICES.some(([id,,fn])=>F.price.has(id)&&fn(t.p.price)));
+function renderShop(){
+  /* sync controls */
+  $$("#fCat input,#fCol input,#fPrice input").forEach(cb=>{ const g=cb.closest("#fCat")?"cat":cb.closest("#fCol")?"fam":"price"; cb.checked=F[g].has(cb.value); });
+  $$("#fSize button").forEach(b=>b.setAttribute("aria-pressed",String(F.size.has(b.textContent))));
+  const so=sortSel.value;
+  const list=TILES.filter(match).sort((a,b)=>so==="lo"?a.p.price-b.p.price||a.rank-b.rank:so==="hi"?b.p.price-a.p.price||a.rank-b.rank:so==="az"?a.p.name.localeCompare(b.p.name):a.rank-b.rank);
+  $("#shopCount").innerHTML=`Showing <b>${list.length}</b> of ${TILES.length} styles`;
+  /* applied filter chips */
+  const chips=$("#chips"); chips.innerHTML="";
+  const chip=(label,off)=>{ const b=document.createElement("button"); b.type="button"; b.innerHTML=`${esc(label)} <span aria-hidden="true">×</span>`; b.setAttribute("aria-label","Remove filter "+label); b.addEventListener("click",()=>{ off(); renderShop(); }); chips.appendChild(b); };
+  F.cat.forEach(v=>chip(CATS[v],()=>F.cat.delete(v))); F.fam.forEach(v=>chip(v,()=>F.fam.delete(v)));
+  F.size.forEach(v=>chip("Size "+v,()=>F.size.delete(v))); F.price.forEach(v=>chip(PRICES.find(x=>x[0]===v)[1],()=>F.price.delete(v)));
+  grid.innerHTML="";
+  if(!list.length){ grid.innerHTML=`<div class="empty"><p>Nothing matches those filters.</p><button type="button" class="btn btn-ghost btn-sm">Clear filters</button></div>`; $("button",grid).addEventListener("click",()=>{ clearF(); renderShop(); }); return; }
+  list.forEach((t,i)=>{ const g=t.p.gallery[t.c]||[t.p.img], cols=Object.keys(t.p.colours);
+    const b=document.createElement("button"); b.type="button"; b.className="tile"; b.style.animationDelay=Math.min(i,8)*40+"ms";
+    b.setAttribute("aria-label",`${t.p.name}, ${t.c}, ${inr(t.p.price)}`);
+    b.innerHTML=`<span class="ti"><img src="${g[0]}" alt="${esc(t.p.name+" in "+t.c)}" loading="lazy">${g[1]?`<img class="alt" src="${g[1]}" alt="" loading="lazy">`:""}${cols.length>1?`<span class="more">${cols.length} colours</span>`:""}<span class="qv"><b>Quick view</b><span>Sizes: ${t.p.sizes.join("  ")}</span></span></span>`+
+      `<span class="tb"><span class="br">52 Alive</span><span class="nm">${esc(t.p.name)} · ${esc(t.c)}</span><span class="pr">${inr(t.p.price)}</span><span class="sw">${cols.map(c=>`<i class="${c===t.c?"on":""}" style="background:${t.p.colours[c]}" title="${esc(c)}"></i>`).join("")}</span></span>`;
+    b.addEventListener("click",()=>openPDP(t.k,t.c)); grid.appendChild(b); });
+}
+
+/* product page */
+const pdp=$("#pdp"); let cur={k:"",c:"",size:""};
+function openPDP(k,c){
+  const p=P[k]; if(!p) return; c=p.colours[c]?c:Object.keys(p.colours)[0];
+  const keepSize=cur.k===k?cur.size:""; cur={k,c,size:keepSize};
+  $("#pdpCrumb").textContent=`Home / ${CATS[p.cat]} / ${p.name}`;
+  $("#pdpName").textContent=p.name;
+  $("#pdpPrice").innerHTML=`${inr(p.price)}<small>Delivery charges, if any, confirmed on WhatsApp</small>`;
+  $("#pdpColName").textContent="· "+c;
+  $("#pdpGal").innerHTML=(p.gallery[c]||[p.img]).map((src,i)=>`<img src="${src}" alt="${esc(p.name+" in "+c+(i?" — detail "+i:""))}">`).join("");
+  $("#pdpGal").scrollTop=0;
+  const cols=$("#pdpCols"); cols.innerHTML="";
+  Object.keys(p.colours).forEach(col=>{ const b=document.createElement("button"); b.type="button"; b.title=col; b.setAttribute("aria-label",col); b.setAttribute("aria-pressed",String(col===c));
+    b.innerHTML=`<img src="${(p.gallery[col]||[p.img])[0]}" alt="">`; b.addEventListener("click",()=>openPDP(k,col)); cols.appendChild(b); });
+  const sz=$("#pdpSizes"); sz.innerHTML=""; sz.classList.remove("bad");
+  p.sizes.forEach(z=>{ const b=document.createElement("button"); b.type="button"; b.textContent=z; b.setAttribute("role","radio"); b.setAttribute("aria-checked",String(z===cur.size)); b.setAttribute("aria-pressed",String(z===cur.size));
+    b.addEventListener("click",()=>{ cur.size=z; sz.classList.remove("bad"); $$("button",sz).forEach(x=>{ const on=x.textContent===z; x.setAttribute("aria-pressed",String(on)); x.setAttribute("aria-checked",String(on)); }); }); sz.appendChild(b); });
+  $("#pdpDesc").textContent=p.desc; $("#pdpDet").innerHTML=p.details.map(d=>`<li>${esc(d)}</li>`).join("");
+  const seen=new Set([k]); const sim=[...TILES.filter(t=>t.p.cat===p.cat),...TILES].filter(t=>!seen.has(t.k)&&seen.add(t.k)).slice(0,4);
+  $("#pdpSim").innerHTML=""; sim.forEach(t=>{ const b=document.createElement("button"); b.type="button";
+    b.innerHTML=`<img src="${(t.p.gallery[t.c]||[t.p.img])[0]}" alt="" loading="lazy"><b>${esc(t.p.name)}</b><span>${inr(t.p.price)}</span>`;
+    b.addEventListener("click",()=>{ openPDP(t.k,t.c); $(".pdp-info",pdp).scrollTop=0; }); $("#pdpSim").appendChild(b); });
+  if(!pdp.open) pdp.showModal();
+}
+const addCur=()=>{ if(!cur.size){ $("#pdpSizes").classList.add("bad"); toast("Please select a size"); return false; }
+  const same=bag.find(b=>b.key===cur.k&&b.colour===cur.c&&b.size===cur.size);
+  if(same) same.qty=Math.min(10,same.qty+1); else bag.push({key:cur.k,colour:cur.c,size:cur.size,qty:1});
+  renderBag(); return true; };
+$("#pdpAdd").addEventListener("click",()=>{ if(addCur()) toast(`Added ${P[cur.k].name} (${cur.c}, ${cur.size}) to your bag`); });
+$("#pdpBuy").addEventListener("click",()=>{ if(!addCur()) return; pdp.close(); const t=$(".oform"); window.scrollTo({top:t.getBoundingClientRect().top+scrollY-90,behavior:reduced?"auto":"smooth"}); toast("Added — fill in your details to order"); });
+$$("[data-close-pdp]",pdp).forEach(a=>a.addEventListener("click",()=>pdp.close()));
+function updateBagCount(){ const n=bag.reduce((a,b)=>a+b.qty,0), el=$("#bagCount"); el.textContent=n; el.classList.toggle("on",n>0); $("#bagBtn").setAttribute("aria-label",`Bag, ${n} item${n===1?"":"s"}`); }
+$("#bagBtn").addEventListener("click",()=>{ const t=$(".oform"); window.scrollTo({top:t.getBoundingClientRect().top+scrollY-90,behavior:reduced?"auto":"smooth"}); if(!bag.length) toast("Your bag is empty — pick something from the shop"); });
+renderShop();
 
 renderOptions(false); renderBag();
 })();
