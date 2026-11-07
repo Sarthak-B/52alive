@@ -229,11 +229,8 @@ export async function handleOrder(request, env, ctx) {
   try { payload = buildPayload(input, env, new Date(), catalog); }
   catch (e) { return json({ ok: false, error: e.status === 400 ? e.message : "Something went wrong — please try again." }, e.status || 500); }
 
-  /* the order is valid: tell the shop on WhatsApp (from the site's own number) and put it in Shiprocket.
-     The WhatsApp alert never waits on Shiprocket, and a Shiprocket hiccup never fails the customer's order:
-     it is also saved to the shop's NOWORA dashboard by the page. */
-  const alert = sendOrderAlert(input, payload, request, env).catch(e => { console.error("[alert]", e.message); return false; });
-  if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(alert);
+  /* the order is valid: put it in Shiprocket. A Shiprocket hiccup never fails the customer's order — the page also
+     saves it to the shop's NOWORA dashboard, which sends the WhatsApp order alert to the shop. */
   let shiprocket = false, sr = {};
   if (env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD) {
     try { payload.pickup_location = await resolvePickup(env); sr = await createOrder(payload, env); shiprocket = true; }
@@ -241,57 +238,6 @@ export async function handleOrder(request, env, ctx) {
   }
   return json({ ok: true, orderId: payload.order_id, shiprocket, shiprocket_order_id: sr.order_id, shipment_id: sr.shipment_id });
 }
-
-/* ============================== WhatsApp order alert ==============================
- * Every new order is sent to the shop's WhatsApp (ORDER_ALERT_TO, default 52 Alive's number) FROM the NOWORA
- * number, by the GitHub workflow .github/workflows/whatsapp.yml: Playwright opens WhatsApp Web (logged in once
- * as the NOWORA number) and sends the message. This endpoint only fires a repository_dispatch with the message
- * encrypted (AES-GCM, key = SHA-256 of WA_KEY or SHIPROCKET_WEBHOOK_TOKEN), because the repo is public and
- * the message holds the customer's phone and address. Uses the same GITHUB_TOKEN as the stock sync.
- */
-const ALERT_TO_DEFAULT = "919368986368";
-export function orderAlertText(input, payload, origin) {
-  const inr = n => "₹" + Number(n).toLocaleString("en-IN");
-  const note = str(input && input.note, 250);
-  return [
-    "🛍️ *New order — 52 Alive*",
-    "",
-    "*Order:* " + payload.order_id,
-    "*Customer:* " + (payload.billing_customer_name + " " + payload.billing_last_name).trim(),
-    "*Phone:* +91 " + payload.billing_phone,
-    "",
-    "*Items*",
-    ...payload.order_items.map((i, n) => (n + 1) + ". " + i.name + " × " + i.units + " — " + inr(i.selling_price * i.units)),
-    "",
-    "*Total:* " + inr(payload.sub_total) + " · " + (payload.payment_method === "COD" ? "Cash on delivery" : "Prepaid (UPI)"),
-    "*Address:* " + [payload.billing_address, payload.billing_city, payload.billing_state, payload.billing_pincode].filter(Boolean).join(", "),
-    ...(note ? ["*Note:* " + note] : []),
-    "",
-    "*Track:* " + origin + "/track/?id=" + payload.order_id,
-    "Send it from your NOWORA dashboard → Orders.",
-  ].join("\n");
-}
-async function aesKey(secret) {
-  const raw = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(secret)));
-  return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt"]);
-}
-export async function sealAlert(obj, secret) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await aesKey(secret), new TextEncoder().encode(JSON.stringify(obj))));
-  const all = new Uint8Array(iv.length + ct.length); all.set(iv); all.set(ct, iv.length);
-  let bin = ""; all.forEach(b => bin += String.fromCharCode(b)); return btoa(bin);
-}
-export async function sendOrderAlert(input, payload, request, env) {
-  const secret = env.WA_KEY || env.SHIPROCKET_WEBHOOK_TOKEN;
-  if (!env.GITHUB_TOKEN || !secret || env.ORDER_ALERT_TO === "off") return false;
-  const to = String(env.ORDER_ALERT_TO || ALERT_TO_DEFAULT).split(",").map(x => x.replace(/\D/g, "")).filter(x => x.length >= 10);
-  if (!to.length) return false;
-  const data = await sealAlert({ to, text: orderAlertText(input, payload, new URL(request.url).origin), id: payload.order_id }, secret);
-  const r = await gh(env, "POST", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive") + "/dispatches", { event_type: "order-alert", client_payload: { data } });
-  if (!r.ok) { console.error("[alert] dispatch", r.status, (await r.text()).slice(0, 200)); return false; }
-  return true;
-}
-
 
 /* ============================== pickup location ==============================
  * Shiprocket wants the pickup location's NAME (Settings → Pickup Addresses), e.g. "Home".
@@ -447,7 +393,6 @@ export async function handleTrack(request, env) {
  */
 export async function handleHealth(request, env) {
   const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL,
-    orderAlert: { via: "github-workflow", ready: !!(env.GITHUB_TOKEN && (env.WA_KEY || env.SHIPROCKET_WEBHOOK_TOKEN)) && env.ORDER_ALERT_TO !== "off", to: String(env.ORDER_ALERT_TO || ALERT_TO_DEFAULT).replace(/\d(?=\d{4})/g, "•") },
     stockSync: { webhookToken: !!env.SHIPROCKET_WEBHOOK_TOKEN, githubToken: !!env.GITHUB_TOKEN } };
   if (env.GITHUB_TOKEN) { try { const r = await gh(env, "GET", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive")); const d = await r.json().catch(() => ({})); out.stockSync.githubCanWrite = r.ok && !!(d.permissions && d.permissions.push); } catch (e) { out.stockSync.githubCanWrite = false; } }
   if (!out.secrets) return json(out);

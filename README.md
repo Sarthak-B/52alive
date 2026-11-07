@@ -63,8 +63,4 @@ Courier charges come out of the Shiprocket wallet.
 - **Order now** places the order straight from the site (`POST /api/order`): it checks prices and stock against the
   catalogue, creates it in Shiprocket and saves it to the NOWORA dashboard. No WhatsApp redirect.
 - **Tracking page:** `/track/?id=52A-…` (old `/?track=…` links redirect there).
-- **WhatsApp order alert to the shop** (from the business number, not the customer's): set `ORDER_ALERT_TO`
-  (default `919368986368`, comma-separated for more, `off` to stop). Sent by the GitHub workflow
-  `.github/workflows/whatsapp.yml` (Playwright + WhatsApp Web, logged in as the NOWORA number); needs repo secret
-  `WA_KEY` = same value as `SHIPROCKET_WEBHOOK_TOKEN`. First time: run the workflow with mode `login`
-  and enter the 8-character code on that phone (Linked devices → Link with phone number).
+- **WhatsApp order alert to the shop** comes from NOWORA (repo Sarthak-B/Nowora, workflow `whatsapp.yml`), for every client site.
