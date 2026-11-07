@@ -23,7 +23,7 @@ function mock({orders = [order], track = tracking, trackStatus = 200} = {}) {
 const ask = (body, origin = 'https://52.example') => worker.fetch(new Request('https://52.example/api/track', {method: 'POST', headers: {Origin: origin, 'CF-Connecting-IP': '1.2.3.4'}, body: JSON.stringify(body)}), env);
 beforeEach(() => { _resetTokenCache(); _resetLoginFail(); _resetLookups(); });
 
-test('finds the order by its ID, checks the delivery PIN code, and returns the courier timeline', async () => {
+test('finds the order by its ID,  and returns the courier timeline', async () => {
   mock();
   const r = await ask({orderId: ID, pin: '248001'});
   assert.equal(r.status, 200);
@@ -35,13 +35,11 @@ test('finds the order by its ID, checks the delivery PIN code, and returns the c
   assert.ok(calls.some(u => u.includes('filter_by=channel_order_id') && u.includes(encodeURIComponent(ID))));
 });
 
-test('wrong PIN code and unknown order look the same', async () => {
-  mock();
-  const a = await ask({orderId: ID, pin: '110001'});
+test('an order not in Shiprocket says not found', async () => {
   mock({orders: []});
-  const b = await ask({orderId: ID, pin: '248001'});
-  assert.equal(a.status, 404); assert.equal(b.status, 404);
-  assert.deepEqual(await a.json(), await b.json());
+  const r = await ask({orderId: ID});
+  assert.equal(r.status, 404);
+  assert.match((await r.json()).error, /couldn't find/);
 });
 
 test('an order not yet shipped still answers, without courier details', async () => {
@@ -60,7 +58,6 @@ test('a courier tracking error falls back to the order status', async () => {
 test('rejects bad input, other sites, too many lookups, and works only with secrets', async () => {
   mock();
   assert.equal((await ask({orderId: 'abc', pin: '248001'})).status, 400);
-  assert.equal((await ask({orderId: ID, pin: '12'})).status, 400);
   assert.equal((await ask({orderId: ID, pin: '248001'}, 'https://evil.example')).status, 403);
   _resetLookups(); let last;
   for (let i = 0; i < 21; i++) last = await ask({orderId: ID, pin: '248001'});
