@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test, beforeEach} from 'node:test';
-import worker, {trackStep, _resetTokenCache, _resetLookups} from '../src/worker.js';
+import worker, {trackStep, _resetTokenCache, _resetLoginFail, _resetLookups} from '../src/worker.js';
 
 const env = {SHIPROCKET_EMAIL: 'api@shop.in', SHIPROCKET_PASSWORD: 'x', ASSETS: {fetch: () => new Response('asset')}};
 const ID = '52A-3ac6011a-d786-4d90-bfc6-4e5938741314';
@@ -21,7 +21,7 @@ function mock({orders = [order], track = tracking, trackStatus = 200} = {}) {
   };
 }
 const ask = (body, origin = 'https://52.example') => worker.fetch(new Request('https://52.example/api/track', {method: 'POST', headers: {Origin: origin, 'CF-Connecting-IP': '1.2.3.4'}, body: JSON.stringify(body)}), env);
-beforeEach(() => { _resetTokenCache(); _resetLookups(); });
+beforeEach(() => { _resetTokenCache(); _resetLoginFail(); _resetLookups(); });
 
 test('finds the order by its ID, checks the phone, and returns the courier timeline', async () => {
   mock();

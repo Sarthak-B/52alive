@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {test, beforeEach} from 'node:test';
-import worker, {catalogFromHtml, buildPayload, applyDispatch, _resetTokenCache} from '../src/worker.js';
+import worker, {catalogFromHtml, buildPayload, applyDispatch, _resetTokenCache, _resetLoginFail} from '../src/worker.js';
 
 const page = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
 const block = d => `<script type="application/json" id="nowora-products">\n${JSON.stringify(d, null, 1)}\n</script>`;

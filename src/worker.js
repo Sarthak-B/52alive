@@ -68,15 +68,25 @@ const MAX_LINES = 20, MAX_QTY = 10;
 let tokenCache = { token: "", exp: 0 };
 export function _resetTokenCache() { tokenCache = { token: "", exp: 0 }; }
 
+/* After a failed login, don't try again for 15 minutes: Shiprocket blocks the API user after repeated
+   failed logins, and every order/tracking request would otherwise retry. */
+let loginFail = { until: 0, msg: "" };
+export function _resetLoginFail() { loginFail = { until: 0, msg: "" }; }
 async function login(env, force = false) {
   if (!force && tokenCache.token && Date.now() < tokenCache.exp) return tokenCache.token;
+  if (Date.now() < loginFail.until) throw new Error(loginFail.msg + " (waiting before trying again)");
   const r = await fetch(SR + "/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: env.SHIPROCKET_EMAIL, password: env.SHIPROCKET_PASSWORD }),
   });
   const d = await r.json().catch(() => ({}));
-  if (!r.ok || !d.token) throw new Error("Shiprocket login failed (" + r.status + "): " + (d.message || "no token"));
+  if (!r.ok || !d.token) {
+    const msg = "Shiprocket login failed (" + r.status + "): " + (d.message || "no token");
+    if (r.status >= 400 && r.status < 500) loginFail = { until: Date.now() + 15 * 60000, msg };
+    throw new Error(msg);
+  }
+  loginFail = { until: 0, msg: "" };
   tokenCache = { token: d.token, exp: Date.now() + 8 * 24 * 3600 * 1000 };
   return d.token;
 }
@@ -362,7 +372,7 @@ export async function handleHealth(request, env) {
     stockSync: { webhookToken: !!env.SHIPROCKET_WEBHOOK_TOKEN, githubToken: !!env.GITHUB_TOKEN } };
   if (env.GITHUB_TOKEN) { try { const r = await gh(env, "GET", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive")); const d = await r.json().catch(() => ({})); out.stockSync.githubCanWrite = r.ok && !!(d.permissions && d.permissions.push); } catch (e) { out.stockSync.githubCanWrite = false; } }
   if (!out.secrets) return json(out);
-  try { await login(env, true); out.login = true; } catch (e) { out.login = false; out.loginError = String(e.message).slice(0, 160); return json(out); }
+  try { await login(env); out.login = true; } catch (e) { out.login = false; out.loginError = String(e.message).slice(0, 160); return json(out); }
   try {
     const p = await srGet("/settings/company/pickup", env);
     const list = (p && p.data && (p.data.shipping_address || p.data)) || [];
