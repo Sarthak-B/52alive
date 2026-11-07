@@ -137,7 +137,7 @@ test('after a failed login, Shiprocket is not asked again for a while', async ()
   _resetLoginFail();
   let logins = 0;
   globalThis.fetch = async (url) => { if (url.endsWith('/auth/login')) { logins++; return Response.json({message: 'Invalid email and password combination'}, {status: 400}); } return Response.json({}); };
-  const req = () => worker.fetch(new Request('https://52alive.example/api/track', {method: 'POST', headers: {'CF-Connecting-IP': '9.9.9.' + Math.random()}, body: JSON.stringify({orderId: '52A-' + crypto.randomUUID(), phone: '9876543210'})}), env);
+  const req = () => worker.fetch(new Request('https://52alive.example/api/track', {method: 'POST', headers: {'CF-Connecting-IP': '9.9.9.' + Math.random()}, body: JSON.stringify({orderId: '52A-' + crypto.randomUUID(), pin: '248001'})}), env);
   for (let i = 0; i < 5; i++) await req();
   assert.equal(logins, 1);
   _resetLoginFail();
