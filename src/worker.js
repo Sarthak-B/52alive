@@ -494,6 +494,155 @@ export async function handleCourierUpdate(request, env, ctx) {
   return done({ queued: true });
 }
 
+/* ============================== store dashboard: orders → ship ==============================
+ * POST /api/store  (header x-store-key = STORE_KEY, or SHIPROCKET_WEBHOOK_TOKEN when STORE_KEY isn't set)
+ * Used by the NOWORA client dashboard (Shop → Orders), which runs on another domain, so CORS is open
+ * and the key is the gate: shipping spends Shiprocket wallet money.
+ *   {action:"list"}                         → latest Shiprocket orders, each with a stage
+ *   {action:"rates", id}                    → couriers that can deliver it, cheapest first, recommended flagged
+ *   {action:"ship", id, courierId?}         → assign courier (AWB) → schedule pickup → label + invoice → stock off
+ *   {action:"label", id}                    → label + invoice links again
+ *   {action:"cancel", id}                   → cancel an order that hasn't shipped
+ */
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, x-store-key", "Access-Control-Max-Age": "86400" };
+const cjson = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...CORS } });
+const arr = v => Array.isArray(v) ? v : v && typeof v === "object" ? [v] : [];
+
+/* Any Shiprocket call that should hand back the error message instead of throwing (4xx carry the reason). */
+async function srReq(method, path, body, env) {
+  const send = token => fetch(SR + path, { method, headers: { Authorization: "Bearer " + token, ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  let r = await send(await login(env));
+  if (r.status === 401) r = await send(await login(env, true));
+  const d = await r.json().catch(() => ({}));
+  return { ok: r.ok, status: r.status, d };
+}
+const srMsg = (d, fallback) => {
+  const m = d && (d.message || (d.response && d.response.data && (d.response.data.awb_assign_error || d.response.data.message)) || (d.errors && JSON.stringify(d.errors)));
+  return String(m || fallback || "Shiprocket said no").replace(/\s+/g, " ").slice(0, 240);
+};
+
+/** One Shiprocket order (list or show shape) → what the dashboard needs. */
+export function storeOrder(o) {
+  const sh = arr(o.shipments)[0] || {};
+  const awb = String(sh.awb || sh.awb_code || o.awb_code || "").trim();
+  const status = String(o.status || "");
+  const t = trackStep(status);
+  const stage = t.problem === "cancelled" ? "cancelled" : t.problem === "returned" ? "returned"
+    : t.step >= 4 ? "delivered" : t.step >= 2 ? "transit" : awb ? "ready" : "new";
+  return {
+    id: o.id, orderId: String(o.channel_order_id || ""), placed: o.created_at || o.channel_created_at || "",
+    name: String(o.customer_name || ""), city: String(o.customer_city || ""), state: String(o.customer_state || ""), pin: String(o.customer_pincode || ""),
+    payment: /cod/i.test(o.payment_method || "") ? "COD" : "Prepaid", total: Number(o.total) || 0,
+    items: arr(o.products || o.order_items).slice(0, 20).map(p => ({ name: String(p.name || ""), qty: Number(p.quantity || p.units || 1) || 1, sku: String(p.channel_sku || p.sku || "") })),
+    status, label: t.label, stage, shipmentId: sh.id || o.shipment_id || null, awb, courier: String(sh.courier || sh.courier_name || o.courier_name || ""),
+    pickup: String(sh.pickup_scheduled_date || o.pickup_scheduled_date || "")
+  };
+}
+
+async function srOrder(id, env) {
+  const r = await srReq("GET", "/orders/show/" + encodeURIComponent(id), null, env);
+  if (!r.ok) { const e = new Error(r.status === 404 ? "Order not found in Shiprocket" : srMsg(r.d, "Couldn't read the order")); e.status = r.status === 404 ? 404 : 502; throw e; }
+  const o = r.d && (r.d.data || r.d);
+  if (!o || !o.id) { const e = new Error("Order not found in Shiprocket"); e.status = 404; throw e; }
+  return o;
+}
+
+export async function storeList(env, page = 1) {
+  const r = await srReq("GET", "/orders?per_page=60&page=" + Math.max(1, Math.min(20, page | 0 || 1)), null, env);
+  if (!r.ok) { const e = new Error(srMsg(r.d, "Couldn't load orders")); e.status = 502; throw e; }
+  return arr(r.d && r.d.data).map(storeOrder);
+}
+
+export async function storeRates(id, env) {
+  let r = await srReq("GET", "/courier/serviceability/?order_id=" + encodeURIComponent(id), null, env);
+  let data = r.ok && r.d && r.d.data;
+  if (!data || !arr(data.available_courier_companies).length) {         /* fall back to pincodes + weight */
+    const o = await srOrder(id, env);
+    await resolvePickup(env);
+    const from = ((pickupCache.list || []).find(x => x.pickup_location === o.pickup_location) || (pickupCache.list || [])[0] || {}).pin_code;
+    const to = o.customer_pincode || (o.shipping_address && o.shipping_address.pincode);
+    const w = Number(o.weight || (o.others && o.others.weight)) || 0.5;
+    if (from && to) {
+      r = await srReq("GET", "/courier/serviceability/?pickup_postcode=" + from + "&delivery_postcode=" + to + "&weight=" + w + "&cod=" + (/cod/i.test(o.payment_method || "") ? 1 : 0), null, env);
+      data = r.ok && r.d && r.d.data;
+    }
+  }
+  const list = arr(data && data.available_courier_companies);
+  if (!list.length) { const e = new Error(srMsg(r.d, "No courier delivers to this PIN code right now")); e.status = 422; throw e; }
+  const rec = Number(data.recommended_courier_company_id || data.shiprocket_recommended_courier_id) || 0;
+  const out = list.map(c => ({ id: Number(c.courier_company_id), name: String(c.courier_name || ""), rate: Math.round((Number(c.rate || c.freight_charge) || 0) * 100) / 100,
+    days: String(c.estimated_delivery_days || ""), etd: String(c.etd || ""), rating: Number(c.rating) || 0, recommended: Number(c.courier_company_id) === rec }))
+    .filter(c => c.id).sort((a, b) => a.rate - b.rate);
+  const top = out.slice(0, 8); const recC = out.find(c => c.recommended); if (recC && !top.includes(recC)) top.push(recC);
+  return top;
+}
+
+async function labelLinks(id, sid, env) {
+  const out = {};
+  if (sid) { const l = await srReq("POST", "/courier/generate/label", { shipment_id: [sid] }, env).catch(() => null);
+    if (l && l.d && /^https?:/.test(l.d.label_url || "")) out.labelUrl = l.d.label_url; else if (l) out.labelError = srMsg(l.d, "Label not ready yet"); }
+  const v = await srReq("POST", "/orders/print/invoice", { ids: [String(id)] }, env).catch(() => null);
+  if (v && v.d && /^https?:/.test(v.d.invoice_url || "")) out.invoiceUrl = v.d.invoice_url;
+  return out;
+}
+
+export async function storeShip(input, env, ctx) {
+  const id = Number(input.id); if (!id) { const e = new Error("Missing order"); e.status = 400; throw e; }
+  const o = await srOrder(id, env), s = storeOrder(o);
+  if (s.stage === "cancelled" || s.stage === "returned") { const e = new Error("This order is " + s.stage); e.status = 409; throw e; }
+  const sid = s.shipmentId || Number(input.shipmentId) || null;
+  if (!sid) { const e = new Error("Shiprocket hasn't made a shipment for this order"); e.status = 409; throw e; }
+  let awb = s.awb, courier = s.courier;
+  if (!awb) {
+    const courierId = Number(input.courierId) || 0;
+    const a = await srReq("POST", "/courier/assign/awb", { shipment_id: sid, ...(courierId ? { courier_id: courierId } : {}) }, env);
+    const ad = a.d && a.d.response && a.d.response.data;
+    if (!a.ok || a.d.awb_assign_status != 1 || !ad || !ad.awb_code) { const e = new Error(srMsg(a.d, "Couldn't book a courier")); e.status = 422; throw e; }
+    awb = String(ad.awb_code); courier = String(ad.courier_name || courier);
+  }
+  const out = { ok: true, awb, courier };
+  const p = await srReq("POST", "/courier/generate/pickup", { shipment_id: [sid] }, env);
+  if (p.ok && p.d && p.d.pickup_status == 1) out.pickup = String((p.d.response && (p.d.response.pickup_scheduled_date || p.d.response.pickup_generated_date)) || "");
+  else if (/already|queue|scheduled/i.test(srMsg(p.d))) out.pickup = s.pickup || "already booked";
+  else out.pickupError = srMsg(p.d, "Pickup not booked — book it in Shiprocket");
+  Object.assign(out, await labelLinks(id, sid, env));
+  /* the parcel is committed: take it off the website's stock (counted once per order, so the webhook won't double it) */
+  if (env.GITHUB_TOKEN && /^52A-[0-9a-f-]{36}$/i.test(s.orderId)) {
+    const work = recordDispatch(s.orderId, env).then(r => console.log("[stock]", s.orderId, JSON.stringify(r).slice(0, 300))).catch(e => console.error("[stock]", s.orderId, e.message));
+    if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(work); else await work;
+    out.stock = true;
+  }
+  return out;
+}
+
+export async function handleStore(request, env, ctx) {
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+  if (request.method !== "POST") return cjson({ ok: false, error: "Method not allowed" }, 405);
+  const key = env.STORE_KEY || env.SHIPROCKET_WEBHOOK_TOKEN;
+  if (!key) return cjson({ ok: false, error: "Store key isn't set on the website" }, 503);
+  if (!sameToken(request.headers.get("x-store-key"), key)) return cjson({ ok: false, error: "Wrong store key", badKey: true }, 401);
+  if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) return cjson({ ok: false, error: "Shiprocket isn't connected" }, 503);
+  let b; try { b = JSON.parse(await request.text() || "{}"); } catch { return cjson({ ok: false, error: "Invalid JSON" }, 400); }
+  try {
+    switch (b.action) {
+      case "list": return cjson({ ok: true, orders: await storeList(env, b.page) });
+      case "rates": return cjson({ ok: true, couriers: await storeRates(Number(b.id), env) });
+      case "ship": return cjson(await storeShip(b, env, ctx));
+      case "label": { const o = storeOrder(await srOrder(Number(b.id), env)); return cjson({ ok: true, ...(await labelLinks(o.id, o.shipmentId, env)) }); }
+      case "cancel": {
+        const o = storeOrder(await srOrder(Number(b.id), env));
+        if (o.stage !== "new" && o.stage !== "ready") return cjson({ ok: false, error: "It's already with the courier — cancel it in Shiprocket" }, 409);
+        const r = await srReq("POST", "/orders/cancel", { ids: [o.id] }, env);
+        return r.ok ? cjson({ ok: true }) : cjson({ ok: false, error: srMsg(r.d, "Couldn't cancel") }, 422);
+      }
+      default: return cjson({ ok: false, error: "Unknown action" }, 400);
+    }
+  } catch (e) {
+    console.error("[store]", b.action, e.message);
+    return cjson({ ok: false, error: String(e.message || "Shiprocket error").slice(0, 240) }, e.status && e.status < 600 ? e.status : 502);
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -506,6 +655,7 @@ export default {
       if (request.method !== "POST") return json({ ok: true });
       return handleCourierUpdate(request, env, ctx);
     }
+    if (url.pathname === "/api/store") return handleStore(request, env, ctx);
     if (url.pathname === "/api/track") {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
       return handleTrack(request, env);
