@@ -68,27 +68,44 @@ const MAX_LINES = 20, MAX_QTY = 10;
 let tokenCache = { token: "", exp: 0 };
 export function _resetTokenCache() { tokenCache = { token: "", exp: 0 }; }
 
-/* After a failed login, don't try again for 15 minutes: Shiprocket blocks the API user after repeated
-   failed logins, and every order/tracking request would otherwise retry. */
+/* Shiprocket blocks the API user after repeated logins that fail — and every Cloudflare instance used to log in
+   on its own. So the token and any failure are shared through Cloudflare's cache (one login per ~8 days per data
+   centre), a failure stops ALL instances from trying for 30 minutes, and two requests never log in at once. */
 let loginFail = { until: 0, msg: "" };
 export function _resetLoginFail() { loginFail = { until: 0, msg: "" }; }
+const shared = () => { try { return typeof caches !== "undefined" && caches.default ? caches.default : null; } catch (e) { return null; } };
+const sharedKey = (env, what) => "https://52alive-cache.invalid/sr/" + what + "/" + encodeURIComponent(String(env.SHIPROCKET_EMAIL || "").toLowerCase());
+async function sharedGet(env, what) { const c = shared(); if (!c) return null; try { const r = await c.match(sharedKey(env, what)); return r ? await r.json() : null; } catch (e) { return null; } }
+async function sharedPut(env, what, value, seconds) { const c = shared(); if (!c) return; try { await c.put(sharedKey(env, what), new Response(JSON.stringify(value), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=" + Math.max(1, Math.floor(seconds)) } })); } catch (e) { /* best effort */ } }
+async function sharedDel(env, what) { const c = shared(); if (!c) return; try { await c.delete(sharedKey(env, what)); } catch (e) {} }
+export const _shared = { get: sharedGet, put: sharedPut };
+let loginInFlight = null;
 async function login(env, force = false) {
   if (!force && tokenCache.token && Date.now() < tokenCache.exp) return tokenCache.token;
+  if (!force) { const t = await sharedGet(env, "token"); if (t && t.token && t.exp > Date.now()) { tokenCache = t; return t.token; } }
   if (Date.now() < loginFail.until) throw new Error(loginFail.msg + " (waiting before trying again)");
-  const r = await fetch(SR + "/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: env.SHIPROCKET_EMAIL, password: env.SHIPROCKET_PASSWORD }),
-  });
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok || !d.token) {
-    const msg = "Shiprocket login failed (" + r.status + "): " + (d.message || "no token");
-    if (r.status >= 400 && r.status < 500) loginFail = { until: Date.now() + 15 * 60000, msg };
-    throw new Error(msg);
-  }
-  loginFail = { until: 0, msg: "" };
-  tokenCache = { token: d.token, exp: Date.now() + 8 * 24 * 3600 * 1000 };
-  return d.token;
+  const f = await sharedGet(env, "fail");
+  if (f && f.until > Date.now()) { loginFail = f; throw new Error(f.msg + " (waiting before trying again)"); }
+  if (force) await sharedDel(env, "token");
+  if (loginInFlight) return loginInFlight;
+  loginInFlight = (async () => {
+    const r = await fetch(SR + "/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: env.SHIPROCKET_EMAIL, password: env.SHIPROCKET_PASSWORD }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.token) {
+      const msg = "Shiprocket login failed (" + r.status + "): " + (d.message || "no token");
+      if (r.status >= 400 && r.status < 500) { loginFail = { until: Date.now() + 30 * 60000, msg }; await sharedPut(env, "fail", loginFail, 30 * 60); }
+      throw new Error(msg);
+    }
+    loginFail = { until: 0, msg: "" };
+    tokenCache = { token: d.token, exp: Date.now() + 8 * 24 * 3600 * 1000 };
+    await sharedPut(env, "token", tokenCache, 8 * 24 * 3600);
+    return d.token;
+  })();
+  try { return await loginInFlight; } finally { loginInFlight = null; }
 }
 
 const json = (body, status = 200) =>
@@ -380,6 +397,7 @@ export async function handleHealth(request, env) {
     stockSync: { webhookToken: !!env.SHIPROCKET_WEBHOOK_TOKEN, githubToken: !!env.GITHUB_TOKEN } };
   if (env.GITHUB_TOKEN) { try { const r = await gh(env, "GET", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive")); const d = await r.json().catch(() => ({})); out.stockSync.githubCanWrite = r.ok && !!(d.permissions && d.permissions.push); } catch (e) { out.stockSync.githubCanWrite = false; } }
   if (!out.secrets) return json(out);
+  try { await sharedPut(env, "probe", { ok: 1 }, 60); out.sharedCache = !!(await sharedGet(env, "probe")); } catch (e) { out.sharedCache = false; }
   try { await login(env); out.login = true; } catch (e) { out.login = false; out.loginError = String(e.message).slice(0, 160); return json(out); }
   try {
     const p = await srGet("/settings/company/pickup", env);
