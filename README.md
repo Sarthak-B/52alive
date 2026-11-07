@@ -31,3 +31,17 @@ Until the secrets are set, `/api/order` returns 503 and the site keeps working o
 Update both `const P` in `public/index.html` and `CATALOG` in `src/worker.js` (names, prices, sizes, colours). `node --test tests/*.test.mjs` fails if they drift apart. Weights (kg) and the box size in `src/worker.js` are estimates — set them to your real packaging so shipping rates are right.
 
 Failed Shiprocket calls show up in Cloudflare → Workers → 52alive → Logs.
+
+## Stock (sold-out variants disappear)
+
+Each colour in the product catalogue can carry `stock: {size: count}`, set from the NOWORA client dashboard (Shop → Products → Track stock). A size at 0 disappears from the shop, a colour with nothing left disappears, and so does a product. `/api/order` refuses sold-out variants.
+
+When Shiprocket picks up / ships a website order, `POST /api/courier-updates` takes its items off the stock and commits the catalogue, so the site redeploys. Each order is counted once.
+
+Setup (Cloudflare → Workers & Pages → **52-alive** (the Pages project) → Settings → Variables and Secrets → **Production**, then redeploy):
+- `GITHUB_TOKEN` — fine-grained token, Contents read & write on this repo
+- `SHIPROCKET_WEBHOOK_TOKEN` — any long random string
+
+Shiprocket → Settings → API → Webhooks: URL `https://52-alive.pages.dev/api/courier-updates`, security token = `SHIPROCKET_WEBHOOK_TOKEN`, switched on.
+
+Check: `https://52-alive.pages.dev/api/shiprocket-health` → `stockSync.webhookToken`, `githubToken` and `githubCanWrite` all `true`.
