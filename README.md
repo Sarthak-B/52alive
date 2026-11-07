@@ -47,3 +47,5 @@ Shiprocket → Settings → API → Webhooks: URL `https://52-alive.pages.dev/ap
 Check: `https://52-alive.pages.dev/api/shiprocket-health` → `stockSync.webhookToken`, `githubToken` and `githubCanWrite` all `true`.
 
 If the Shiprocket API user's password changes, update `SHIPROCKET_PASSWORD` on the Pages project and redeploy. After a failed login the site waits 15 minutes before trying again, so Shiprocket doesn't block the user.
+
+Use a dedicated Shiprocket API user (Settings → API → Configure), not the main login.
