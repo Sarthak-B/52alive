@@ -82,3 +82,13 @@ test('Pages Function routes POST /api/track to the same handler', async () => {
   const {onRequestPost} = await import('../functions/api/track.js');
   assert.equal((await onRequestPost({request: new Request('https://52-alive.pages.dev/api/track', {method: 'POST', body: '{}'}), env: {}})).status, 503);
 });
+
+import {phoneMatch} from '../src/worker.js';
+test('phone check works with full and masked numbers', () => {
+  assert.equal(phoneMatch('9876543210', '+91 98765 43210'), true);
+  assert.equal(phoneMatch('919876543210', '9876543210'), true);
+  assert.equal(phoneMatch('******3210', '9876543210'), true);
+  assert.equal(phoneMatch('98xxxxx210', '9876543210'), false);       // too little shown to be sure
+  assert.equal(phoneMatch('9876543210', '9876543211'), false);
+  assert.equal(phoneMatch('******3210', '9876543299'), false);
+});
