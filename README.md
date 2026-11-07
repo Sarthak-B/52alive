@@ -38,7 +38,7 @@ Each colour in the product catalogue can carry `stock: {size: count}`, set from 
 
 When Shiprocket picks up / ships a website order, `POST /api/courier-updates` takes its items off the stock and commits the catalogue, so the site redeploys. Each order is counted once.
 
-Setup (Cloudflare → Workers & Pages → **52-alive** (the Pages project) → Settings → Variables and Secrets → **Production**, then redeploy):
+Setup — on the **Pages project** that serves 52-alive.pages.dev, not the 52alive Worker (Cloudflare → Workers & Pages → **52-alive** → Settings → Variables and Secrets → **Production**, then redeploy):
 - `GITHUB_TOKEN` — fine-grained token, Contents read & write on this repo
 - `SHIPROCKET_WEBHOOK_TOKEN` — any long random string
 
