@@ -302,14 +302,15 @@ export function _resetLookups() { lookups.clear(); }
 
 export async function trackOrder(input, env) {
   const orderId = String(input && input.orderId || "").trim();
-  const phone = cleanPhone(input && input.phone);
+  const pin = String(input && input.pin || "").replace(/\D/g, "");
   if (!/^52A-[0-9a-f-]{36}$/i.test(orderId)) { const e = new Error("Check your order ID — it starts with 52A-"); e.status = 400; throw e; }
-  if (!/^[6-9]\d{9}$/.test(phone)) { const e = new Error("Enter the 10-digit mobile number you ordered with"); e.status = 400; throw e; }
+  if (!/^[1-9]\d{5}$/.test(pin)) { const e = new Error("Enter the 6-digit PIN code of your delivery address"); e.status = 400; throw e; }
 
   const list = await srGet("/orders?filter_by=channel_order_id&filter=" + encodeURIComponent(orderId) + "&per_page=5", env);
   const orders = Array.isArray(list && list.data) ? list.data : [];
   const o = orders.find(x => String(x.channel_order_id || "").toLowerCase() === orderId.toLowerCase());
-  if (!o || !phoneMatch(o.customer_phone, phone)) return null;
+  /* Shiprocket masks the customer's phone in API answers, so the delivery PIN code is the second check. */
+  if (!o || String(o.customer_pincode || "").replace(/\D/g, "") !== pin) return null;
 
   const shipments = Array.isArray(o.shipments) ? o.shipments : o.shipments ? [o.shipments] : [];
   const sh = shipments.find(x => x && (x.awb || x.awb_code)) || shipments[0] || {};
@@ -362,7 +363,7 @@ export async function handleTrack(request, env) {
   let input; try { input = JSON.parse(raw); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   try {
     const order = await trackOrder(input, env);
-    if (!order) return json({ ok: false, error: "We couldn't find that order. Check the order ID and use the phone number you ordered with." }, 404);
+    if (!order) return json({ ok: false, error: "We couldn't find that order. Check the order ID and the delivery PIN code." }, 404);
     return json({ ok: true, order: order });
   } catch (e) {
     console.error("[track]", e.message);

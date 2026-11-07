@@ -1367,7 +1367,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
     <div class="faq" data-reveal>
       <details><summary>How does ordering on WhatsApp work?</summary><p>Fill the order form and tap Order on WhatsApp. Your full order — items, sizes, colours and address — opens in a WhatsApp chat with us. Send it, and we reply to confirm stock and the final total.</p></details>
       <details><summary>Do you have cash on delivery?</summary><p>Yes, COD is available across most of India. You can also pay by UPI once we confirm your order.</p></details>
-      <details><summary>How long does delivery take?</summary><p>We dispatch within 48 hours of confirming. Most cities receive it in 3–6 days; you can follow it any time with <a class="link" href="#track" data-track>Track order</a> — use the order ID from your WhatsApp message and your phone number.</p></details>
+      <details><summary>How long does delivery take?</summary><p>We dispatch within 48 hours of confirming. Most cities receive it in 3–6 days; you can follow it any time with <a class="link" href="#track" data-track>Track order</a> — use the order ID from your WhatsApp message and your delivery PIN code.</p></details>
       <details><summary>What if the size doesn't fit?</summary><p>Message us within 7 days of delivery. If the piece is unworn with tags on, we'll exchange the size.</p></details>
       <details><summary>Are the colours true to the photos?</summary><p>Photos are of our actual stock, retouched onto a clean white background, so shade can differ slightly from what you see. Washed pieces also vary a little piece to piece. Ask on WhatsApp and we'll send a real photo before you order.</p></details>
       <details><summary>How do I hear about new drops first?</summary><p>Join the 52 Alive WhatsApp community. Drops, restocks and members-only prices go there before anywhere else.</p></details>
@@ -1392,12 +1392,12 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
 <dialog class="sheet trk-dlg" id="trackDlg" aria-labelledby="trkTitle">
   <button class="sheet-close" aria-label="Close">×</button>
   <div class="trk">
-    <div><h3 id="trkTitle">Track your order</h3><p class="sub">Use the order ID from your WhatsApp order message (it starts with 52A-) and the phone number you ordered with.</p></div>
+    <div><h3 id="trkTitle">Track your order</h3><p class="sub">Use the order ID from your WhatsApp order message (it starts with 52A-) and the PIN code of your delivery address.</p></div>
     <p class="trk-last" id="trkLast" hidden></p>
     <form id="trkForm" novalidate>
       <div class="row2">
         <div class="field"><label for="trkId">Order ID</label><input id="trkId" autocomplete="off" spellcheck="false" placeholder="52A-…" maxlength="60"></div>
-        <div class="field"><label for="trkPhone">Phone</label><input id="trkPhone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit mobile" maxlength="14"></div>
+        <div class="field"><label for="trkPin">Delivery PIN code</label><input id="trkPin" inputmode="numeric" autocomplete="postal-code" placeholder="6 digits" maxlength="6"></div>
       </div>
       <p class="err" id="trkErr" role="alert"></p>
       <button type="submit" class="btn" id="trkGo">Track order <span class="arr">→</span></button>
@@ -1742,8 +1742,8 @@ form.addEventListener("submit",e=>{
   const w=window.open(lastLink,"_blank","noopener");
   if(!w){ /* popup blocked: the success panel button still works */ }
   $("#doneId").textContent="#"+orderId; $("#reopen").href=lastLink;
-  try{ localStorage.setItem("52a_last_order",JSON.stringify({id:orderId,phone:phone,ts:Date.now()})); }catch(_){}
-  $("#trackThis").onclick=e=>{ e.preventDefault(); openTrack(orderId,phone,true); };
+  try{ localStorage.setItem("52a_last_order",JSON.stringify({id:orderId,pin:$("#pin").value.trim(),ts:Date.now()})); }catch(_){}
+  $("#trackThis").onclick=e=>{ e.preventDefault(); openTrack(orderId,$("#pin").value.trim(),true); };
   form.style.display="none"; $("#done").classList.add("show");
 });
 $("#newOrder").addEventListener("click",()=>{ orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value=FIRST_KEY; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
@@ -1853,28 +1853,28 @@ const trkDlg=$("#trackDlg"), trkF=$("#trkForm");
 const STEPS=["Placed","Confirmed","Shipped","Out for delivery","Delivered"];
 const lastOrder=()=>{ try{ const o=JSON.parse(localStorage.getItem("52a_last_order")||"null"); return o&&/^52A-/.test(o.id)?o:null; }catch(_){ return null; } };
 const tesc=t=>String(t==null?"":t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
-function openTrack(id,phone,go){
+function openTrack(id,pin,go){
   const last=lastOrder();
   $("#trkId").value=id||$("#trkId").value||(last?last.id:"");
-  $("#trkPhone").value=phone||$("#trkPhone").value||(last&&(!id||id===last.id)?last.phone:"");
+  $("#trkPin").value=pin||$("#trkPin").value||(last&&(!id||id===last.id)?(last.pin||""):"");
   const tl=$("#trkLast");
-  if(last&&last.id!==$("#trkId").value){ tl.hidden=false; tl.innerHTML=`Your last order: <button type="button">${tesc(last.id.slice(0,12))}…</button>`; tl.querySelector("button").onclick=()=>openTrack(last.id,last.phone,true); } else tl.hidden=true;
+  if(last&&last.id!==$("#trkId").value){ tl.hidden=false; tl.innerHTML=`Your last order: <button type="button">${tesc(last.id.slice(0,12))}…</button>`; tl.querySelector("button").onclick=()=>openTrack(last.id,last.pin||"",true); } else tl.hidden=true;
   $("#trkErr").textContent=""; if(!go) $("#trkRes").innerHTML="";
   if(!trkDlg.open) trkDlg.showModal();
-  if(go&&$("#trkId").value&&$("#trkPhone").value) trkF.requestSubmit(); else setTimeout(()=>($("#trkId").value?$("#trkPhone"):$("#trkId")).focus(),60);
+  if(go&&$("#trkId").value&&$("#trkPin").value) trkF.requestSubmit(); else setTimeout(()=>($("#trkId").value?$("#trkPin"):$("#trkId")).focus(),60);
 }
 $$("[data-track]").forEach(a=>a.addEventListener("click",e=>{ e.preventDefault(); document.body.classList.remove("menu-open"); openTrack(); }));
 trkF.addEventListener("submit",async e=>{
   e.preventDefault();
-  const id=$("#trkId").value.trim(), phone=$("#trkPhone").value.replace(/\D/g,"").slice(-10), err=$("#trkErr"), btn=$("#trkGo");
+  const id=$("#trkId").value.trim(), pin=$("#trkPin").value.replace(/\D/g,""), err=$("#trkErr"), btn=$("#trkGo");
   if(!/^52A-[0-9a-f-]{36}$/i.test(id)){ err.textContent="Check the order ID — copy it from your WhatsApp order message (it starts with 52A-)."; return; }
-  if(!/^[6-9]\d{9}$/.test(phone)){ err.textContent="Enter the 10-digit mobile number you ordered with."; return; }
+  if(!/^[1-9]\d{5}$/.test(pin)){ err.textContent="Enter the 6-digit PIN code of your delivery address."; return; }
   err.textContent=""; btn.disabled=true; btn.firstChild.textContent="Checking… ";
   try{
-    const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id,phone})});
+    const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id,pin})});
     const j=await r.json().catch(()=>({}));
     if(!j.ok){ $("#trkRes").innerHTML=""; err.textContent=j.error||"Couldn't check right now — try again in a minute."; return; }
-    try{ const l=lastOrder(); if(!l||l.id===id) localStorage.setItem("52a_last_order",JSON.stringify({id,phone,ts:Date.now()})); }catch(_){}
+    try{ const l=lastOrder(); if(!l||l.id===id) localStorage.setItem("52a_last_order",JSON.stringify({id,pin,ts:Date.now()})); }catch(_){}
     drawTrack(j.order);
   }catch(_){ err.textContent="Couldn't reach us — check your connection and try again."; }
   finally{ btn.disabled=false; btn.firstChild.textContent="Track order "; }
@@ -1899,7 +1899,7 @@ function drawTrack(o){
 }
 /* deep links: /?track=52A-… (from the WhatsApp message) and #track */
 (()=>{ const q=new URLSearchParams(location.search).get("track");
-  if(q&&/^52A-[0-9a-f-]{36}$/i.test(q)){ const l=lastOrder(); setTimeout(()=>openTrack(q,l&&l.id===q?l.phone:"",true),reduced?0:900); }
+  if(q&&/^52A-[0-9a-f-]{36}$/i.test(q)){ const l=lastOrder(); setTimeout(()=>openTrack(q,l&&l.id===q?(l.pin||""):"",true),reduced?0:900); }
   else if(location.hash==="#track") setTimeout(()=>openTrack(),reduced?0:900); })();
 
 renderOptions(false); renderBag();
