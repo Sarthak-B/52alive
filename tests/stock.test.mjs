@@ -32,7 +32,7 @@ test('website hides sold-out sizes, colours and products (same rules on page and
 
 test('orders for sold-out variants are refused', () => {
   const c = catalogFromHtml(block(cat()));
-  assert.equal(buildPayload(order([{key: 'puffer', colour: 'Blush Pink', size: 'S', qty: 1}]), {}, new Date(), c).sub_total, 1999);
+  assert.equal(buildPayload(order([{key: 'puffer', colour: 'Blush Pink', size: 'S', qty: 1}]), {COD_FEE: '0'}, new Date(), c).sub_total, 1999);
   assert.throws(() => buildPayload(order([{key: 'puffer', colour: 'Blush Pink', size: 'M', qty: 1}]), {}, new Date(), c), /Sold out/);
   assert.throws(() => buildPayload(order([{key: 'puffer', colour: 'Lavender', size: 'S', qty: 1}]), {}, new Date(), c), e => e.status === 400);
   assert.throws(() => buildPayload(order([{key: 'gone', colour: 'Red', size: 'M', qty: 1}]), {}, new Date(), c), e => e.status === 400);

@@ -55,8 +55,17 @@ test('builds a Shiprocket payload priced from the catalog', () => {
   assert.equal(p.payment_method, 'COD');
   assert.equal(p.order_items[0].selling_price, 1299);
   assert.equal(p.order_items[0].sku, '52A-HOODIE-STONEBEIGE-L');
-  assert.equal(p.sub_total, 2598);
-  assert.equal(p.weight, 1.2);
+  assert.equal(p.sub_total, 2598 + 99);                         /* + ₹99 cash on delivery handling */
+  assert.deepEqual(p.order_items[1], {name: 'Cash on delivery handling charge', sku: '52A-COD-FEE', units: 1, selling_price: 99, discount: 0, tax: 0});
+  assert.equal(p.weight, 1.2);                                  /* the charge adds no weight */
+});
+
+test('COD charge: only on cash on delivery, and COD_FEE can change or remove it', () => {
+  const it = {key: 'hoodie', colour: 'Stone Beige', size: 'L', qty: 1};
+  assert.equal(buildPayload(order({payment: 'UPI (prepaid)', items: [it]}), env, new Date(), CATALOG).sub_total, 1299);
+  assert.equal(buildPayload(order({items: [it]}), {...env, COD_FEE: '49'}, new Date(), CATALOG).sub_total, 1299 + 49);
+  const none = buildPayload(order({items: [it]}), {...env, COD_FEE: '0'}, new Date(), CATALOG);
+  assert.equal(none.sub_total, 1299); assert.equal(none.order_items.length, 1);
 });
 
 test('merges duplicate lines and maps prepaid', () => {
