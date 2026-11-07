@@ -486,6 +486,13 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
 .pb-id{font-size:14px;color:var(--ink-2);margin:4px 0 0}.pb-id b{color:var(--ink)}
 .pb-id button{margin-left:6px;font-weight:700;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .pb-note{font-size:13px;color:var(--muted);margin:0}
+.pb-paid{display:grid;gap:8px;padding:14px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .3s}
+.pb-paid.glow{box-shadow:inset 0 0 0 2px var(--accent),0 0 0 6px color-mix(in srgb,var(--accent) 15%,transparent)}
+.pb-paid label{font-size:13px;font-weight:600}
+.pb-paid-row{display:flex;flex-wrap:wrap;gap:8px}.pb-paid-row input{flex:1 1 220px;min-width:0;height:46px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);padding:0 12px;font-size:15px;letter-spacing:.04em}
+.pb-paid-row input:focus{outline:none;border-color:var(--accent)}
+.pb-paid .err{color:#B3261E;font-size:13px;font-weight:600;margin:0;min-height:0}
+@media (max-width:640px){.pb-paid-row{flex-direction:column}}
 @media (max-width:640px){.pb-body{grid-template-columns:1fr}.pb-body img{width:180px;margin:0 auto}}
 .toast{position:fixed;left:50%;bottom:26px;z-index:95;transform:translate(-50%,calc(100% + 40px));visibility:hidden;background:var(--dark);color:var(--on-dark);padding:13px 20px;border-radius:999px;font-size:14px;font-weight:500;box-shadow:0 20px 40px -16px rgba(0,0,0,.6);transition:transform .5s var(--ease-out);white-space:nowrap}
 .toast.show{transform:translate(-50%,0);visibility:visible}
@@ -1390,6 +1397,11 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
               <a class="btn btn-gpay" id="pbGpay" rel="noopener">Pay with GPay</a>
               <a class="btn btn-ghost btn-sm" id="pbUpi" rel="noopener">Other UPI app (PhonePe, Paytm…)</a>
               <p class="pb-id">UPI ID: <b id="pbId"></b> <button type="button" id="pbCopy">Copy</button></p>
+              <form class="pb-paid" id="pbPaid" novalidate>
+                <label for="pbUtr">Paid? Enter the 12-digit UPI reference (UTR) from your payment app <span class="muted">(optional)</span></label>
+                <div class="pb-paid-row"><input id="pbUtr" inputmode="numeric" maxlength="16" placeholder="e.g. 431289765432" autocomplete="off"><button type="submit" class="btn btn-sm" id="pbDone">I've paid — track my order →</button></div>
+                <p class="err" id="pbErr" role="alert"></p>
+              </form>
               <p class="pb-note">On a computer? Scan the QR with your phone — the amount is already filled in. Your order ID <b id="pbRef"></b> is in the payment note. We pack your order once the payment shows up.</p>
             </div>
           </div>
@@ -1783,6 +1795,21 @@ form.addEventListener("submit",async e=>{
     $("#pbGpay").href=L.gpay; $("#pbUpi").href=L.any; drawAmountQr(L.any,paid); $("#pbGpay").style.display=$("#pbUpi").style.display=L.mobile?"":"none";
     $("#pbCopy").onclick=()=>{ try{ navigator.clipboard.writeText(UPI).then(()=>toast("UPI ID copied"),()=>toast(UPI)); }catch(_){ toast(UPI); } };
     pb.hidden=false; $("#done h3").textContent="Order placed — now pay to confirm";
+    /* after paying: note the UPI reference for the shop (Records → UPI payments) and go straight to tracking */
+    let wentToPay=false;
+    [$("#pbGpay"),$("#pbUpi")].forEach(a=>a.onclick=()=>{ wentToPay=true; });
+    const back=()=>{ if(document.visibilityState==="visible"&&wentToPay){ wentToPay=false; const f=$("#pbPaid"); f.classList.add("glow"); f.scrollIntoView({behavior:reduced?"auto":"smooth",block:"center"}); setTimeout(()=>$("#pbUtr").focus({preventScroll:true}),400); } };
+    document.addEventListener("visibilitychange",back);
+    $("#pbPaid").onsubmit=e=>{ e.preventDefault();
+      const utr=$("#pbUtr").value.replace(/\s/g,"");
+      if(utr&&!/^\d{12}$/.test(utr)){ $("#pbErr").textContent="The UPI reference is 12 digits — check your payment app, or leave it empty."; return; }
+      $("#pbErr").textContent="";
+      (window.noworaQ=window.noworaQ||[]).push(["UPI payments",{"Order ID":placed,"Amount":String(paid),"UPI reference (UTR)":utr||"not entered","Paid to":UPI,"Customer":$("#name").value.trim(),"Phone":"+91 "+phone}]);
+      try{ localStorage.setItem("52a_paid_"+placed,"1"); }catch(_){}
+      document.removeEventListener("visibilitychange",back);
+      $("#pbDone").disabled=true; $("#pbDone").textContent="Opening your tracking…";
+      setTimeout(()=>{ location.href="/track/?id="+encodeURIComponent(placed)+"&paid=1"; },700);
+    };
   } else { pb.hidden=true; $("#done h3").textContent="Order placed — thank you!"; }
   const cd=$("#codDue"); cd.hidden=pay!=="Cash on Delivery";
   if(!cd.hidden) cd.innerHTML=`Keep <b>${inr(paid+COD_FEE)}</b> ready — pay in cash when your order arrives${COD_FEE?` (includes ${inr(COD_FEE)} cash handling)`:""}.`;

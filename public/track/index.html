@@ -60,6 +60,7 @@ input{flex:1;min-width:0;height:58px;border-radius:14px;border:1.5px solid var(-
 .tl div:first-child::before{background:var(--accent);border-color:var(--accent)}
 .tl time{font-size:12.5px;color:var(--muted)}.tl small{color:var(--muted)}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
+.paid-note{margin-top:18px;border-radius:16px;padding:14px 18px;background:#E8F3E1;color:#25502A;font-weight:600;font-size:15px}
 .foot{border-top:1px solid var(--line);padding:22px 0;font-size:13px;color:var(--muted)}.foot .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(1turn)}}
 @media (max-width:860px){.grid{grid-template-columns:1fr}.in{flex-direction:column}.in input{flex:none;width:100%}.facts{grid-template-columns:1fr}.steps div{font-size:10.5px}}
@@ -78,6 +79,7 @@ input{flex:1;min-width:0;height:58px;border-radius:14px;border:1.5px solid var(-
       <p class="err" id="err" role="alert"></p>
       <p class="hint" id="last" hidden></p>
     </form>
+    <p class="paid-note" id="paidNote" hidden>✓ Thanks — we've got your payment note. We check it against our UPI account and pack your order. This page updates as it moves.</p>
   </div>
   <section class="card" id="res" aria-live="polite">
     <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><b style="color:var(--ink);font-family:var(--display);font-size:22px">Your order shows here</b><span>Enter your order ID to see where it is.</span></div>
@@ -130,6 +132,7 @@ async function track(id, quiet){
 }
 $("#f").addEventListener("submit",e=>{ e.preventDefault(); track($("#id").value); });
 const q=new URLSearchParams(location.search), qid=q.get("id")||q.get("track"), l=last();
+if(q.get("paid")==="1") $("#paidNote").hidden=false;
 if(qid) track(qid);
 else if(l){ $("#last").hidden=false; $("#last").innerHTML=`Your last order: <button type="button">${esc(l.id.slice(0,12))}…</button>`; $("#last").querySelector("button").onclick=()=>track(l.id); $("#id").value=l.id; }
 })();
