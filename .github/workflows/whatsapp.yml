@@ -1,0 +1,80 @@
+# Order alerts on WhatsApp, sent from the NOWORA number through WhatsApp Web (Playwright).
+#  - The website fires `order-alert` for every new order (encrypted: this repo is public).
+#  - First time (and whenever WhatsApp logs out): Actions → WhatsApp order alerts → Run workflow → mode "login",
+#    open the run and enter the 8-character code on the phone that should send the alerts.
+#  - Needs one repo secret: WA_KEY = the same value as SHIPROCKET_WEBHOOK_TOKEN in Cloudflare.
+name: WhatsApp order alerts
+on:
+  repository_dispatch:
+    types: [order-alert]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "login = link the sending number · test = send a test message"
+        type: choice
+        options: [login, test, keepalive]
+        default: login
+      phone:
+        description: "login: number that SENDS the alerts · test: number to send the test to (with 91)"
+        default: "916397988191"
+  schedule:
+    - cron: "17 3 */3 * *"   # every 3 days: keeps the saved login fresh
+permissions:
+  contents: read
+jobs:
+  whatsapp:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      WA_KEY: ${{ secrets.WA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Playwright
+        id: pw
+        run: |
+          npm i --no-save --no-package-lock playwright@1.48.2 >/dev/null
+          echo "v=1.48.2" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ steps.pw.outputs.v }}
+      - run: npx playwright install --with-deps chromium >/dev/null
+      - name: Check secret
+        run: '[ -n "$WA_KEY" ] || { echo "::error::Add the repo secret WA_KEY (same value as SHIPROCKET_WEBHOOK_TOKEN)"; exit 1; }'
+      - name: Restore WhatsApp login
+        uses: actions/cache/restore@v4
+        with:
+          path: wa-session.enc
+          key: wa-session-${{ github.run_id }}
+          restore-keys: wa-session-
+      - name: Unlock login
+        run: |
+          if [ -f wa-session.enc ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:WA_KEY -in wa-session.enc | tar -xz && echo "login restored" || echo "::warning::saved login couldn't be opened"
+          else echo "no saved login yet"; fi
+      - name: Send order alert
+        if: github.event_name == 'repository_dispatch'
+        env:
+          ALERT_DATA: ${{ github.event.client_payload.data }}
+        run: node scripts/whatsapp.mjs send
+      - name: Login / test / keep alive
+        if: github.event_name != 'repository_dispatch'
+        env:
+          WA_PHONE: ${{ inputs.phone }}
+          TEST_TO: ${{ inputs.phone }}
+        run: node scripts/whatsapp.mjs ${{ github.event_name == 'schedule' && 'keepalive' || inputs.mode }}
+      - name: Lock and save login
+        if: always()
+        run: |
+          [ -d wa-profile ] || exit 0
+          rm -rf wa-profile/Default/{Cache,"Code Cache",GPUCache,"Service Worker/CacheStorage","Service Worker/ScriptCache"} wa-profile/{ShaderCache,GrShaderCache,component_crx_cache} 2>/dev/null || true
+          tar -cz wa-profile | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -pass env:WA_KEY -out wa-session.enc
+          ls -lh wa-session.enc
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('wa-session.enc') != ''
+        with:
+          path: wa-session.enc
+          key: wa-session-${{ github.run_id }}
