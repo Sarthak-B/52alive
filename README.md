@@ -49,3 +49,11 @@ Check: `https://52-alive.pages.dev/api/shiprocket-health` → `stockSync.webhook
 If the Shiprocket API user's password changes, update `SHIPROCKET_PASSWORD` on the Pages project and redeploy. After a failed login the site waits 15 minutes before trying again, so Shiprocket doesn't block the user.
 
 Use a dedicated Shiprocket API user (Settings → API → Configure), not the main login.
+
+## Shipping from the NOWORA dashboard
+
+`POST /api/store` lets the client dashboard (Shop → Orders) list Shiprocket orders and press **Ship now**:
+it books the courier (AWB), schedules the pickup, returns the label and invoice links and takes the
+items off the website's stock. Calls must send the header `x-store-key` = `STORE_KEY` (Pages secret) —
+or, if `STORE_KEY` isn't set, the same value as `SHIPROCKET_WEBHOOK_TOKEN`. Paste that key once in the
+dashboard. Courier charges come out of the Shiprocket wallet.
