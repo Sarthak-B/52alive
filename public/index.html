@@ -476,6 +476,10 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
 .pb-head b{font-family:var(--display);font-size:26px;letter-spacing:-.03em}
 .pb-body{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:20px;align-items:center}
 .pb-body img{width:200px;height:auto;border-radius:14px}
+.pb-qr{display:grid;justify-items:center;gap:6px}
+.pb-qr .qr{width:200px;height:200px;padding:10px;background:#fff;border-radius:14px;box-shadow:inset 0 0 0 1px var(--line)}
+.pb-qr .qr svg{display:block;width:100%;height:100%}
+.pb-qr small{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.35}.pb-qr small b{color:var(--ink)}
 .pb-side{display:grid;gap:10px}
 .btn-gpay{background:#fff;color:#1f1f1f;box-shadow:inset 0 0 0 1.5px var(--line)}
 .btn-gpay::before{content:"";width:22px;height:22px;flex:none;background:conic-gradient(#4285F4 0 25%,#34A853 0 50%,#FBBC04 0 75%,#EA4335 0);border-radius:6px}
@@ -1381,12 +1385,12 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
         <div class="paybox" id="payBox" hidden>
           <div class="pb-head"><span>Pay now to confirm</span><b id="pbAmt"></b></div>
           <div class="pb-body">
-            <img src="images/upi-qr.jpg" alt="UPI QR code for Ankit Maikhuri — ankitmaikhuri5-1@okicici" width="200" height="225" loading="lazy">
+            <div class="pb-qr" id="pbQr"><img src="images/upi-qr.jpg" alt="UPI QR code for Ankit Maikhuri — ankitmaikhuri5-1@okicici" width="200" height="225" loading="lazy"></div>
             <div class="pb-side">
               <a class="btn btn-gpay" id="pbGpay" rel="noopener">Pay with GPay</a>
               <a class="btn btn-ghost btn-sm" id="pbUpi" rel="noopener">Other UPI app (PhonePe, Paytm…)</a>
               <p class="pb-id">UPI ID: <b id="pbId"></b> <button type="button" id="pbCopy">Copy</button></p>
-              <p class="pb-note">On a computer? Scan the QR with your phone. Add your order ID <b id="pbRef"></b> in the payment note. We pack your order once the payment shows up.</p>
+              <p class="pb-note">On a computer? Scan the QR with your phone — the amount is already filled in. Your order ID <b id="pbRef"></b> is in the payment note. We pack your order once the payment shows up.</p>
             </div>
           </div>
         </div>
@@ -1727,6 +1731,16 @@ function syncUpiHint(){ const on=UPI&&(form.querySelector("input[name=pay]:check
   if(on){ const t=lineItems().reduce((a,b)=>a+P[b.key].price*b.qty,0); $("#upiHintAmt").textContent=inr(t); } }
 form.addEventListener("change",e=>{ if(e.target.name==="pay") updateTotal(); else if(e.target.name==="size"||e.target.name==="colour") syncUpiHint(); });
 $("#toUpi").addEventListener("click",()=>{ const r=form.querySelector('input[name=pay][value="UPI (prepaid)"]'); if(r){ r.checked=true; updateTotal(); toast("Switched to UPI — you save ₹99"); } });
+function loadQr(){ return window.qrcode?Promise.resolve(window.qrcode):(loadQr.p=loadQr.p||new Promise((res,rej)=>{ const sc=document.createElement("script"); sc.src="js/qrcode.min.js"; sc.onload=()=>window.qrcode?res(window.qrcode):rej(); sc.onerror=rej; document.head.appendChild(sc); })); }
+function drawAmountQr(link,amount){
+  const box=$("#pbQr"), fallback=box.innerHTML;
+  loadQr().then(qrcode=>{
+    const q=qrcode(0,"M"); q.addData(link); q.make();
+    const n=q.getModuleCount(); let d="";
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(q.isDark(r,c)) d+=`M${c} ${r}h1v1h-1z`;
+    box.innerHTML=`<div class="qr" role="img" aria-label="UPI QR code to pay ${inr(amount)}"><svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><path d="${d}" fill="#111"/></svg></div><small>Scan with any UPI app to pay <b>${inr(amount)}</b></small>`;
+  }).catch(()=>{ box.innerHTML=fallback; });
+}
 let placing=false;
 form.addEventListener("submit",async e=>{
   e.preventDefault();
@@ -1766,7 +1780,7 @@ form.addEventListener("submit",async e=>{
   if(UPI&&pay==="UPI (prepaid)"){
     const L=upiLinks(paid,placed.slice(0,12));
     $("#pbAmt").textContent=inr(paid); $("#pbId").textContent=UPI; $("#pbRef").textContent=placed.slice(0,12);
-    $("#pbGpay").href=L.gpay; $("#pbUpi").href=L.any; $("#pbGpay").style.display=$("#pbUpi").style.display=L.mobile?"":"none";
+    $("#pbGpay").href=L.gpay; $("#pbUpi").href=L.any; drawAmountQr(L.any,paid); $("#pbGpay").style.display=$("#pbUpi").style.display=L.mobile?"":"none";
     $("#pbCopy").onclick=()=>{ try{ navigator.clipboard.writeText(UPI).then(()=>toast("UPI ID copied"),()=>toast(UPI)); }catch(_){ toast(UPI); } };
     pb.hidden=false; $("#done h3").textContent="Order placed — now pay to confirm";
   } else { pb.hidden=true; $("#done h3").textContent="Order placed — thank you!"; }
