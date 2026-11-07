@@ -284,6 +284,14 @@ export function trackStep(status) {
 }
 
 const cleanPhone = v => String(v || "").replace(/\D/g, "").slice(-10);
+/* Shiprocket may return the number in full or partly masked (e.g. "******8191"): compare the digits it shows. */
+export function phoneMatch(stored, typed) {
+  const t = cleanPhone(typed), raw = String(stored || "").trim();
+  if (!/^[6-9]\d{9}$/.test(t)) return false;
+  if (/^[\d\s+()-]+$/.test(raw)) return cleanPhone(raw) === t;
+  const tail = (raw.match(/\d+$/) || [""])[0];
+  return tail.length >= 4 && t.endsWith(tail.slice(-10));
+}
 const lookups = new Map();                          /* per-visitor lookup counter (per isolate) */
 function tooMany(ip) {
   const now = Date.now(), k = ip || "?", e = lookups.get(k);
@@ -301,7 +309,7 @@ export async function trackOrder(input, env) {
   const list = await srGet("/orders?filter_by=channel_order_id&filter=" + encodeURIComponent(orderId) + "&per_page=5", env);
   const orders = Array.isArray(list && list.data) ? list.data : [];
   const o = orders.find(x => String(x.channel_order_id || "").toLowerCase() === orderId.toLowerCase());
-  if (!o || cleanPhone(o.customer_phone) !== phone) return null;
+  if (!o || !phoneMatch(o.customer_phone, phone)) return null;
 
   const shipments = Array.isArray(o.shipments) ? o.shipments : o.shipments ? [o.shipments] : [];
   const sh = shipments.find(x => x && (x.awb || x.awb_code)) || shipments[0] || {};
@@ -385,7 +393,9 @@ export async function handleHealth(request, env) {
   if (/^52A-[0-9a-f-]{36}$/i.test(id)) {
     const look = async q => { try { const d = await srGet("/orders?" + q, env); const rows = Array.isArray(d && d.data) ? d.data : [];
       const hit = rows.find(x => String(x.channel_order_id || "").toLowerCase() === id.toLowerCase());
-      return { rows: rows.length, found: !!hit, status: hit ? hit.status : undefined, hasAwb: hit ? !!((hit.shipments && (hit.shipments[0] || hit.shipments).awb) || "") : undefined }; }
+      const ph = new URL(request.url).searchParams.get("phone");
+      return { rows: rows.length, found: !!hit, status: hit ? hit.status : undefined, hasAwb: hit ? !!((hit.shipments && (hit.shipments[0] || hit.shipments).awb) || "") : undefined,
+        phoneShape: hit ? String(hit.customer_phone || "").replace(/\d/g, "d") : undefined, phoneMatches: hit && ph ? phoneMatch(hit.customer_phone, ph) : undefined }; }
       catch (e) { return { error: String(e.message).slice(0, 160) }; } };
     out.orderByFilter = await look("filter_by=channel_order_id&filter=" + encodeURIComponent(id) + "&per_page=5");
     out.orderBySearch = await look("search=" + encodeURIComponent(id) + "&per_page=5");
