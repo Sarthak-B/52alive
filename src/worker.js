@@ -165,6 +165,10 @@ export function buildPayload(input, env, now = new Date(), CATALOG = {}) {
 
   const [first, ...rest] = name.split(" ");
   const cod = input.payment === "Cash on Delivery";
+  /* cash on delivery handling charge (COD_FEE, default ₹99): added as its own line so the courier collects it
+     and it shows on the invoice; prepaid orders don't pay it */
+  const codFee = cod ? Math.max(0, Math.round(Number(env.COD_FEE == null || env.COD_FEE === "" ? 99 : env.COD_FEE)) || 0) : 0;
+  if (codFee) order_items.push({ name: "Cash on delivery handling charge", sku: "52A-COD-FEE", units: 1, selling_price: codFee, discount: 0, tax: 0 });
   const note = str(input.note, 250);
 
   const payload = {
@@ -183,7 +187,7 @@ export function buildPayload(input, env, now = new Date(), CATALOG = {}) {
     shipping_is_billing: true,
     order_items,
     payment_method: cod ? "COD" : "Prepaid",
-    sub_total,
+    sub_total: sub_total + codFee,
     length: BOX.length,
     breadth: BOX.breadth,
     height: Math.max(BOX.minHeight, BOX.heightPerItem * units),
