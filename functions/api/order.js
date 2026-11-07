@@ -3,4 +3,4 @@
  * SHIPROCKET_PICKUP and SHIPROCKET_FALLBACK_EMAIL in Pages → Settings → Variables and Secrets. */
 import { handleOrder } from "../../src/worker.js";
 
-export const onRequestPost = ({ request, env }) => handleOrder(request, env);
+export const onRequestPost = ({ request, env, waitUntil }) => handleOrder(request, env, { waitUntil });

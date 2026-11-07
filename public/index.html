@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>52 Alive — Layer up. Stay alive.</title>
-<meta name="description" content="52 Alive streetwear: zip hoodies, packable quilted puffers, track jackets, knits and sweatpants. Order on WhatsApp, delivered across India.">
+<meta name="description" content="52 Alive streetwear: zip hoodies, packable quilted puffers, track jackets, knits and sweatpants. Order online, delivered across India.">
 <meta property="og:title" content="52 Alive — Layer up. Stay alive.">
-<meta property="og:description" content="The Winter Drop 2026: zip hoodies, quilted puffers, track jackets, knits and sweatpants. Order on WhatsApp.">
+<meta property="og:description" content="The Winter Drop 2026: zip hoodies, quilted puffers, track jackets, knits and sweatpants. Order online.">
 <meta name="theme-color" content="#121110">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%229%22%20fill%3D%22%23121110%22%2F%3E%3Ctext%20x%3D%2216%22%20y%3D%2222%22%20font-size%3D%2214%22%20font-weight%3D%22800%22%20text-anchor%3D%22middle%22%20fill%3D%22%23D7F25A%22%20font-family%3D%22Arial%22%3E52%3C%2Ftext%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1105,17 +1105,17 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
   <div class="wrap">
     <a href="#top" class="logo"><span>52 <b>ALIVE</b></span><small>Streetwear · India</small></a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="#fit">Size guide</a><a href="#track" data-track>Track order</a>
+      <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="#fit">Size guide</a><a href="/track/">Track order</a>
     </nav>
     <div style="display:flex;gap:10px;align-items:center">
       <button type="button" class="bag-btn" id="bagBtn" aria-label="Bag, 0 items"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><b id="bagCount">0</b></button>
-      <a class="btn btn-wa" href="#order">Order on WhatsApp</a>
+      <a class="btn btn-wa" href="#order">Order now</a>
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><i></i><i></i></button>
     </div>
   </div>
 </header>
 <nav class="mobile-menu" aria-label="Mobile">
-  <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="#track" data-track>Track order</a><a href="#order">Your bag &amp; order</a>
+  <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="/track/">Track order</a><a href="#order">Your bag &amp; order</a>
 </nav>
 
 <main id="top">
@@ -1307,7 +1307,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
       <ol class="steps">
         <li data-reveal><span><b>Build your bag</b>Choose the piece, colour, size and quantity. Add as many as you like.</span></li>
         <li data-reveal><span><b>Add your details</b>Name, phone and delivery address — that's all we need.</span></li>
-        <li data-reveal><span><b>Hit Order on WhatsApp</b>Your full order opens in WhatsApp, ready to send. We confirm and dispatch within 48 hours.</span></li>
+        <li data-reveal><span><b>Hit Order now</b>Your order is placed straight away and you get an order ID to track it. We dispatch within 48 hours.</span></li>
       </ol>
       <p class="side-contact" data-reveal>Prefer to just chat? <a data-wa="Hi 52 Alive! I have a question about an order.">Message +91 93689 86368</a></p>
     </div>
@@ -1348,15 +1348,16 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
         </fieldset>
 
         <div class="total"><span id="totalLabel">1 item</span><b id="total">₹1,299</b></div>
-        <button type="submit" class="btn btn-wa submit"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.2c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Order on WhatsApp</button>
-        <p class="fine">Opens WhatsApp with your full order to +91 93689 86368. Nothing is charged until we confirm.</p>
+        <button type="submit" class="btn btn-wa submit" id="placeBtn">Order now <span class="arr">→</span></button>
+        <p class="err" id="orderErr" role="alert" style="color:#B3261E;font-weight:600;font-size:14px;margin-top:10px;min-height:0"></p>
+        <p class="fine">Pay cash when it arrives, or by UPI after we confirm. You'll get an order ID to track it.</p>
       </form>
       <div class="done" id="done" aria-live="polite">
         <div class="tick">✓</div>
-        <h3>Almost there — hit send.</h3>
-        <p>Your order <b id="doneId"></b> is ready in WhatsApp. Press send there and we'll confirm availability and delivery within a few hours.</p>
-        <p style="font-size:14px;color:var(--ink-2);margin-top:8px">Your tracking link is in the message too — use it any time to see where your order is.</p>
-        <div class="acts"><a class="btn btn-wa" id="reopen" target="_blank" rel="noopener">Open WhatsApp again</a><a class="btn btn-ghost" id="trackThis" href="#track">Track this order</a><button type="button" class="btn btn-ghost" id="newOrder">Start a new order</button></div>
+        <h3>Order placed — thank you!</h3>
+        <p>Your order ID is <b id="doneId"></b>. We've got your order and will pack it within 48 hours.</p>
+        <p style="font-size:14px;color:var(--ink-2);margin-top:8px">Save your order ID or bookmark the tracking page — it shows every step until it reaches you.</p>
+        <div class="acts"><a class="btn btn-wa" id="trackThis" href="/track/">Track this order</a><button type="button" class="btn btn-ghost" id="copyId">Copy order ID</button><button type="button" class="btn btn-ghost" id="newOrder">Start a new order</button></div>
       </div>
     </div>
   </div>
@@ -1368,9 +1369,9 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
     <div><span class="eyebrow" data-reveal>09 / Questions</span><h2 data-split>Asked <em>a lot.</em></h2>
       <p class="lead" data-reveal>Still stuck? <a class="link" data-wa="Hi 52 Alive! I have a question.">Ask us on WhatsApp</a></p></div>
     <div class="faq" data-reveal>
-      <details><summary>How does ordering on WhatsApp work?</summary><p>Fill the order form and tap Order on WhatsApp. Your full order — items, sizes, colours and address — opens in a WhatsApp chat with us. Send it, and we reply to confirm stock and the final total.</p></details>
+      <details><summary>How does ordering work?</summary><p>Add your pieces to the bag, fill in your name, phone and address, and tap Order now. Your order is placed straight away and you get an order ID — use it on the <a class="link" href="/track/">tracking page</a> any time.</p></details>
       <details><summary>Do you have cash on delivery?</summary><p>Yes, COD is available across most of India. You can also pay by UPI once we confirm your order.</p></details>
-      <details><summary>How long does delivery take?</summary><p>We dispatch within 48 hours of confirming. Most cities receive it in 3–6 days; you can follow it any time with <a class="link" href="#track" data-track>Track order</a> — tap the tracking link in your WhatsApp order message, or enter its order ID.</p></details>
+      <details><summary>How long does delivery take?</summary><p>We dispatch within 48 hours of confirming. Most cities receive it in 3–6 days; you can follow it any time on the <a class="link" href="/track/">tracking page</a> with your order ID.</p></details>
       <details><summary>What if the size doesn't fit?</summary><p>Message us within 7 days of delivery. If the piece is unworn with tags on, we'll exchange the size.</p></details>
       <details><summary>Are the colours true to the photos?</summary><p>Photos are of our actual stock, retouched onto a clean white background, so shade can differ slightly from what you see. Washed pieces also vary a little piece to piece. Ask on WhatsApp and we'll send a real photo before you order.</p></details>
       <details><summary>How do I hear about new drops first?</summary><p>Join the 52 Alive WhatsApp community. Drops, restocks and members-only prices go there before anywhere else.</p></details>
@@ -1383,28 +1384,14 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
   <div class="wrap">
     <p class="mega" data-split>Stay <em>alive.</em></p>
     <div class="foot-links">
-      <a href="#order">Order on WhatsApp</a>
-      <a href="#track" data-track>Track your order</a>
+      <a href="#order">Order now</a>
+      <a href="/track/">Track your order</a>
       <a href="https://chat.whatsapp.com/Hd93P6B4txr5QOmvCSjk65" target="_blank" rel="noopener">Join the community</a>
       <a data-wa="Hi 52 Alive!">+91 93689 86368</a>
     </div>
     <div class="footer-row"><span>© <span data-year></span> 52 Alive · Shipping across India</span><span>Orders &amp; support on WhatsApp · 10 am – 9 pm</span></div>
   </div>
 </footer>
-
-<dialog class="sheet trk-dlg" id="trackDlg" aria-labelledby="trkTitle">
-  <button class="sheet-close" aria-label="Close">×</button>
-  <div class="trk">
-    <div><h3 id="trkTitle">Track your order</h3><p class="sub">Use the order ID from your WhatsApp order message (it starts with 52A-), or just tap the tracking link in that message.</p></div>
-    <p class="trk-last" id="trkLast" hidden></p>
-    <form id="trkForm" novalidate>
-      <div class="field"><label for="trkId">Order ID</label><input id="trkId" autocomplete="off" spellcheck="false" placeholder="52A-…" maxlength="60"></div>
-      <p class="err" id="trkErr" role="alert"></p>
-      <button type="submit" class="btn" id="trkGo">Track order <span class="arr">→</span></button>
-    </form>
-    <div class="trk-res" id="trkRes" aria-live="polite"></div>
-  </div>
-</dialog>
 
 <dialog class="sheet pdp" id="pdp" aria-labelledby="pdpName">
   <button class="sheet-close" aria-label="Close">×</button>
@@ -1690,61 +1677,45 @@ const rules={
 };
 Object.keys(rules).forEach(id=>{ const el=$("#"+id); el.addEventListener("input",()=>{ if(id==="pin") el.value=el.value.replace(/\D/g,""); if($("#f-"+id).classList.contains("bad")&&rules[id](el.value)) $("#f-"+id).classList.remove("bad"); }); });
 
-let lastLink="";
-form.addEventListener("submit",e=>{
+let placing=false;
+form.addEventListener("submit",async e=>{
   e.preventDefault();
+  if(placing) return;
   let firstBad=null;
   if(!bag.length && !checkPick()) firstBad=$("#f-colour").classList.contains("bad")?$("#f-colour"):$("#f-size");
   Object.keys(rules).forEach(id=>{ const ok=rules[id]($("#"+id).value); $("#f-"+id).classList.toggle("bad",!ok); if(!ok&&!firstBad) firstBad=$("#f-"+id); });
   if(firstBad){ toast("Please fill the highlighted fields"); window.scrollTo({top:firstBad.getBoundingClientRect().top+scrollY-120,behavior:reduced?"auto":"smooth"}); const f=firstBad.querySelector("input,select,textarea"); if(f) setTimeout(()=>f.focus({preventScroll:true}),reduced?0:500); return; }
 
-  const items=lineItems(), total=items.reduce((a,b)=>a+P[b.key].price*b.qty,0);
+  const items=lineItems();
   const phone=$("#phone").value.replace(/\D/g,"").slice(-10);
   const pay=form.querySelector("input[name=pay]:checked").value, note=$("#note").value.trim();
-  const lines=[
-    `Hi 52 Alive! I'd like to place an order.`,
-    ``,
-    `*Order ID:* ${orderId}`,
-    ``,
-    `*ITEMS*`,
-    ...items.map((b,i)=>`${i+1}. ${P[b.key].name}\n    Colour: ${b.colour}\n    Size: ${b.size}\n    Qty: ${b.qty} × ${inr(P[b.key].price)} = ${inr(P[b.key].price*b.qty)}`),
-    ``,
-    `*Total:* ${inr(total)} (+ delivery, if any)`,
-    `*Payment:* ${pay}`,
-    ``,
-    `*CUSTOMER DETAILS*`,
-    `Name: ${$("#name").value.trim()}`,
-    `Phone: +91 ${phone}`,
-    `Address: ${$("#address").value.trim().replace(/\s*\n\s*/g,", ")}`,
-    `City: ${$("#city").value.trim()}`,
-    `State: ${$("#state").value.trim()}`,
-    `PIN: ${$("#pin").value.trim()}`,
-    ...(note?[`Note: ${note}`]:[]),
-    ``,
-    `*Track your order:* ${location.origin}/?track=${orderId}`,
-    ``,
-    `Please confirm availability. Thank you!`
-  ];
-  /* save the order to the shop's NOWORA database (real time) — t.js picks it up even if it loads a moment later */
+  const btn=$("#placeBtn"), err=$("#orderErr"); err.textContent="";
+  placing=true; btn.disabled=true; btn.firstChild.textContent="Placing your order… ";
+  let res=null;
+  try{
+    const r=await fetch("/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      orderId, name:$("#name").value.trim(), phone, address:$("#address").value.trim(), city:$("#city").value.trim(), state:$("#state").value.trim(),
+      pin:$("#pin").value.trim(), payment:pay, note, items:items.map(b=>({key:b.key, colour:b.colour, size:b.size, qty:b.qty}))
+    })});
+    res=await r.json().catch(()=>({ok:false,error:"Something went wrong — please try again."}));
+  }catch(_){ res={ok:false,error:"Couldn't reach us — check your internet and tap Order now again."}; }
+  placing=false; btn.disabled=false; btn.firstChild.textContent="Order now ";
+  if(!res.ok){ err.textContent=res.error||"Couldn't place the order — please try again."; toast(err.textContent); return; }
+
+  /* the order went through: save it to the shop's NOWORA dashboard (t.js picks it up even if it loads a moment later) */
   (window.noworaQ=window.noworaQ||[]).push(["Orders",{
     "Order ID":orderId, "Name":$("#name").value.trim(), "Phone":"+91 "+phone,
     "Address":$("#address").value.trim().replace(/\s*\n\s*/g,", "), "City":$("#city").value.trim(), "State":$("#state").value.trim(),
     "PIN code":$("#pin").value.trim(), "Payment":pay, "Note":note
   }, items.map(b=>({name:P[b.key].name, colour:b.colour, size:b.size, qty:b.qty, price:P[b.key].price}))]);
 
-  /* also create the order in Shiprocket (in the background — WhatsApp stays the main flow, a failure here never blocks the customer) */
-  try{ fetch("/api/order",{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify({
-    orderId, name:$("#name").value.trim(), phone, address:$("#address").value.trim(), city:$("#city").value.trim(), state:$("#state").value.trim(),
-    pin:$("#pin").value.trim(), payment:pay, note, items:items.map(b=>({key:b.key, colour:b.colour, size:b.size, qty:b.qty}))
-  })}).catch(()=>{}); }catch(_){}
-
-  lastLink="https://wa.me/"+WA+"?text="+encodeURIComponent(lines.join("\n"));
-  const w=window.open(lastLink,"_blank","noopener");
-  if(!w){ /* popup blocked: the success panel button still works */ }
-  $("#doneId").textContent="#"+orderId; $("#reopen").href=lastLink;
-  try{ localStorage.setItem("52a_last_order",JSON.stringify({id:orderId,pin:$("#pin").value.trim(),ts:Date.now()})); }catch(_){}
-  $("#trackThis").onclick=e=>{ e.preventDefault(); openTrack(orderId,$("#pin").value.trim(),true); };
+  const placed=orderId;
+  $("#doneId").textContent=placed; $("#trackThis").href="/track/?id="+encodeURIComponent(placed);
+  $("#copyId").onclick=()=>{ try{ navigator.clipboard.writeText(placed).then(()=>toast("Order ID copied"),()=>toast(placed)); }catch(_){ toast(placed); } };
+  try{ localStorage.setItem("52a_last_order",JSON.stringify({id:placed,ts:Date.now()})); }catch(_){}
   form.style.display="none"; $("#done").classList.add("show");
+  window.scrollTo({top:$("#done").getBoundingClientRect().top+scrollY-120,behavior:reduced?"auto":"smooth"});
+  bag=[]; renderBag();
 });
 $("#newOrder").addEventListener("click",()=>{ orderId=newOrderId(); $("#oid").textContent="#"+orderId; form.reset(); bag=[]; qty=1; qtyO.textContent=1; renderBag(); sel.value=FIRST_KEY; renderOptions(false); $("#done").classList.remove("show"); form.style.display=""; });
 
@@ -1848,57 +1819,10 @@ function updateBagCount(){ const n=bag.reduce((a,b)=>a+b.qty,0), el=$("#bagCount
 $("#bagBtn").addEventListener("click",()=>{ const t=$(".oform"); window.scrollTo({top:t.getBoundingClientRect().top+scrollY-90,behavior:reduced?"auto":"smooth"}); if(!bag.length) toast("Your bag is empty — pick something from the shop"); });
 renderShop();
 
-/* ---------------- TRACK ORDER (order ID + phone → Shiprocket, via /api/track) ---------------- */
-const trkDlg=$("#trackDlg"), trkF=$("#trkForm");
-const STEPS=["Placed","Confirmed","Shipped","Out for delivery","Delivered"];
-const lastOrder=()=>{ try{ const o=JSON.parse(localStorage.getItem("52a_last_order")||"null"); return o&&/^52A-/.test(o.id)?o:null; }catch(_){ return null; } };
-const tesc=t=>String(t==null?"":t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
-function openTrack(id,pin,go){
-  const last=lastOrder();
-  $("#trkId").value=id||$("#trkId").value||(last?last.id:"");
-  const tl=$("#trkLast");
-  if(last&&last.id!==$("#trkId").value){ tl.hidden=false; tl.innerHTML=`Your last order: <button type="button">${tesc(last.id.slice(0,12))}…</button>`; tl.querySelector("button").onclick=()=>openTrack(last.id,last.pin||"",true); } else tl.hidden=true;
-  $("#trkErr").textContent=""; if(!go) $("#trkRes").innerHTML="";
-  if(!trkDlg.open) trkDlg.showModal();
-  if(go&&$("#trkId").value) trkF.requestSubmit(); else setTimeout(()=>$("#trkId").focus(),60);
-}
-$$("[data-track]").forEach(a=>a.addEventListener("click",e=>{ e.preventDefault(); document.body.classList.remove("menu-open"); openTrack(); }));
-trkF.addEventListener("submit",async e=>{
-  e.preventDefault();
-  const id=($("#trkId").value.match(/52A-[0-9a-f-]{36}/i)||[$("#trkId").value.trim()])[0], err=$("#trkErr"), btn=$("#trkGo");
-  if(!/^52A-[0-9a-f-]{36}$/i.test(id)){ err.textContent="Check the order ID — copy it from your WhatsApp order message (it starts with 52A-)."; return; }
-  err.textContent=""; btn.disabled=true; btn.firstChild.textContent="Checking… ";
-  try{
-    const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id})});
-    const j=await r.json().catch(()=>({}));
-    if(!j.ok){ $("#trkRes").innerHTML=""; err.textContent=j.error||"Couldn't check right now — try again in a minute."; return; }
-    try{ const l=lastOrder(); if(!l||l.id===id) localStorage.setItem("52a_last_order",JSON.stringify({id,ts:Date.now()})); }catch(_){}
-    drawTrack(j.order);
-  }catch(_){ err.textContent="Couldn't reach us — check your connection and try again."; }
-  finally{ btn.disabled=false; btn.firstChild.textContent="Track order "; }
-});
-function drawTrack(o){
-  const t=o.tracking, wa=`https://wa.me/${WA}?text=${encodeURIComponent("Hi 52 Alive! A question about my order "+o.orderId)}`;
-  const fmt=d=>{ const x=new Date(String(d).replace(" ","T")); return isNaN(x)?tesc(d):x.toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); };
-  const day=d=>{ const x=new Date(String(d).replace(" ","T")); return isNaN(x)?tesc(d):x.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}); };
-  $("#trkRes").innerHTML=
-    `<div class="trk-head"><b>${tesc(o.label)}</b><small>Order ${tesc(o.orderId.slice(0,12))}…${o.placed?" · placed "+tesc(o.placed):""}</small></div>`+
-    (o.step<0?`<div class="trk-bad">${o.problem==="returned"?"This order is on its way back to us.":"This order was cancelled."} Message us on WhatsApp if that's unexpected.</div>`:
-      `<div class="trk-steps" role="img" aria-label="Step ${o.step+1} of 5: ${tesc(STEPS[o.step])}">${STEPS.map((s,i)=>`<div class="${i<=o.step?"on":""}${i===o.step?" cur":""}"><i></i>${s}</div>`).join("")}</div>`)+
-    (o.problem==="attempt"?`<div class="trk-bad">The courier couldn't deliver on their last try. We'll contact you — or message us to arrange a new time.</div>`:"")+
-    `<div class="trk-facts">`+
-      (o.courier||o.awb?`<div><span>Courier</span>${tesc(o.courier||"Assigned")}${o.awb?` · ${tesc(o.awb)}`:""}</div>`:`<div><span>Courier</span>Assigned when we pack your order</div>`)+
-      (t&&t.delivered?`<div><span>Delivered</span>${day(t.delivered)}</div>`:t&&t.etd?`<div><span>Expected by</span>${day(t.etd)}</div>`:`<div><span>Delivery</span>3–6 days after dispatch</div>`)+
-      `<div><span>Payment</span>${tesc(o.payment||"—")}${o.total?` · ₹${Number(o.total).toLocaleString("en-IN")}`:""}</div>`+
-      `<div><span>Items</span>${o.items.length?o.items.map(i=>tesc(i.qty+" × "+i.name)).join("<br>"):"—"}</div>`+
-    `</div>`+
-    (t&&t.activities&&t.activities.length?`<div class="trk-acts">${t.activities.map(a=>`<div><time>${fmt(a.date)}</time><b>${tesc(a.status)}</b>${a.detail&&a.detail!==a.status||a.location?`<small>${tesc([a.detail!==a.status?a.detail:"",a.location].filter(Boolean).join(" · "))}</small>`:""}</div>`).join("")}</div>`:"")+
-    `<div class="trk-btns">${t&&t.url?`<a class="btn btn-ghost btn-sm" href="${tesc(t.url)}" target="_blank" rel="noopener">Courier tracking page ↗</a>`:""}<a class="btn btn-wa btn-sm" href="${wa}" target="_blank" rel="noopener">Ask about this order</a></div>`;
-}
-/* deep links: /?track=52A-… (from the WhatsApp message) and #track */
+/* tracking lives on its own page now: old links (/?track=… from earlier messages, #track) go there */
 (()=>{ const q=new URLSearchParams(location.search).get("track");
-  if(q&&/^52A-[0-9a-f-]{36}$/i.test(q)){ const l=lastOrder(); setTimeout(()=>openTrack(q,l&&l.id===q?(l.pin||""):"",true),reduced?0:900); }
-  else if(location.hash==="#track") setTimeout(()=>openTrack(),reduced?0:900); })();
+  if(q&&/^52A-[0-9a-f-]{36}$/i.test(q)) location.replace("/track/?id="+encodeURIComponent(q));
+  else if(location.hash==="#track") location.replace("/track/"); })();
 
 renderOptions(false); renderBag();
 })();
