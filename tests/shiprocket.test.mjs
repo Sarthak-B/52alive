@@ -94,7 +94,8 @@ test('POST /api/order logs in, creates the order and refreshes an expired token'
     return Response.json({order_id: 111, shipment_id: 222, status: 'NEW'});
   };
   const res = await worker.fetch(new Request('https://52alive.example/api/order', {method: 'POST', headers: {Origin: 'https://52alive.example'}, body: JSON.stringify(order())}), env);
-  assert.deepEqual(await res.json(), {ok: true, shiprocket_order_id: 111, shipment_id: 222});
+  const out = await res.json();
+  assert.equal(out.ok, true); assert.equal(out.shiprocket, true); assert.equal(out.shiprocket_order_id, 111); assert.equal(out.shipment_id, 222);
   assert.equal(logins, 2);
   assert.equal(calls.filter(u => u.endsWith('/orders/create/adhoc')).length, 2);
   assert.equal(lastBody.pickup_location, 'Home');
@@ -103,14 +104,16 @@ test('POST /api/order logs in, creates the order and refreshes an expired token'
 test('blocks other origins and works without secrets', async () => {
   const req = o => new Request('https://52alive.example/api/order', {method: 'POST', headers: {Origin: o}, body: JSON.stringify(order())});
   assert.equal((await worker.fetch(req('https://evil.example'), env)).status, 403);
-  assert.equal((await worker.fetch(req('https://52alive.example'), {...env, SHIPROCKET_EMAIL: ''})).status, 503);
+  const noSr = await worker.fetch(req('https://52alive.example'), {...env, SHIPROCKET_EMAIL: ''});
+  assert.equal(noSr.status, 200); assert.equal((await noSr.json()).shiprocket, false);   /* the order still goes through */
   assert.ok((await (await worker.fetch(new Request('https://52alive.example/'), env)).text()).includes('nowora-products'));
   assert.equal(await (await worker.fetch(new Request('https://52alive.example/style.css'), env)).text(), 'asset');
 });
 
-test('page sends the order to /api/order without blocking WhatsApp', () => {
+test('page places the order itself (no WhatsApp redirect) and links to the tracking page', () => {
   assert.ok(html.includes('fetch("/api/order"'));
-  assert.ok(html.indexOf('fetch("/api/order"') < html.indexOf('window.open(lastLink'));
+  assert.ok(!html.includes('window.open(lastLink'));
+  assert.ok(html.includes('/track/?id='));
   assert.equal(istStamp(new Date('2026-01-01T00:00:00Z')), '2026-01-01 05:30');
 });
 

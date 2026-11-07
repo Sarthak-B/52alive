@@ -209,9 +209,7 @@ async function createOrder(payload, env) {
   return d;
 }
 
-export async function handleOrder(request, env) {
-  if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) return json({ ok: false, error: "Shiprocket not configured" }, 503);
-
+export async function handleOrder(request, env, ctx) {
   /* only accept submits from this site's own pages */
   const origin = request.headers.get("Origin");
   if (origin) {
@@ -225,18 +223,68 @@ export async function handleOrder(request, env) {
   let input;
   try { input = JSON.parse(raw); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
 
-  try {
-    let catalog;
-    try { catalog = await loadCatalog(request, env); }
-    catch (e) { console.error("[shiprocket] catalogue:", e.message); return json({ ok: false, error: "Product list unavailable" }, 503); }
-    const payload = buildPayload(input, env, new Date(), catalog);
-    payload.pickup_location = await resolvePickup(env);
-    const d = await createOrder(payload, env);
-    return json({ ok: true, shiprocket_order_id: d.order_id, shipment_id: d.shipment_id });
-  } catch (e) {
-    console.error("[shiprocket]", e.message);
-    return json({ ok: false, error: e.status === 400 ? e.message : "Could not create Shiprocket order" }, e.status || 500);
+  let catalog, payload;
+  try { catalog = await loadCatalog(request, env); }
+  catch (e) { console.error("[order] catalogue:", e.message); return json({ ok: false, error: "Our product list didn't load — please try again in a minute." }, 503); }
+  try { payload = buildPayload(input, env, new Date(), catalog); }
+  catch (e) { return json({ ok: false, error: e.status === 400 ? e.message : "Something went wrong — please try again." }, e.status || 500); }
+
+  /* the order is valid: tell the shop on WhatsApp (from the site's own number) and put it in Shiprocket.
+     The WhatsApp alert never waits on Shiprocket, and a Shiprocket hiccup never fails the customer's order:
+     it is also saved to the shop's NOWORA dashboard by the page. */
+  const alert = sendOrderAlert(input, payload, request, env).catch(e => { console.error("[alert]", e.message); return false; });
+  if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(alert);
+  let shiprocket = false, sr = {};
+  if (env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD) {
+    try { payload.pickup_location = await resolvePickup(env); sr = await createOrder(payload, env); shiprocket = true; }
+    catch (e) { console.error("[shiprocket]", e.message); }
   }
+  return json({ ok: true, orderId: payload.order_id, shiprocket, shiprocket_order_id: sr.order_id, shipment_id: sr.shipment_id });
+}
+
+/* ============================== WhatsApp order alert ==============================
+ * Every new order goes to the shop owner's WhatsApp (ORDER_ALERT_TO, comma-separated, e.g. 919368986368)
+ * from the business number on the WhatsApp Business API — not from the customer's phone.
+ * WhatsApp only lets a business start a chat with an approved template, so the message is the template
+ * "new_order_alert" (or WHATSAPP_TEMPLATE) with 6 values: order ID · customer name · customer phone ·
+ * items · total & payment · full address (+ note and tracking link).
+ *   Meta WhatsApp Cloud API: WHATSAPP_TOKEN, WHATSAPP_PHONE_ID (+ WHATSAPP_TEMPLATE, WHATSAPP_LANG)
+ *   or AiSensy:              AISENSY_API_KEY, AISENSY_CAMPAIGN (a live API campaign on that template)
+ */
+const tplText = (v, max = 900) => String(v == null ? "" : v).replace(/[\r\n\t]+/g, " · ").replace(/ {4,}/g, "   ").trim().slice(0, max) || "-";
+export function orderAlertValues(input, payload, origin) {
+  const items = payload.order_items.map(i => i.units + " × " + i.name + " (₹" + (i.selling_price * i.units).toLocaleString("en-IN") + ")").join(" · ");
+  const pay = payload.payment_method === "COD" ? "Cash on delivery" : "Prepaid (UPI)";
+  const addr = [payload.billing_address, payload.billing_city, payload.billing_state, payload.billing_pincode].filter(Boolean).join(", ");
+  const note = str(input && input.note, 200);
+  return [
+    payload.order_id,
+    (payload.billing_customer_name + " " + payload.billing_last_name).trim(),
+    "+91 " + payload.billing_phone,
+    items,
+    "₹" + Number(payload.sub_total).toLocaleString("en-IN") + " · " + pay,
+    addr + (note ? " · Note: " + note : "") + (origin ? " · Track: " + origin + "/track/?id=" + payload.order_id : ""),
+  ].map(v => tplText(v));
+}
+export async function sendOrderAlert(input, payload, request, env) {
+  const to = String(env.ORDER_ALERT_TO || "").split(",").map(x => x.replace(/\D/g, "")).filter(x => x.length >= 10);
+  if (!to.length) return false;
+  const values = orderAlertValues(input, payload, new URL(request.url).origin);
+  const sends = [];
+  if (env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_ID) {
+    for (const n of to) sends.push(fetch("https://graph.facebook.com/v21.0/" + encodeURIComponent(env.WHATSAPP_PHONE_ID) + "/messages", {
+      method: "POST", headers: { Authorization: "Bearer " + env.WHATSAPP_TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify({ messaging_product: "whatsapp", to: n, type: "template", template: { name: env.WHATSAPP_TEMPLATE || "new_order_alert", language: { code: env.WHATSAPP_LANG || "en" },
+        components: [{ type: "body", parameters: values.map(t => ({ type: "text", text: t })) }] } })
+    }));
+  } else if (env.AISENSY_API_KEY && env.AISENSY_CAMPAIGN) {
+    for (const n of to) sends.push(fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apiKey: env.AISENSY_API_KEY, campaignName: env.AISENSY_CAMPAIGN, destination: n, userName: "52 Alive orders", templateParams: values, source: "52alive-website" })
+    }));
+  } else return false;
+  const res = await Promise.all(sends.map(p => p.then(async r => { if (!r.ok) console.error("[alert]", r.status, (await r.text()).slice(0, 300)); return r.ok; }, e => { console.error("[alert]", e.message); return false; })));
+  return res.some(Boolean);
 }
 
 
@@ -394,6 +442,7 @@ export async function handleTrack(request, env) {
  */
 export async function handleHealth(request, env) {
   const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL,
+    orderAlert: { to: !!env.ORDER_ALERT_TO, whatsappCloud: !!(env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_ID), aisensy: !!(env.AISENSY_API_KEY && env.AISENSY_CAMPAIGN) },
     stockSync: { webhookToken: !!env.SHIPROCKET_WEBHOOK_TOKEN, githubToken: !!env.GITHUB_TOKEN } };
   if (env.GITHUB_TOKEN) { try { const r = await gh(env, "GET", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive")); const d = await r.json().catch(() => ({})); out.stockSync.githubCanWrite = r.ok && !!(d.permissions && d.permissions.push); } catch (e) { out.stockSync.githubCanWrite = false; } }
   if (!out.secrets) return json(out);
@@ -672,7 +721,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/order") {
       if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
-      return handleOrder(request, env);
+      return handleOrder(request, env, ctx);
     }
     if (url.pathname === "/api/shiprocket-health") return handleHealth(request, env);
     if (url.pathname === "/api/courier-updates") {

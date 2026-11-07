@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Track your order — 52 Alive</title>
+<meta name="description" content="See where your 52 Alive order is: packed, shipped, out for delivery or delivered.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#121110">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%229%22%20fill%3D%22%23121110%22%2F%3E%3Ctext%20x%3D%2216%22%20y%3D%2222%22%20font-size%3D%2214%22%20font-weight%3D%22800%22%20text-anchor%3D%22middle%22%20fill%3D%22%23D7F25A%22%20font-family%3D%22Arial%22%3E52%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ECE8E1;--bg-2:#E1DBD1;--surface:#F6F3EE;--ink:#151413;--ink-2:#4B4640;--muted:#857D73;--accent:#B9512A;--accent-2:#D7F25A;--dark:#121110;--on-dark:#F1EDE6;--line:rgba(21,20,19,.14);
+  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;--italic:"Instrument Serif",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--ease:cubic-bezier(.2,.7,.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100svh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none}button,input{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1100px,100% - 40px);margin-inline:auto}
+header{border-bottom:1px solid var(--line)}header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;gap:16px}
+.logo{font-family:var(--display);font-weight:800;font-size:25px;letter-spacing:-.04em;line-height:1;display:flex;flex-direction:column}.logo b{color:var(--accent)}
+.logo small{font-family:var(--body);font-size:9px;letter-spacing:.32em;text-transform:uppercase;margin-top:4px;opacity:.7;font-weight:600}
+.back{font-weight:600;font-size:14.5px;display:inline-flex;gap:8px;align-items:center}.back:hover{color:var(--accent)}
+main{flex:1;padding:clamp(40px,7vw,90px) 0}
+.grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(28px,5vw,70px);align-items:start}
+.eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}.eyebrow::before{content:"";width:26px;height:1px;background:currentColor}
+h1{font-family:var(--display);font-weight:700;letter-spacing:-.045em;font-size:clamp(48px,7vw,96px);line-height:.88;margin-top:18px}
+h1 em{font-family:var(--italic);font-style:italic;font-weight:400;color:var(--accent);letter-spacing:-.01em}
+.lead{color:var(--ink-2);margin-top:20px;max-width:42ch}
+form{display:grid;gap:12px;margin-top:30px}
+label{font-size:13px;font-weight:600}
+.in{display:flex;gap:10px}
+input{flex:1;min-width:0;height:58px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);padding:0 16px;font-size:15px}input:focus{outline:none;border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:58px;padding:0 26px;border-radius:999px;background:var(--accent);color:var(--on-dark);font-weight:600;font-size:15.5px;transition:transform .3s var(--ease),box-shadow .3s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 18px 34px -16px rgba(185,81,42,.7)}.btn:disabled{opacity:.6;transform:none}
+.btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}.btn-ghost:hover{background:var(--ink);color:var(--bg);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.btn-dark{background:var(--ink);color:var(--bg)}.btn-sm{min-height:46px;padding:0 20px;font-size:14.5px}
+.err{color:#B3261E;font-size:14px;font-weight:600;min-height:1.2em}
+.hint{font-size:13.5px;color:var(--muted)}.hint button{color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:clamp(22px,3.4vw,40px);display:grid;gap:22px;min-height:300px}
+.empty{display:grid;place-items:center;text-align:center;color:var(--muted);gap:10px;align-content:center}
+.empty svg{width:56px;height:56px;color:var(--accent);opacity:.8}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.head b{display:block;font-family:var(--display);font-size:clamp(30px,3.4vw,42px);letter-spacing:-.035em;line-height:1}
+.head small{color:var(--muted);font-size:13px}
+.pill{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:var(--accent-2);color:var(--dark);white-space:nowrap}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.steps div{display:grid;gap:8px;font-size:12.5px;color:var(--muted);text-align:center}
+.steps i{height:7px;border-radius:7px;background:var(--line)}.steps div.on i{background:var(--accent)}.steps div.on{color:var(--ink);font-weight:600}
+.steps div.cur i{box-shadow:0 0 0 4px rgba(185,81,42,.2)}
+.bad{border-radius:14px;padding:14px 16px;background:#FBE9E7;color:#8A2A1E;font-weight:600;font-size:15px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;font-size:15px}
+.facts span{display:block;color:var(--muted);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:3px}
+.acts h4{font-family:var(--display);font-size:20px;letter-spacing:-.02em;margin-bottom:8px}
+.tl{position:relative;display:grid;border-left:2px solid var(--line);margin-left:6px}
+.tl div{position:relative;padding:0 0 16px 22px;display:grid;gap:2px;font-size:14.5px}
+.tl div::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--muted)}
+.tl div:first-child::before{background:var(--accent);border-color:var(--accent)}
+.tl time{font-size:12.5px;color:var(--muted)}.tl small{color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.foot{border-top:1px solid var(--line);padding:22px 0;font-size:13px;color:var(--muted)}.foot .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(1turn)}}
+@media (max-width:860px){.grid{grid-template-columns:1fr}.in{flex-direction:column}.in input{flex:none;width:100%}.facts{grid-template-columns:1fr}.steps div{font-size:10.5px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a href="/" class="logo"><span>52 <b>ALIVE</b></span><small>Streetwear · India</small></a><a class="back" href="/#shop">← Back to the shop</a></div></header>
+<main><div class="wrap grid">
+  <div>
+    <span class="eyebrow">Order tracking</span>
+    <h1>Where's my <em>order?</em></h1>
+    <p class="lead">Enter the order ID from your order confirmation (it starts with 52A-). You'll see every step, from packing to your door.</p>
+    <form id="f" novalidate>
+      <label for="id">Order ID</label>
+      <div class="in"><input id="id" autocomplete="off" spellcheck="false" placeholder="52A-xxxxxxxx-xxxx-…" maxlength="80"><button class="btn" id="go" type="submit"><span>Track</span> →</button></div>
+      <p class="err" id="err" role="alert"></p>
+      <p class="hint" id="last" hidden></p>
+    </form>
+  </div>
+  <section class="card" id="res" aria-live="polite">
+    <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><b style="color:var(--ink);font-family:var(--display);font-size:22px">Your order shows here</b><span>Enter your order ID to see where it is.</span></div>
+  </section>
+</div></main>
+<footer class="foot"><div class="wrap"><span>© <span id="yr"></span> 52 Alive · Shipping across India</span><span>Help: <a href="https://wa.me/919368986368" target="_blank" rel="noopener">WhatsApp +91 93689 86368</a></span></div></footer>
+<script>
+(()=>{
+const $=s=>document.querySelector(s), WA="919368986368", STEPS=["Placed","Confirmed","Shipped","Out for delivery","Delivered"];
+$("#yr").textContent=new Date().getFullYear();
+const esc=t=>String(t==null?"":t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const cleanId=v=>{ const m=String(v||"").replace(/\s+/g,"").match(/52A-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i); return m?m[0]:String(v||"").trim(); };
+const last=()=>{ try{ const o=JSON.parse(localStorage.getItem("52a_last_order")||"null"); return o&&/^52A-/.test(o.id)?o:null; }catch(_){ return null; } };
+const when=d=>{ const x=new Date(String(d).replace(" ","T")); return isNaN(x)?esc(d):x.toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); };
+const day=d=>{ const x=new Date(String(d).replace(" ","T")); return isNaN(x)?esc(d):x.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}); };
+let timer=null, current="";
+function draw(o){
+  const t=o.tracking, ask=`https://wa.me/${WA}?text=${encodeURIComponent("Hi 52 Alive! A question about my order "+o.orderId)}`;
+  const acts=t&&t.activities&&t.activities.length?t.activities:[];
+  $("#res").innerHTML=
+    `<div class="head"><div><b>${esc(o.label)}</b><small>Order ${esc(o.orderId.slice(0,12))}…${o.placed?" · placed "+esc(o.placed):""}</small></div>${o.step>=0?`<span class="pill">Step ${o.step+1} of 5</span>`:""}</div>`+
+    (o.step<0?`<div class="bad">${o.problem==="returned"?"This order is on its way back to us.":"This order was cancelled."} Message us on WhatsApp if that's unexpected.</div>`:
+      `<div class="steps" role="img" aria-label="Step ${o.step+1} of 5: ${esc(STEPS[o.step])}">${STEPS.map((s,i)=>`<div class="${i<=o.step?"on":""}${i===o.step?" cur":""}"><i></i>${s}</div>`).join("")}</div>`)+
+    (o.problem==="attempt"?`<div class="bad">The courier couldn't deliver on their last try. We'll contact you — or message us to arrange a new time.</div>`:"")+
+    `<div class="facts">`+
+      `<div><span>Courier</span>${o.courier||o.awb?esc(o.courier||"Assigned")+(o.awb?`<br><small style="color:var(--muted)">Tracking no. ${esc(o.awb)}</small>`:""):"Assigned when we pack your order"}</div>`+
+      `<div><span>${t&&t.delivered?"Delivered":"Expected delivery"}</span>${t&&t.delivered?day(t.delivered):t&&t.etd?day(t.etd):"3–6 days after dispatch"}</div>`+
+      `<div><span>Payment</span>${esc(o.payment||"—")}${o.total?` · ₹${Number(o.total).toLocaleString("en-IN")}`:""}</div>`+
+      `<div><span>Items</span>${o.items.length?o.items.map(i=>esc(i.qty+" × "+i.name)).join("<br>"):"—"}</div>`+
+    `</div>`+
+    (acts.length?`<div class="acts"><h4>Journey</h4><div class="tl">${acts.map(a=>`<div><time>${when(a.date)}</time><b>${esc(a.status)}</b>${(a.detail&&a.detail!==a.status)||a.location?`<small>${esc([a.detail!==a.status?a.detail:"",a.location].filter(Boolean).join(" · "))}</small>`:""}</div>`).join("")}</div></div>`:
+      o.step>=0&&o.step<2?`<p class="hint">Live courier updates start as soon as the courier picks up your parcel.</p>`:"")+
+    `<div class="btns">${t&&t.url?`<a class="btn btn-ghost btn-sm" href="${esc(t.url)}" target="_blank" rel="noopener">Courier's page ↗</a>`:""}<a class="btn btn-dark btn-sm" href="${ask}" target="_blank" rel="noopener">Ask about this order</a></div>`;
+}
+async function track(id, quiet){
+  id=cleanId(id); const err=$("#err"), btn=$("#go");
+  if(!/^52A-[0-9a-f-]{36}$/i.test(id)){ err.textContent="Check the order ID — it starts with 52A- and is in your order confirmation."; return; }
+  $("#id").value=id; err.textContent="";
+  if(!quiet){ btn.disabled=true; btn.firstChild.textContent="Checking…"; }
+  try{
+    const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id})});
+    const j=await r.json().catch(()=>({}));
+    if(!j.ok){ if(!quiet) err.textContent=j.error||"Couldn't check right now — try again in a minute."; return; }
+    current=id; draw(j.order);
+    try{ const l=last(); if(!l||l.id===id) localStorage.setItem("52a_last_order",JSON.stringify({id,ts:Date.now()})); }catch(_){}
+    const u=new URL(location.href); if(u.searchParams.get("id")!==id){ u.searchParams.set("id",id); history.replaceState(null,"",u); }
+    clearInterval(timer); if(j.order.step>=0&&j.order.step<4) timer=setInterval(()=>{ if(!document.hidden&&current) track(current,true); },120000);
+  }catch(_){ if(!quiet) err.textContent="Couldn't reach us — check your connection and try again."; }
+  finally{ btn.disabled=false; btn.firstChild.textContent="Track"; }
+}
+$("#f").addEventListener("submit",e=>{ e.preventDefault(); track($("#id").value); });
+const q=new URLSearchParams(location.search), qid=q.get("id")||q.get("track"), l=last();
+if(qid) track(qid);
+else if(l){ $("#last").hidden=false; $("#last").innerHTML=`Your last order: <button type="button">${esc(l.id.slice(0,12))}…</button>`; $("#last").querySelector("button").onclick=()=>track(l.id); $("#id").value=l.id; }
+})();
+</script>
+</body>
+</html>
