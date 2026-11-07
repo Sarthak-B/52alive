@@ -64,7 +64,7 @@ Courier charges come out of the Shiprocket wallet.
   catalogue, creates it in Shiprocket and saves it to the NOWORA dashboard. No WhatsApp redirect.
 - **Tracking page:** `/track/?id=52A-…` (old `/?track=…` links redirect there).
 - **WhatsApp order alert to the shop** (from the business number, not the customer's): set `ORDER_ALERT_TO`
-  (e.g. `919368986368`, comma-separated for more) and one provider —
-  Meta WhatsApp Cloud API (`WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, optional `WHATSAPP_TEMPLATE`, `WHATSAPP_LANG`)
-  or AiSensy (`AISENSY_API_KEY`, `AISENSY_CAMPAIGN`). It uses an approved utility template with 6 values:
-  order ID, customer name, customer phone, items, total & payment, address (+ note + tracking link).
+  (default `919368986368`, comma-separated for more, `off` to stop). Sent by the GitHub workflow
+  `.github/workflows/whatsapp.yml` (Playwright + WhatsApp Web, logged in as the NOWORA number); needs repo secret
+  `WA_KEY` = same value as `SHIPROCKET_WEBHOOK_TOKEN`. First time: run the workflow with mode `login`
+  and enter the 8-character code on that phone (Linked devices → Link with phone number).

@@ -243,48 +243,53 @@ export async function handleOrder(request, env, ctx) {
 }
 
 /* ============================== WhatsApp order alert ==============================
- * Every new order goes to the shop owner's WhatsApp (ORDER_ALERT_TO, comma-separated, e.g. 919368986368)
- * from the business number on the WhatsApp Business API — not from the customer's phone.
- * WhatsApp only lets a business start a chat with an approved template, so the message is the template
- * "new_order_alert" (or WHATSAPP_TEMPLATE) with 6 values: order ID · customer name · customer phone ·
- * items · total & payment · full address (+ note and tracking link).
- *   Meta WhatsApp Cloud API: WHATSAPP_TOKEN, WHATSAPP_PHONE_ID (+ WHATSAPP_TEMPLATE, WHATSAPP_LANG)
- *   or AiSensy:              AISENSY_API_KEY, AISENSY_CAMPAIGN (a live API campaign on that template)
+ * Every new order is sent to the shop's WhatsApp (ORDER_ALERT_TO, default 52 Alive's number) FROM the NOWORA
+ * number, by the GitHub workflow .github/workflows/whatsapp.yml: Playwright opens WhatsApp Web (logged in once
+ * as the NOWORA number) and sends the message. This endpoint only fires a repository_dispatch with the message
+ * encrypted (AES-GCM, key = SHA-256 of WA_KEY or SHIPROCKET_WEBHOOK_TOKEN), because the repo is public and
+ * the message holds the customer's phone and address. Uses the same GITHUB_TOKEN as the stock sync.
  */
-const tplText = (v, max = 900) => String(v == null ? "" : v).replace(/[\r\n\t]+/g, " · ").replace(/ {4,}/g, "   ").trim().slice(0, max) || "-";
-export function orderAlertValues(input, payload, origin) {
-  const items = payload.order_items.map(i => i.units + " × " + i.name + " (₹" + (i.selling_price * i.units).toLocaleString("en-IN") + ")").join(" · ");
-  const pay = payload.payment_method === "COD" ? "Cash on delivery" : "Prepaid (UPI)";
-  const addr = [payload.billing_address, payload.billing_city, payload.billing_state, payload.billing_pincode].filter(Boolean).join(", ");
-  const note = str(input && input.note, 200);
+const ALERT_TO_DEFAULT = "919368986368";
+export function orderAlertText(input, payload, origin) {
+  const inr = n => "₹" + Number(n).toLocaleString("en-IN");
+  const note = str(input && input.note, 250);
   return [
-    payload.order_id,
-    (payload.billing_customer_name + " " + payload.billing_last_name).trim(),
-    "+91 " + payload.billing_phone,
-    items,
-    "₹" + Number(payload.sub_total).toLocaleString("en-IN") + " · " + pay,
-    addr + (note ? " · Note: " + note : "") + (origin ? " · Track: " + origin + "/track/?id=" + payload.order_id : ""),
-  ].map(v => tplText(v));
+    "🛍️ *New order — 52 Alive*",
+    "",
+    "*Order:* " + payload.order_id,
+    "*Customer:* " + (payload.billing_customer_name + " " + payload.billing_last_name).trim(),
+    "*Phone:* +91 " + payload.billing_phone,
+    "",
+    "*Items*",
+    ...payload.order_items.map((i, n) => (n + 1) + ". " + i.name + " × " + i.units + " — " + inr(i.selling_price * i.units)),
+    "",
+    "*Total:* " + inr(payload.sub_total) + " · " + (payload.payment_method === "COD" ? "Cash on delivery" : "Prepaid (UPI)"),
+    "*Address:* " + [payload.billing_address, payload.billing_city, payload.billing_state, payload.billing_pincode].filter(Boolean).join(", "),
+    ...(note ? ["*Note:* " + note] : []),
+    "",
+    "*Track:* " + origin + "/track/?id=" + payload.order_id,
+    "Send it from your NOWORA dashboard → Orders.",
+  ].join("\n");
+}
+async function aesKey(secret) {
+  const raw = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(secret)));
+  return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt"]);
+}
+export async function sealAlert(obj, secret) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await aesKey(secret), new TextEncoder().encode(JSON.stringify(obj))));
+  const all = new Uint8Array(iv.length + ct.length); all.set(iv); all.set(ct, iv.length);
+  let bin = ""; all.forEach(b => bin += String.fromCharCode(b)); return btoa(bin);
 }
 export async function sendOrderAlert(input, payload, request, env) {
-  const to = String(env.ORDER_ALERT_TO || "").split(",").map(x => x.replace(/\D/g, "")).filter(x => x.length >= 10);
+  const secret = env.WA_KEY || env.SHIPROCKET_WEBHOOK_TOKEN;
+  if (!env.GITHUB_TOKEN || !secret || env.ORDER_ALERT_TO === "off") return false;
+  const to = String(env.ORDER_ALERT_TO || ALERT_TO_DEFAULT).split(",").map(x => x.replace(/\D/g, "")).filter(x => x.length >= 10);
   if (!to.length) return false;
-  const values = orderAlertValues(input, payload, new URL(request.url).origin);
-  const sends = [];
-  if (env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_ID) {
-    for (const n of to) sends.push(fetch("https://graph.facebook.com/v21.0/" + encodeURIComponent(env.WHATSAPP_PHONE_ID) + "/messages", {
-      method: "POST", headers: { Authorization: "Bearer " + env.WHATSAPP_TOKEN, "Content-Type": "application/json" },
-      body: JSON.stringify({ messaging_product: "whatsapp", to: n, type: "template", template: { name: env.WHATSAPP_TEMPLATE || "new_order_alert", language: { code: env.WHATSAPP_LANG || "en" },
-        components: [{ type: "body", parameters: values.map(t => ({ type: "text", text: t })) }] } })
-    }));
-  } else if (env.AISENSY_API_KEY && env.AISENSY_CAMPAIGN) {
-    for (const n of to) sends.push(fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ apiKey: env.AISENSY_API_KEY, campaignName: env.AISENSY_CAMPAIGN, destination: n, userName: "52 Alive orders", templateParams: values, source: "52alive-website" })
-    }));
-  } else return false;
-  const res = await Promise.all(sends.map(p => p.then(async r => { if (!r.ok) console.error("[alert]", r.status, (await r.text()).slice(0, 300)); return r.ok; }, e => { console.error("[alert]", e.message); return false; })));
-  return res.some(Boolean);
+  const data = await sealAlert({ to, text: orderAlertText(input, payload, new URL(request.url).origin), id: payload.order_id }, secret);
+  const r = await gh(env, "POST", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive") + "/dispatches", { event_type: "order-alert", client_payload: { data } });
+  if (!r.ok) { console.error("[alert] dispatch", r.status, (await r.text()).slice(0, 200)); return false; }
+  return true;
 }
 
 
@@ -442,7 +447,7 @@ export async function handleTrack(request, env) {
  */
 export async function handleHealth(request, env) {
   const out = { secrets: !!(env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD), fallbackEmailSet: !!env.SHIPROCKET_FALLBACK_EMAIL,
-    orderAlert: { to: !!env.ORDER_ALERT_TO, whatsappCloud: !!(env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_ID), aisensy: !!(env.AISENSY_API_KEY && env.AISENSY_CAMPAIGN) },
+    orderAlert: { via: "github-workflow", ready: !!(env.GITHUB_TOKEN && (env.WA_KEY || env.SHIPROCKET_WEBHOOK_TOKEN)) && env.ORDER_ALERT_TO !== "off", to: String(env.ORDER_ALERT_TO || ALERT_TO_DEFAULT).replace(/\d(?=\d{4})/g, "•") },
     stockSync: { webhookToken: !!env.SHIPROCKET_WEBHOOK_TOKEN, githubToken: !!env.GITHUB_TOKEN } };
   if (env.GITHUB_TOKEN) { try { const r = await gh(env, "GET", "/repos/" + (env.GITHUB_REPO || "Sarthak-B/52alive")); const d = await r.json().catch(() => ({})); out.stockSync.githubCanWrite = r.ok && !!(d.permissions && d.permissions.push); } catch (e) { out.stockSync.githubCanWrite = false; } }
   if (!out.secrets) return json(out);
