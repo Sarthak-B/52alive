@@ -395,7 +395,10 @@ export async function handleHealth(request, env) {
       const hit = rows.find(x => String(x.channel_order_id || "").toLowerCase() === id.toLowerCase());
       const ph = new URL(request.url).searchParams.get("phone");
       return { rows: rows.length, found: !!hit, status: hit ? hit.status : undefined, hasAwb: hit ? !!((hit.shipments && (hit.shipments[0] || hit.shipments).awb) || "") : undefined,
-        phoneShape: hit ? String(hit.customer_phone || "").replace(/\d/g, "d") : undefined, phoneMatches: hit && ph ? phoneMatch(hit.customer_phone, ph) : undefined }; }
+        phoneShape: hit ? String(hit.customer_phone || "").replace(/\d/g, "d") : undefined, phoneMatches: hit && ph ? phoneMatch(hit.customer_phone, ph) : undefined,
+        shapes: hit ? Object.fromEntries(["customer_pincode", "customer_city", "customer_name", "customer_email", "customer_state", "id"].map(k => [k, String(hit[k] == null ? "" : hit[k]).replace(/\d/g, "d").replace(/[a-z]/gi, "a").slice(0, 30)])) : undefined,
+        detail: hit && hit.id ? await (async () => { try { const d = await srGet("/orders/show/" + encodeURIComponent(hit.id), env); const x = d && (d.data || d) || {};
+          return Object.fromEntries(["customer_phone", "customer_pincode", "customer_email", "billing_phone", "customer_alternate_phone"].map(k => [k, String(x[k] == null ? "(none)" : x[k]).replace(/\d/g, "d").replace(/[a-z]/gi, "a").slice(0, 30)])); } catch (e) { return String(e.message).slice(0, 80); } })() : undefined }; }
       catch (e) { return { error: String(e.message).slice(0, 160) }; } };
     out.orderByFilter = await look("filter_by=channel_order_id&filter=" + encodeURIComponent(id) + "&per_page=5");
     out.orderBySearch = await look("search=" + encodeURIComponent(id) + "&per_page=5");
