@@ -28,12 +28,17 @@ function mock(o = {}) {
 const ask = (body, key = env.SHIPROCKET_WEBHOOK_TOKEN, method = 'POST') => worker.fetch(new Request('https://52.example/api/store', {method, headers: {'x-store-key': key, Origin: 'https://nowora.vercel.app'}, body: method === 'POST' ? JSON.stringify(body) : undefined}), env);
 beforeEach(() => { _resetTokenCache(); _resetLoginFail(); _resetPickupCache(); });
 
-test('needs the store key; preflight is open', async () => {
+test('the NOWORA dashboard needs no key; others do; preflight is open', async () => {
   mock();
-  const r = await ask({action: 'list'}, 'wrong'); assert.equal(r.status, 401);
-  assert.equal((await r.json()).badKey, true);
+  const plain = (origin, key) => worker.fetch(new Request('https://52.example/api/store', {method: 'POST', headers: {...(origin ? {Origin: origin} : {}), ...(key ? {'x-store-key': key} : {})}, body: '{"action":"list"}'}), env);
+  assert.equal((await plain('https://nowora.vercel.app')).status, 200);
+  assert.equal((await plain('https://52.example')).status, 200);
+  calls = [];
+  assert.equal((await plain('https://evil.example')).status, 401);
+  assert.equal((await plain(null)).status, 401);
+  assert.equal((await plain(null, env.SHIPROCKET_WEBHOOK_TOKEN)).status, 200);
+  calls = [];
   const p = await ask(null, '', 'OPTIONS'); assert.equal(p.status, 204); assert.equal(p.headers.get('access-control-allow-origin'), '*');
-  assert.ok(!calls.length);
 });
 
 test('lists orders with a stage', async () => {

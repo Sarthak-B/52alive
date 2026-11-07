@@ -495,7 +495,7 @@ export async function handleCourierUpdate(request, env, ctx) {
 }
 
 /* ============================== store dashboard: orders → ship ==============================
- * POST /api/store  (header x-store-key = STORE_KEY, or SHIPROCKET_WEBHOOK_TOKEN when STORE_KEY isn't set)
+ * POST /api/store  — from the NOWORA dashboard (Origin nowora.vercel.app, or DASHBOARD_ORIGINS), or with x-store-key
  * Used by the NOWORA client dashboard (Shop → Orders), which runs on another domain, so CORS is open
  * and the key is the gate: shipping spends Shiprocket wallet money.
  *   {action:"list"}                         → latest Shiprocket orders, each with a stage
@@ -615,12 +615,18 @@ export async function storeShip(input, env, ctx) {
   return out;
 }
 
+export function dashboardOrigin(request, env) {
+  let host = ""; try { host = new URL(request.headers.get("Origin") || "").host; } catch (e) { return false; }
+  const allowed = String(env.DASHBOARD_ORIGINS || "nowora.vercel.app").split(",").map(x => x.trim()).filter(Boolean);
+  return host === new URL(request.url).host || allowed.includes(host);
+}
 export async function handleStore(request, env, ctx) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (request.method !== "POST") return cjson({ ok: false, error: "Method not allowed" }, 405);
+  /* No key to paste: the NOWORA dashboard (behind the client's PIN) and this site itself are let in by origin.
+     A key still works for anything else (STORE_KEY, or SHIPROCKET_WEBHOOK_TOKEN). */
   const key = env.STORE_KEY || env.SHIPROCKET_WEBHOOK_TOKEN;
-  if (!key) return cjson({ ok: false, error: "Store key isn't set on the website" }, 503);
-  if (!sameToken(request.headers.get("x-store-key"), key)) return cjson({ ok: false, error: "Wrong store key", badKey: true }, 401);
+  if (!dashboardOrigin(request, env) && !(key && sameToken(request.headers.get("x-store-key"), key))) return cjson({ ok: false, error: "Not allowed", badKey: true }, 401);
   if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) return cjson({ ok: false, error: "Shiprocket isn't connected" }, 503);
   let b; try { b = JSON.parse(await request.text() || "{}"); } catch { return cjson({ ok: false, error: "Invalid JSON" }, 400); }
   try {

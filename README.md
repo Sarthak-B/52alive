@@ -54,6 +54,6 @@ Use a dedicated Shiprocket API user (Settings → API → Configure), not the ma
 
 `POST /api/store` lets the client dashboard (Shop → Orders) list Shiprocket orders and press **Ship now**:
 it books the courier (AWB), schedules the pickup, returns the label and invoice links and takes the
-items off the website's stock. Calls must send the header `x-store-key` = `STORE_KEY` (Pages secret) —
-or, if `STORE_KEY` isn't set, the same value as `SHIPROCKET_WEBHOOK_TOKEN`. Paste that key once in the
-dashboard. Courier charges come out of the Shiprocket wallet.
+items off the website's stock. The NOWORA dashboard (Origin nowora.vercel.app, or DASHBOARD_ORIGINS) needs no key;
+anything else must send `x-store-key` = `STORE_KEY` or `SHIPROCKET_WEBHOOK_TOKEN`.
+Courier charges: Shiprocket wallet. Courier charges come out of the Shiprocket wallet.
