@@ -17,7 +17,7 @@
  */
 
 /* The product list lives in the page itself: <script type="application/json" id="nowora-products"> in
- * public/index.html, edited from the NOWORA client dashboard. The endpoint reads that block from the
+ * public/index.html, edited from the make4yu client dashboard. The endpoint reads that block from the
  * deployed site (cached for a minute), so names and prices always match what customers see and never
  * come from the browser. */
 const DEFAULT_WEIGHT = 0.5;
@@ -234,7 +234,7 @@ export async function handleOrder(request, env, ctx) {
   catch (e) { return json({ ok: false, error: e.status === 400 ? e.message : "Something went wrong — please try again." }, e.status || 500); }
 
   /* the order is valid: put it in Shiprocket. A Shiprocket hiccup never fails the customer's order — the page also
-     saves it to the shop's NOWORA dashboard, which sends the WhatsApp order alert to the shop. */
+     saves it to the shop's make4yu dashboard, which sends the WhatsApp order alert to the shop. */
   let shiprocket = false, sr = {};
   if (env.SHIPROCKET_EMAIL && env.SHIPROCKET_PASSWORD) {
     try { payload.pickup_location = await resolvePickup(env); sr = await createOrder(payload, env); shiprocket = true; }
@@ -545,8 +545,8 @@ export async function handleCourierUpdate(request, env, ctx) {
 }
 
 /* ============================== store dashboard: orders → ship ==============================
- * POST /api/store  — from the NOWORA dashboard (Origin nowora.vercel.app, or DASHBOARD_ORIGINS), or with x-store-key
- * Used by the NOWORA client dashboard (Shop → Orders), which runs on another domain, so CORS is open
+ * POST /api/store  — from the make4yu dashboard (Origin nowora.vercel.app, or DASHBOARD_ORIGINS), or with x-store-key
+ * Used by the make4yu client dashboard (Shop → Orders), which runs on another domain, so CORS is open
  * and the key is the gate: shipping spends Shiprocket wallet money.
  *   {action:"list"}                         → latest Shiprocket orders, each with a stage
  *   {action:"rates", id}                    → couriers that can deliver it, cheapest first, recommended flagged
@@ -673,7 +673,7 @@ export function dashboardOrigin(request, env) {
 export async function handleStore(request, env, ctx) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (request.method !== "POST") return cjson({ ok: false, error: "Method not allowed" }, 405);
-  /* No key to paste: the NOWORA dashboard (behind the client's PIN) and this site itself are let in by origin.
+  /* No key to paste: the make4yu dashboard (behind the client's PIN) and this site itself are let in by origin.
      A key still works for anything else (STORE_KEY, or SHIPROCKET_WEBHOOK_TOKEN). */
   const key = env.STORE_KEY || env.SHIPROCKET_WEBHOOK_TOKEN;
   if (!dashboardOrigin(request, env) && !(key && sameToken(request.headers.get("x-store-key"), key))) return cjson({ ok: false, error: "Not allowed", badKey: true }, 401);

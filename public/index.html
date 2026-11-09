@@ -726,7 +726,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
 <script type="application/json" id="nowora-products">
 {
  "v": 1,
- "note": "Managed from the NOWORA client dashboard (Shop → Products). Edit there so photos, colours and categories stay in step.",
+ "note": "Managed from the make4yu client dashboard (Shop → Products). Edit there so photos, colours and categories stay in step.",
  "categories": [
   {
    "id": "hoodies",
@@ -1574,7 +1574,7 @@ const inr=n=>"₹"+n.toLocaleString("en-IN");
 
 /* Keep in sync with CATALOG in src/worker.js (names, prices, sizes, colours) — tests/shiprocket.test.mjs checks it.
    imgs: photo per colour, used for the bag thumbnail. */
-/* Products come from the catalogue block (#nowora-products) — the NOWORA dashboard edits it, and the
+/* Products come from the catalogue block (#nowora-products) — the make4yu dashboard edits it, and the
    Shiprocket endpoint reads the same block from the live page, so prices are always checked server-side. */
 const DATA=(()=>{ try{ return JSON.parse(document.getElementById("nowora-products").textContent); }catch(e){ return {categories:[],products:[]}; } })();
 const P={};
@@ -1782,7 +1782,7 @@ form.addEventListener("submit",async e=>{
   placing=false; btn.disabled=false; btn.firstChild.textContent="Order now ";
   if(!res.ok){ err.textContent=res.error||"Couldn't place the order — please try again."; toast(err.textContent); return; }
 
-  /* the order went through: save it to the shop's NOWORA dashboard (t.js picks it up even if it loads a moment later) */
+  /* the order went through: save it to the shop's make4yu dashboard (t.js picks it up even if it loads a moment later) */
   (window.noworaQ=window.noworaQ||[]).push(["Orders",{
     "Order ID":orderId, "Name":$("#name").value.trim(), "Phone":"+91 "+phone,
     "Address":$("#address").value.trim().replace(/\s*\n\s*/g,", "), "City":$("#city").value.trim(), "State":$("#state").value.trim(),
@@ -1939,7 +1939,7 @@ renderShop();
 renderOptions(false); renderBag();
 })();
 </script>
-<!-- NOWORA visitor stats (no cookies) -->
+<!-- make4yu visitor stats (no cookies) -->
 <script src="https://nowora.vercel.app/t.js" data-site="7LvyjnQvzQ" defer></script>
 </body>
 </html>
