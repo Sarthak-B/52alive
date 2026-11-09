@@ -248,6 +248,9 @@ h2{font-size:clamp(42px,5.6vw,92px);line-height:.9}
 .chip-row span{display:inline-flex;align-items:center;gap:8px}
 .chip-row span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .btn-wa{background:var(--ink);color:var(--bg)}
+.trk-link{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.trk-link input{flex:1;min-width:220px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface,#F6F3EE);padding:0 12px;font-size:13.5px;color:var(--ink-2)}
+.trk-wa{background:#1DA851;color:#fff}
 .btn-wa:hover{box-shadow:0 18px 34px -16px rgba(0,0,0,.55)}
 .btn svg{width:19px;height:19px;flex:none}
 
@@ -1387,7 +1390,8 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
         <div class="tick">✓</div>
         <h3>Order placed — thank you!</h3>
         <p>Your order ID is <b id="doneId"></b>. We've got your order and will pack it within 48 hours.</p>
-        <p style="font-size:14px;color:var(--ink-2);margin-top:8px">Save your order ID or bookmark the tracking page — it shows every step until it reaches you.</p>
+        <p style="font-size:14px;color:var(--ink-2);margin-top:8px">We're also sending your tracking link to your WhatsApp (<b id="doneWa"></b>) in the next few minutes. Keep it — it shows every step, and your courier tracking number (AWB) once it ships.</p>
+        <div class="trk-link"><input id="trkUrl" readonly aria-label="Your tracking link"><button type="button" class="btn btn-ghost btn-sm" id="copyTrk">Copy link</button><a class="btn btn-sm trk-wa" id="waTrk" target="_blank" rel="noopener">Send to my WhatsApp</a></div>
         <p class="cod-due" id="codDue" hidden></p>
         <div class="paybox" id="payBox" hidden>
           <div class="pb-head"><span>Pay now to confirm</span><b id="pbAmt"></b></div>
@@ -1783,6 +1787,7 @@ form.addEventListener("submit",async e=>{
     "Order ID":orderId, "Name":$("#name").value.trim(), "Phone":"+91 "+phone,
     "Address":$("#address").value.trim().replace(/\s*\n\s*/g,", "), "City":$("#city").value.trim(), "State":$("#state").value.trim(),
     "PIN code":$("#pin").value.trim(), "Payment":pay, "Note":note,
+    "Tracking link":location.origin+"/track/?id="+encodeURIComponent(orderId),
     ...(pay==="Cash on Delivery"&&COD_FEE?{"COD charge":String(COD_FEE)}:{}),
     "Total":String(items.reduce((a,b)=>a+P[b.key].price*b.qty,0)+(pay==="Cash on Delivery"?COD_FEE:0))
   }, items.map(b=>({name:P[b.key].name, colour:b.colour, size:b.size, qty:b.qty, price:P[b.key].price}))]);
@@ -1814,6 +1819,10 @@ form.addEventListener("submit",async e=>{
   const cd=$("#codDue"); cd.hidden=pay!=="Cash on Delivery";
   if(!cd.hidden) cd.innerHTML=`Keep <b>${inr(paid+COD_FEE)}</b> ready — pay in cash when your order arrives${COD_FEE?` (includes ${inr(COD_FEE)} cash handling)`:""}.`;
   $("#doneId").textContent=placed; $("#trackThis").href="/track/?id="+encodeURIComponent(placed);
+  { const url=location.origin+"/track/?id="+encodeURIComponent(placed);
+    $("#trkUrl").value=url; $("#doneWa").textContent="+91 "+phone;
+    $("#waTrk").href="https://wa.me/91"+phone+"?text="+encodeURIComponent("My 52 Alive order "+placed+"\nTrack it here: "+url);
+    $("#copyTrk").onclick=()=>{ try{ navigator.clipboard.writeText(url).then(()=>toast("Tracking link copied"),()=>toast(url)); }catch(_){ toast(url); } }; }
   $("#copyId").onclick=()=>{ try{ navigator.clipboard.writeText(placed).then(()=>toast("Order ID copied"),()=>toast(placed)); }catch(_){ toast(placed); } };
   try{ localStorage.setItem("52a_last_order",JSON.stringify({id:placed,ts:Date.now()})); }catch(_){}
   form.style.display="none"; $("#done").classList.add("show");

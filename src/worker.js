@@ -275,7 +275,7 @@ export async function resolvePickup(env) {
 }
 
 /* ============================== order tracking ==============================
- * POST /api/track {orderId, phone} → where the order is, straight from Shiprocket.
+ * POST /api/track {orderId} or {awb} → where the order is, straight from Shiprocket.
  * No customer accounts: the long random order ID plus the phone number the order was placed with
  * act as the key. A wrong ID and a wrong phone get the same "not found" answer, so nobody can probe
  * other people's orders, and each visitor gets a limited number of lookups.
@@ -320,50 +320,79 @@ function tooMany(ip) {
 }
 export function _resetLookups() { lookups.clear(); }
 
-export async function trackOrder(input, env) {
-  const orderId = String(input && input.orderId || "").trim();
+/* Shiprocket's courier tracking reply → what the page shows. null when Shiprocket has nothing for that AWB yet. */
+export function parseTracking(t, awb, fallbackCourier) {
+  const td = t && (t.tracking_data || (t[awb] && t[awb].tracking_data)) || null;
+  if (!td) return null;
+  const st = (Array.isArray(td.shipment_track) ? td.shipment_track[0] : null) || {};
+  const acts = Array.isArray(td.shipment_track_activities) ? td.shipment_track_activities : [];
+  if (!st.current_status && !acts.length && !td.track_url) return null;
+  return {
+    status: st.current_status || "",
+    courier: st.courier_name || fallbackCourier || "",
+    orderRef: String(st.order_id || ""),
+    etd: td.etd || st.edd || "",
+    delivered: st.delivered_date || "",
+    url: /^https:\/\//.test(td.track_url || "") ? td.track_url : "",
+    activities: acts.slice(0, 25).map(a => ({ date: String(a.date || ""), status: String(a["sr-status-label"] || a.activity || a.status || ""), detail: String(a.activity || ""), location: String(a.location || "") }))
+  };
+}
+const ORDER_ID_RE = /^52A-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const cleanAwb = v => String(v || "").replace(/[\s#]/g, "").toUpperCase();
+const awbOf = sh => String(sh && (sh.awb || sh.awb_code) || "").trim();
+const shipmentsOf = o => Array.isArray(o.shipments) ? o.shipments : o.shipments ? [o.shipments] : [];
 
-  if (!/^52A-[0-9a-f-]{36}$/i.test(orderId)) { const e = new Error("Check your order ID — it starts with 52A-"); e.status = 400; throw e; }
-
-
+async function findByOrderId(orderId, env) {
   const list = await srGet("/orders?filter_by=channel_order_id&filter=" + encodeURIComponent(orderId) + "&per_page=5", env);
   const orders = Array.isArray(list && list.data) ? list.data : [];
-  const o = orders.find(x => String(x.channel_order_id || "").toLowerCase() === orderId.toLowerCase());
-  if (!o) return null;                 /* the order ID itself is the key: long and random, so nobody can guess one */
+  return orders.find(x => String(x.channel_order_id || "").toLowerCase() === orderId.toLowerCase()) || null;
+}
+async function findByAwb(awb, env) {
+  const list = await srGet("/orders?search=" + encodeURIComponent(awb) + "&per_page=5", env).catch(() => null);
+  const orders = Array.isArray(list && list.data) ? list.data : [];
+  return orders.find(o => shipmentsOf(o).some(sh => cleanAwb(awbOf(sh)) === awb)) || null;
+}
 
-  const shipments = Array.isArray(o.shipments) ? o.shipments : o.shipments ? [o.shipments] : [];
-  const sh = shipments.find(x => x && (x.awb || x.awb_code)) || shipments[0] || {};
-  const awb = String(sh.awb || sh.awb_code || "").trim();
+/* Look up by order ID (52A-…) or by the courier tracking number (AWB). Both are only on the customer's
+   confirmation / parcel, so either one works as the key. */
+export async function trackOrder(input, env) {
+  const orderId = String(input && input.orderId || "").trim();
+  const awbIn = cleanAwb(input && input.awb);
+  let o = null, tracking = null, awb = "";
 
-  let tracking = null;
-  if (awb) {
-    try {
-      const t = await srGet("/courier/track/awb/" + encodeURIComponent(awb), env);
-      const td = t && (t.tracking_data || (t[awb] && t[awb].tracking_data)) || null;
-      if (td) {
-        const st = (Array.isArray(td.shipment_track) ? td.shipment_track[0] : null) || {};
-        const acts = Array.isArray(td.shipment_track_activities) ? td.shipment_track_activities : [];
-        tracking = {
-          status: st.current_status || "",
-          courier: st.courier_name || sh.courier || "",
-          etd: td.etd || st.edd || "",
-          delivered: st.delivered_date || "",
-          url: /^https:\/\//.test(td.track_url || "") ? td.track_url : "",
-          activities: acts.slice(0, 25).map(a => ({ date: String(a.date || ""), status: String(a["sr-status-label"] || a.activity || a.status || ""), detail: String(a.activity || ""), location: String(a.location || "") }))
-        };
-      }
-    } catch (e) { console.error("[track] awb", e.message); }       /* the order status below still answers */
+  if (orderId || !awbIn) {
+    if (!ORDER_ID_RE.test(orderId)) { const e = new Error("Check your order ID — it starts with 52A-"); e.status = 400; throw e; }
+    o = await findByOrderId(orderId, env);
+    if (!o) return null;                 /* the order ID itself is the key: long and random, so nobody can guess one */
+  } else {
+    if (!/^[A-Z0-9-]{6,30}$/.test(awbIn)) { const e = new Error("Check the tracking number — it's the AWB on your parcel or courier message"); e.status = 400; throw e; }
+    awb = awbIn;
+    tracking = parseTracking(await srGet("/courier/track/awb/" + encodeURIComponent(awb), env).catch(e => { if (e.status === 502) throw e; return null; }), awb, "");
+    const ref = tracking && /52A-[0-9a-f-]{36}/i.exec(tracking.orderRef);
+    o = ref ? await findByOrderId(ref[0], env).catch(() => null) : null;
+    if (!o) o = await findByAwb(awb, env);
+    if (!o && !tracking) return null;
   }
 
-  const status = (tracking && tracking.status) || o.status || "";
-  const products = Array.isArray(o.products) ? o.products : [];
+  const shipments = o ? shipmentsOf(o) : [];
+  const sh = (awb && shipments.find(x => cleanAwb(awbOf(x)) === awb)) || shipments.find(x => awbOf(x)) || shipments[0] || {};
+  if (!awb) awb = awbOf(sh);
+
+  if (awb && !tracking) {
+    try { tracking = parseTracking(await srGet("/courier/track/awb/" + encodeURIComponent(awb), env), awb, sh.courier); }
+    catch (e) { console.error("[track] awb", e.message); }       /* the order status below still answers */
+  }
+  if (tracking) delete tracking.orderRef;
+
+  const status = (tracking && tracking.status) || (o && o.status) || "";
+  const products = o && Array.isArray(o.products) ? o.products : [];
   return {
-    orderId: orderId,
-    placed: o.created_at || o.channel_created_at || "",
-    payment: /cod/i.test(o.payment_method || "") ? "Cash on delivery" : o.payment_method ? "Prepaid" : "",
-    total: Number(o.total) || 0,
+    orderId: o ? String(o.channel_order_id || "") : "",
+    placed: o ? o.created_at || o.channel_created_at || "" : "",
+    payment: !o ? "" : /cod/i.test(o.payment_method || "") ? "Cash on delivery" : o.payment_method ? "Prepaid" : "",
+    total: o ? Number(o.total) || 0 : 0,
     items: products.slice(0, 20).map(p => ({ name: String(p.name || ""), qty: Number(p.quantity || p.units || 1) || 1 })),
-    city: o.customer_city || "",
+    city: o ? o.customer_city || "" : "",
     ...trackStep(status),
     status: status,
     awb: awb,
@@ -382,7 +411,7 @@ export async function handleTrack(request, env) {
   let input; try { input = JSON.parse(raw); } catch { return json({ ok: false, error: "Invalid JSON" }, 400); }
   try {
     const order = await trackOrder(input, env);
-    if (!order) return json({ ok: false, error: "We couldn't find that order yet. Check the order ID — new orders can take a minute to appear." }, 404);
+    if (!order) return json({ ok: false, error: input && input.awb && !input.orderId ? "We couldn't find that tracking number yet. Check it, or try your order ID — new shipments can take a few hours to show." : "We couldn't find that order yet. Check the order ID — new orders can take a minute to appear." }, 404);
     return json({ ok: true, order: order });
   } catch (e) {
     console.error("[track]", e.message);
