@@ -63,6 +63,19 @@ input{flex:1;min-width:0;height:58px;border-radius:14px;border:1.5px solid var(-
 .paid-note{margin-top:18px;border-radius:16px;padding:14px 18px;background:#E8F3E1;color:#25502A;font-weight:600;font-size:15px}
 .foot{border-top:1px solid var(--line);padding:22px 0;font-size:13px;color:var(--muted)}.foot .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(1turn)}}
+.awbbox{display:grid;gap:12px;border:1.5px dashed var(--line);border-radius:18px;padding:16px 18px;background:var(--bg)}
+.awbrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.awbrow span{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.awbrow code{font-family:var(--display);font-weight:700;font-size:clamp(20px,2.4vw,26px);letter-spacing:.02em}
+.chipbtn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);font-size:13px;font-weight:600;background:var(--surface);transition:border-color .2s,background .2s}
+.chipbtn:hover{border-color:var(--ink)}.chipbtn.ok{background:var(--accent-2);border-color:var(--accent-2)}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.share{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:18px}
+.share b{font-family:var(--display);font-size:18px;letter-spacing:-.02em}
+.btn-wa{background:#1DA851;color:#fff}.btn-wa:hover{box-shadow:0 18px 34px -16px rgba(29,168,81,.7)}
+.mode{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--bg-2);width:max-content}
+.mode button{height:36px;padding:0 16px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.mode button.on{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px -4px rgba(0,0,0,.25)}
 @media (max-width:860px){.grid{grid-template-columns:1fr}.in{flex-direction:column}.in input{flex:none;width:100%}.facts{grid-template-columns:1fr}.steps div{font-size:10.5px}}
 </style>
 </head>
@@ -72,9 +85,10 @@ input{flex:1;min-width:0;height:58px;border-radius:14px;border:1.5px solid var(-
   <div>
     <span class="eyebrow">Order tracking</span>
     <h1>Where's my <em>order?</em></h1>
-    <p class="lead">Enter the order ID from your order confirmation (it starts with 52A-). You'll see every step, from packing to your door.</p>
+    <p class="lead">Use the order ID from your confirmation (it starts with 52A-) or the courier tracking number (AWB) from your parcel or courier SMS. You'll see every step, from packing to your door.</p>
     <form id="f" novalidate>
-      <label for="id">Order ID</label>
+      <div class="mode" id="mode" role="tablist"><button type="button" data-m="id" class="on" role="tab">Order ID</button><button type="button" data-m="awb" role="tab">Tracking no. (AWB)</button></div>
+      <label for="id" id="lbl">Order ID</label>
       <div class="in"><input id="id" autocomplete="off" spellcheck="false" placeholder="52A-xxxxxxxx-xxxx-…" maxlength="80"><button class="btn" id="go" type="submit"><span>Track</span> →</button></div>
       <p class="err" id="err" role="alert"></p>
       <p class="hint" id="last" hidden></p>
@@ -82,7 +96,7 @@ input{flex:1;min-width:0;height:58px;border-radius:14px;border:1.5px solid var(-
     <p class="paid-note" id="paidNote" hidden>✓ Thanks — we've got your payment note. We check it against our UPI account and pack your order. This page updates as it moves.</p>
   </div>
   <section class="card" id="res" aria-live="polite">
-    <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><b style="color:var(--ink);font-family:var(--display);font-size:22px">Your order shows here</b><span>Enter your order ID to see where it is.</span></div>
+    <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><b style="color:var(--ink);font-family:var(--display);font-size:22px">Your order shows here</b><span>Enter your order ID or tracking number to see where it is.</span></div>
   </section>
 </div></main>
 <footer class="foot"><div class="wrap"><span>© <span id="yr"></span> 52 Alive · Shipping across India</span><span>Help: <a href="https://wa.me/919368986368" target="_blank" rel="noopener">WhatsApp +91 93689 86368</a></span></div></footer>
@@ -95,45 +109,84 @@ const cleanId=v=>{ const m=String(v||"").replace(/\s+/g,"").match(/52A-[0-9a-f]{
 const last=()=>{ try{ const o=JSON.parse(localStorage.getItem("52a_last_order")||"null"); return o&&/^52A-/.test(o.id)?o:null; }catch(_){ return null; } };
 const when=d=>{ const x=new Date(String(d).replace(" ","T")); return isNaN(x)?esc(d):x.toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); };
 const day=d=>{ const x=new Date(String(d).replace(" ","T")); return isNaN(x)?esc(d):x.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}); };
-let timer=null, current="";
+let timer=null, current=null, mode="id";
+const isId=v=>/^52A-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+const cleanAwb=v=>String(v||"").replace(/[\s#]/g,"").toUpperCase();
+function setMode(m){ mode=m; $$("#mode button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+  $("#lbl").textContent=m==="id"?"Order ID":"Tracking number (AWB)"; $("#id").placeholder=m==="id"?"52A-xxxxxxxx-xxxx-…":"e.g. 19041976475952"; $("#err").textContent=""; }
+function $$(s){ return [...document.querySelectorAll(s)]; }
+/* the courier's own site, for the couriers whose public tracking links take the AWB */
+const COURIER_SITES=[[/delhivery/i,"Delhivery",a=>"https://www.delhivery.com/track/package/"+a],[/blue ?dart/i,"Blue Dart",a=>"https://www.bluedart.com/web/guest/trackdartresult?trackFor=0&trackNo="+a]];
+const pageLink=o=>location.origin+"/track/?"+(o.orderId?"id="+encodeURIComponent(o.orderId):"awb="+encodeURIComponent(o.awb));
+async function copy(text,btn,done){ try{ await navigator.clipboard.writeText(text); }catch(_){ const t=document.createElement("textarea"); t.value=text; document.body.appendChild(t); t.select(); try{document.execCommand("copy")}catch(e){} t.remove(); }
+  if(btn){ const old=btn.innerHTML; btn.classList.add("ok"); btn.textContent=done||"Copied ✓"; setTimeout(()=>{ btn.classList.remove("ok"); btn.innerHTML=old; },1600); } }
 function draw(o){
-  const t=o.tracking, ask=`https://wa.me/${WA}?text=${encodeURIComponent("Hi 52 Alive! A question about my order "+o.orderId)}`;
+  const t=o.tracking, ref=o.orderId||o.awb, ask=`https://wa.me/${WA}?text=${encodeURIComponent("Hi 52 Alive! A question about my order "+ref)}`;
   const acts=t&&t.activities&&t.activities.length?t.activities:[];
+  const link=pageLink(o), shareText="Track my 52 Alive order"+(o.awb?" (AWB "+o.awb+(o.courier?", "+o.courier:"")+")":"")+": "+link;
+  const site=o.awb?COURIER_SITES.find(c=>c[0].test(o.courier||"")):null;
+  const links=o.awb?[
+      t&&t.url?[t.url,"Live tracking page ↗"]:null,
+      ["https://shiprocket.co/tracking/"+encodeURIComponent(o.awb),"Shiprocket ↗"],
+      site?[site[2](encodeURIComponent(o.awb)),site[1]+" website ↗"]:null
+    ].filter(Boolean).filter((x,i,arr)=>arr.findIndex(y=>y[0]===x[0])===i):[];
   $("#res").innerHTML=
-    `<div class="head"><div><b>${esc(o.label)}</b><small>Order ${esc(o.orderId.slice(0,12))}…${o.placed?" · placed "+esc(o.placed):""}</small></div>${o.step>=0?`<span class="pill">Step ${o.step+1} of 5</span>`:""}</div>`+
+    `<div class="head"><div><b>${esc(o.label)}</b><small>${o.orderId?`Order ${esc(o.orderId.slice(0,12))}…`:`Tracking no. ${esc(o.awb)}`}${o.placed?" · placed "+esc(o.placed):""}</small></div>${o.step>=0?`<span class="pill">Step ${o.step+1} of 5</span>`:""}</div>`+
     (o.step<0?`<div class="bad">${o.problem==="returned"?"This order is on its way back to us.":"This order was cancelled."} Message us on WhatsApp if that's unexpected.</div>`:
       `<div class="steps" role="img" aria-label="Step ${o.step+1} of 5: ${esc(STEPS[o.step])}">${STEPS.map((s,i)=>`<div class="${i<=o.step?"on":""}${i===o.step?" cur":""}"><i></i>${s}</div>`).join("")}</div>`)+
     (o.problem==="attempt"?`<div class="bad">The courier couldn't deliver on their last try. We'll contact you — or message us to arrange a new time.</div>`:"")+
+    (o.awb?`<div class="awbbox"><div class="awbrow"><span>${esc(o.courier||"Courier")} · AWB</span><code>${esc(o.awb)}</code><button type="button" class="chipbtn" id="cpAwb">Copy AWB</button></div>`+
+      (links.length?`<div class="links">${links.map(l=>`<a class="chipbtn" href="${esc(l[0])}" target="_blank" rel="noopener">${esc(l[1])}</a>`).join("")}</div>`:"")+`</div>`:"")+
     `<div class="facts">`+
-      `<div><span>Courier</span>${o.courier||o.awb?esc(o.courier||"Assigned")+(o.awb?`<br><small style="color:var(--muted)">Tracking no. ${esc(o.awb)}</small>`:""):"Assigned when we pack your order"}</div>`+
+      `<div><span>Courier</span>${o.courier||o.awb?esc(o.courier||"Assigned"):"Assigned when we pack your order"}${!o.awb?`<br><small style="color:var(--muted)">Your tracking number (AWB) appears here once it ships</small>`:""}</div>`+
       `<div><span>${t&&t.delivered?"Delivered":"Expected delivery"}</span>${t&&t.delivered?day(t.delivered):t&&t.etd?day(t.etd):"3–6 days after dispatch"}</div>`+
-      `<div><span>Payment</span>${esc(o.payment||"—")}${o.total?` · ₹${Number(o.total).toLocaleString("en-IN")}`:""}</div>`+
-      `<div><span>Items</span>${o.items.length?o.items.map(i=>esc(i.qty+" × "+i.name)).join("<br>"):"—"}</div>`+
+      (o.orderId?`<div><span>Payment</span>${esc(o.payment||"—")}${o.total?` · ₹${Number(o.total).toLocaleString("en-IN")}`:""}</div>`+
+      `<div><span>Items</span>${o.items.length?o.items.map(i=>esc(i.qty+" × "+i.name)).join("<br>"):"—"}</div>`:"")+
     `</div>`+
     (acts.length?`<div class="acts"><h4>Journey</h4><div class="tl">${acts.map(a=>`<div><time>${when(a.date)}</time><b>${esc(a.status)}</b>${(a.detail&&a.detail!==a.status)||a.location?`<small>${esc([a.detail!==a.status?a.detail:"",a.location].filter(Boolean).join(" · "))}</small>`:""}</div>`).join("")}</div></div>`:
       o.step>=0&&o.step<2?`<p class="hint">Live courier updates start as soon as the courier picks up your parcel.</p>`:"")+
-    `<div class="btns">${t&&t.url?`<a class="btn btn-ghost btn-sm" href="${esc(t.url)}" target="_blank" rel="noopener">Courier's page ↗</a>`:""}<a class="btn btn-dark btn-sm" href="${ask}" target="_blank" rel="noopener">Ask about this order</a></div>`;
+    `<div class="share"><b>Keep this tracking link</b><div class="btns">`+
+      `<a class="btn btn-wa btn-sm" href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" rel="noopener">Send to WhatsApp</a>`+
+      `<button type="button" class="btn btn-ghost btn-sm" id="cpLink">Copy link</button>`+
+      (navigator.share?`<button type="button" class="btn btn-ghost btn-sm" id="shLink">Share…</button>`:"")+
+      `<a class="btn btn-dark btn-sm" href="${ask}" target="_blank" rel="noopener">Ask about this order</a></div>`+
+      `<p class="hint">Bookmark it or send it to yourself — it always shows the latest status.</p></div>`;
+  const ca=$("#cpAwb"); if(ca) ca.onclick=()=>copy(o.awb,ca);
+  $("#cpLink").onclick=e=>copy(link,e.currentTarget,"Link copied ✓");
+  const sl=$("#shLink"); if(sl) sl.onclick=()=>navigator.share({title:"52 Alive order tracking",text:"Track my 52 Alive order",url:link}).catch(()=>{});
 }
-async function track(id, quiet){
-  id=cleanId(id); const err=$("#err"), btn=$("#go");
-  if(!/^52A-[0-9a-f-]{36}$/i.test(id)){ err.textContent="Check the order ID — it starts with 52A- and is in your order confirmation."; return; }
-  $("#id").value=id; err.textContent="";
+async function track(raw, quiet){
+  const err=$("#err"), btn=$("#go"); let q;
+  const id=cleanId(raw);
+  if(isId(id)){ q={orderId:id}; if(mode!=="id") setMode("id"); $("#id").value=id; }
+  else {
+    const a=cleanAwb(raw);
+    if(mode==="id"&&!/^[A-Z0-9-]{6,30}$/.test(a)){ err.textContent="Check the order ID — it starts with 52A- and is in your order confirmation. Have a tracking number instead? Switch to “Tracking no. (AWB)”."; return; }
+    if(!/^[A-Z0-9-]{6,30}$/.test(a)){ err.textContent="Check the tracking number — it's the AWB on your parcel or courier SMS (letters and numbers only)."; return; }
+    q={awb:a}; if(mode!=="awb") setMode("awb"); $("#id").value=a;
+  }
+  err.textContent="";
   if(!quiet){ btn.disabled=true; btn.firstChild.textContent="Checking…"; }
   try{
-    const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:id})});
+    const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(q)});
     const j=await r.json().catch(()=>({}));
     if(!j.ok){ if(!quiet) err.textContent=j.error||"Couldn't check right now — try again in a minute."; return; }
-    current=id; draw(j.order);
-    try{ const l=last(); if(!l||l.id===id) localStorage.setItem("52a_last_order",JSON.stringify({id,ts:Date.now()})); }catch(_){}
-    const u=new URL(location.href); if(u.searchParams.get("id")!==id){ u.searchParams.set("id",id); history.replaceState(null,"",u); }
-    clearInterval(timer); if(j.order.step>=0&&j.order.step<4) timer=setInterval(()=>{ if(!document.hidden&&current) track(current,true); },120000);
+    current=q; draw(j.order);
+    const oid=j.order.orderId;
+    try{ const l=last(); if(oid&&(!l||l.id===oid)) localStorage.setItem("52a_last_order",JSON.stringify({id:oid,ts:Date.now()})); }catch(_){}
+    const u=new URL(location.href); u.searchParams.delete("track");
+    if(q.orderId){ u.searchParams.set("id",q.orderId); u.searchParams.delete("awb"); } else { u.searchParams.set("awb",q.awb); u.searchParams.delete("id"); }
+    history.replaceState(null,"",u);
+    clearInterval(timer); if(j.order.step>=0&&j.order.step<4) timer=setInterval(()=>{ if(!document.hidden&&current) track(current.orderId||current.awb,true); },120000);
   }catch(_){ if(!quiet) err.textContent="Couldn't reach us — check your connection and try again."; }
   finally{ btn.disabled=false; btn.firstChild.textContent="Track"; }
 }
+$("#mode").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; setMode(b.dataset.m); $("#id").value=""; $("#id").focus(); });
 $("#f").addEventListener("submit",e=>{ e.preventDefault(); track($("#id").value); });
-const q=new URLSearchParams(location.search), qid=q.get("id")||q.get("track"), l=last();
+const q=new URLSearchParams(location.search), qid=q.get("id")||q.get("track"), qawb=q.get("awb"), l=last();
 if(q.get("paid")==="1") $("#paidNote").hidden=false;
 if(qid) track(qid);
+else if(qawb){ setMode("awb"); track(qawb); }
 else if(l){ $("#last").hidden=false; $("#last").innerHTML=`Your last order: <button type="button">${esc(l.id.slice(0,12))}…</button>`; $("#last").querySelector("button").onclick=()=>track(l.id); $("#id").value=l.id; }
 })();
 </script>

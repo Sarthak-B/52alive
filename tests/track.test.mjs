@@ -89,3 +89,27 @@ test('phone check works with full and masked numbers', () => {
   assert.equal(phoneMatch('9876543210', '9876543211'), false);
   assert.equal(phoneMatch('******3210', '9876543299'), false);
 });
+
+test('tracks by AWB too: finds the order through the courier reference and returns full details', async () => {
+  const withRef = {tracking_data: {...tracking.tracking_data, shipment_track: [{...tracking.tracking_data.shipment_track[0], order_id: ID}]}};
+  mock({track: withRef});
+  const r = await ask({awb: ' awb 123 '});
+  assert.equal(r.status, 200);
+  const {order: o} = await r.json();
+  assert.equal(o.orderId, ID); assert.equal(o.awb, 'AWB123'); assert.equal(o.label, 'On the way');
+  assert.equal(o.items.length, 1); assert.equal(o.tracking.url, 'https://shiprocket.co/tracking/AWB123');
+  assert.equal(o.tracking.orderRef, undefined);
+});
+
+test('AWB with no matching order still shows the courier journey', async () => {
+  mock({orders: []});
+  const {order: o} = await (await ask({awb: 'AWB123'})).json();
+  assert.equal(o.orderId, ''); assert.equal(o.step, 2); assert.equal(o.tracking.activities[0].location, 'Delhi');
+});
+
+test('unknown or malformed AWB', async () => {
+  mock({orders: [], track: {tracking_data: {track_status: 0, error: 'no activities'}}});
+  assert.equal((await ask({awb: 'AWB999'})).status, 404);
+  assert.equal((await ask({awb: 'ab'})).status, 400);
+  assert.equal((await ask({awb: 'bad awb!!'})).status, 400);
+});
