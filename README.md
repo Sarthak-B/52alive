@@ -34,7 +34,7 @@ Failed Shiprocket calls show up in Cloudflare → Workers → 52alive → Logs.
 
 ## Stock (sold-out variants disappear)
 
-Each colour in the product catalogue can carry `stock: {size: count}`, set from the NOWORA client dashboard (Shop → Products → Track stock). A size at 0 disappears from the shop, a colour with nothing left disappears, and so does a product. `/api/order` refuses sold-out variants.
+Each colour in the product catalogue can carry `stock: {size: count}`, set from the make4yu client dashboard (Shop → Products → Track stock). A size at 0 disappears from the shop, a colour with nothing left disappears, and so does a product. `/api/order` refuses sold-out variants.
 
 When Shiprocket picks up / ships a website order, `POST /api/courier-updates` takes its items off the stock and commits the catalogue, so the site redeploys. Each order is counted once.
 
@@ -50,17 +50,17 @@ If the Shiprocket API user's password changes, update `SHIPROCKET_PASSWORD` on t
 
 Use a dedicated Shiprocket API user (Settings → API → Configure), not the main login.
 
-## Shipping from the NOWORA dashboard
+## Shipping from the make4yu dashboard
 
 `POST /api/store` lets the client dashboard (Shop → Orders) list Shiprocket orders and press **Ship now**:
 it books the courier (AWB), schedules the pickup, returns the label and invoice links and takes the
-items off the website's stock. The NOWORA dashboard (Origin nowora.vercel.app, or DASHBOARD_ORIGINS) needs no key;
+items off the website's stock. The make4yu dashboard (Origin nowora.vercel.app, or DASHBOARD_ORIGINS) needs no key;
 anything else must send `x-store-key` = `STORE_KEY` or `SHIPROCKET_WEBHOOK_TOKEN`.
 Courier charges come out of the Shiprocket wallet.
 
 ## Ordering and tracking
 
 - **Order now** places the order straight from the site (`POST /api/order`): it checks prices and stock against the
-  catalogue, creates it in Shiprocket and saves it to the NOWORA dashboard. No WhatsApp redirect.
+  catalogue, creates it in Shiprocket and saves it to the make4yu dashboard. No WhatsApp redirect.
 - **Tracking page:** `/track/?id=52A-…` (old `/?track=…` links redirect there).
-- **WhatsApp order alert to the shop** comes from NOWORA (repo Sarthak-B/Nowora, workflow `whatsapp.yml`), for every client site.
+- **WhatsApp order alert to the shop** comes from make4yu (repo Sarthak-B/Nowora, workflow `whatsapp.yml`), for every client site.
