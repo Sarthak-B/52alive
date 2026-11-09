@@ -113,3 +113,8 @@ test('unknown or malformed AWB', async () => {
   assert.equal((await ask({awb: 'ab'})).status, 400);
   assert.equal((await ask({awb: 'bad awb!!'})).status, 400);
 });
+
+test('AWB lookup during a Shiprocket outage says busy, not "not found"', async () => {
+  mock({track: {message: 'boom'}, trackStatus: 500});
+  assert.equal((await ask({awb: 'AWB123'})).status, 502);
+});

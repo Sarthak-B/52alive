@@ -367,7 +367,7 @@ export async function trackOrder(input, env) {
   } else {
     if (!/^[A-Z0-9-]{6,30}$/.test(awbIn)) { const e = new Error("Check the tracking number — it's the AWB on your parcel or courier message"); e.status = 400; throw e; }
     awb = awbIn;
-    tracking = parseTracking(await srGet("/courier/track/awb/" + encodeURIComponent(awb), env).catch(e => { if (e.status === 502) throw e; return null; }), awb, "");
+    tracking = parseTracking(await srGet("/courier/track/awb/" + encodeURIComponent(awb), env), awb, "");   /* unknown AWB → null; login/API trouble → "busy" */
     const ref = tracking && /52A-[0-9a-f-]{36}/i.exec(tracking.orderRef);
     o = ref ? await findByOrderId(ref[0], env).catch(() => null) : null;
     if (!o) o = await findByAwb(awb, env);
