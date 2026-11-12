@@ -722,7 +722,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
 @media (max-width:640px){.trk .row2,.trk-facts{grid-template-columns:1fr}.trk-steps div{font-size:10.5px}}
 
 /* ============================== WINTER: entry banner + page transition ============================== */
-.wcta{padding:0 0 clamp(40px,5vw,70px)}
+.wcta{padding:clamp(40px,5vw,70px) 0 clamp(10px,2vw,20px)}
 .wcta[hidden]{display:none}
 .wcta-in{--wt:#F5F9FD;position:relative;display:block;width:min(var(--wrap),calc(100% - 48px));margin:0 auto;height:clamp(500px,44vw,620px);overflow:hidden;isolation:isolate;color:var(--wt);background:linear-gradient(180deg,#46607C 0,#5F7C9A 62%,#7A96B2 100%);clip-path:polygon(36px 0,100% 0,100% calc(100% - 36px),calc(100% - 36px) 100%,0 100%,0 36px);font-family:"JetBrains Mono",ui-monospace,monospace}
 .wcta-snow{position:absolute;inset:-100px 0 0 0;z-index:1;pointer-events:none;opacity:.75;background:radial-gradient(rgba(245,249,253,.95) 1.3px,transparent 2px) 0 0/110px 110px,radial-gradient(rgba(245,249,253,.7) 1px,transparent 1.6px) 50px 40px/150px 150px,radial-gradient(rgba(245,249,253,.5) 2.2px,transparent 3.4px) 20px 90px/230px 230px;animation:wctaSnow 9s linear infinite}
@@ -748,6 +748,13 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
 .wcta-in:hover .wcta-cards span:nth-child(1){translate:-14px -8px}.wcta-in:hover .wcta-cards span:nth-child(2){translate:0 -18px}.wcta-in:hover .wcta-cards span:nth-child(3){translate:14px -8px}
 @keyframes wctaFloat{50%{transform:translateY(-14px)}}
 .nav-links a.wlink{color:#3F6FA3;font-weight:700}
+.wchip{display:none;align-items:center;gap:7px;height:40px;padding:0 15px;border-radius:999px;background:linear-gradient(135deg,#4F6A86,#6F8BA8);color:#F5F9FD;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 8px 22px -10px rgba(40,64,92,.9);white-space:nowrap}
+.wchip svg{animation:wchipSpin 9s linear infinite}
+@keyframes wchipSpin{to{transform:rotate(360deg)}}
+@media (max-width:1000px){.wchip:not([hidden]){display:inline-flex}}
+@media (max-width:440px){.wchip{height:36px;padding:0 10px;gap:5px;font-size:10px;letter-spacing:.04em}.nav .logo span{white-space:nowrap}}
+@media (max-width:350px){.wchip{padding:0 9px}.wchip svg{display:none}.nav .logo small{display:none}}
+@media (prefers-reduced-motion:reduce){.wchip svg{animation:none}}
 .wgo{position:fixed;inset:0;z-index:300;display:grid;place-items:center;text-align:center;color:#F5F9FD;background:linear-gradient(180deg,#46607C,#5F7C9A);clip-path:circle(0 at var(--x,50%) var(--y,50%));pointer-events:none;transition:clip-path .8s var(--ease-curtain)}
 .wgo.on{clip-path:circle(150% at var(--x,50%) var(--y,50%));pointer-events:auto}
 .wgo b{display:block;font-family:"Sedgwick Ave Display",cursive;font-weight:400;font-size:clamp(90px,17vw,240px);line-height:.9;color:rgba(245,249,253,.92);transform:rotate(-6deg) scale(.9);opacity:0;transition:opacity .5s .3s,transform .9s var(--ease-out) .3s}
@@ -1198,6 +1205,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
       <a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#rack">The Rack</a><a href="#fit">Size guide</a><a href="/track/">Track order</a>
     </nav>
     <div style="display:flex;gap:10px;align-items:center">
+      <a class="wchip" href="/winter/" data-winter-go hidden aria-label="Open the winter section"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v18M4.200 7.500l15.600 9M19.800 7.500l-15.600 9"/></svg>Winter</a>
       <button type="button" class="bag-btn" id="bagBtn" aria-label="Bag, 0 items"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><b id="bagCount">0</b></button>
       <a class="btn btn-wa" href="#order">Order now</a>
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><i></i><i></i></button>
@@ -1239,18 +1247,6 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
 </div></div>
 
 <!-- SHOP BY CATEGORY -->
-<section class="cats" id="categories">
-  <div class="wrap">
-    <div class="sec-head">
-      <div><span class="eyebrow">Shop by category</span><h2 data-split>Pick your <em>layer.</em></h2></div>
-      <p class="lead" data-reveal><span data-stat="cats-words">Five</span> categories, <span data-stat="pieces-words">eleven</span> pieces, <span data-stat="colours-words">fourteen</span> colours. Tap one to jump straight into the shop.</p>
-    </div>
-    <div class="cat-grid" id="catGrid"></div>
-    <div class="colour-strip" id="colourStrip"><span class="lbl">Shop by colour</span></div>
-  </div>
-</section>
-
-<!-- SHOP -->
 <!-- WINTER: entry banner to /winter/ — shown when the catalogue has products with collection "winter" -->
 <section class="wcta" id="winter" hidden aria-label="Winter section">
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -1277,6 +1273,20 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
   </a>
 </section>
 <div class="wgo" aria-hidden="true"><div><b>52 Alive</b><span>Winter section</span></div></div>
+
+<section class="cats" id="categories">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Shop by category</span><h2 data-split>Pick your <em>layer.</em></h2></div>
+      <p class="lead" data-reveal><span data-stat="cats-words">Five</span> categories, <span data-stat="pieces-words">eleven</span> pieces, <span data-stat="colours-words">fourteen</span> colours. Tap one to jump straight into the shop.</p>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+    <div class="colour-strip" id="colourStrip"><span class="lbl">Shop by colour</span></div>
+  </div>
+</section>
+
+<!-- SHOP -->
+
 
 <section class="shop" id="shop">
   <div class="wrap">
@@ -2018,7 +2028,7 @@ $$("[data-close-pdp]",pdp).forEach(a=>a.addEventListener("click",()=>pdp.close()
 function updateBagCount(){ const n=bag.reduce((a,b)=>a+b.qty,0), el=$("#bagCount"); el.textContent=n; el.classList.toggle("on",n>0); $("#bagBtn").setAttribute("aria-label",`Bag, ${n} item${n===1?"":"s"}`); }
 /* ---------------- WINTER: entry banner + transition to /winter/ (products with collection "winter") ---------------- */
 (()=>{ const sec=$("#winter"), keys=Object.keys(P).filter(k=>P[k].col==="winter"); if(!sec||!keys.length) return;
-  sec.hidden=false; $("#wcN").textContent=`[ ${keys.length} piece${keys.length===1?"":"s"} ]`;
+  sec.hidden=false; const chipEl=$(".wchip"); if(chipEl) chipEl.hidden=false; $("#wcN").textContent=`[ ${keys.length} piece${keys.length===1?"":"s"} ]`;
   $("#wcCards").innerHTML=keys.slice(0,3).map(k=>`<span><img src="${P[k].img}" alt="" loading="lazy"></span>`).join("");
   const link=(wrap,cls)=>{ if(!wrap) return; const a=document.createElement("a"); a.href="/winter/"; a.textContent="Winter"; a.dataset.winterGo=""; if(cls) a.className=cls; wrap.prepend(a); };
   link($(".nav-links"),"wlink"); link($(".mobile-menu"));
