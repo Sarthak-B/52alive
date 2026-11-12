@@ -231,6 +231,101 @@ body.ready .w-hero>*{opacity:1;transform:none}
 .w-msg{padding:120px 24px;text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
 .w-msg a{border-bottom:1px solid currentColor}
 .w-intro{padding-top:clamp(120px,11vw,170px)}
+/* ---------- winter checkout (drawer) ---------- */
+.wco [hidden]{display:none!important}
+.wco{border:0;padding:0;margin:0 0 0 auto;width:min(580px,100%);height:100dvh;max-height:100dvh;max-width:100%;background:#EAF1F8;color:#2D4258;overflow:hidden;font-family:"JetBrains Mono",ui-monospace,monospace}
+.wco::backdrop{background:rgba(38,56,78,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.wco[open]{display:flex;flex-direction:column;animation:wcoIn .55s var(--ease-out)}
+@keyframes wcoIn{from{transform:translateX(100%)}}
+.wco-head{flex:none;position:relative;overflow:hidden;padding:22px 24px 20px;background:linear-gradient(135deg,#46607C,#5F7C9A);color:#F5F9FD;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.wco-head::before{content:"";position:absolute;inset:0;opacity:.45;background:radial-gradient(rgba(245,249,253,.9) 1.1px,transparent 1.7px) 0 0/34px 34px,radial-gradient(rgba(245,249,253,.6) 1px,transparent 1.5px) 17px 17px/34px 34px;animation:wcoSnow 14s linear infinite}
+@keyframes wcoSnow{to{background-position:0 136px,17px 153px}}
+.wco-head>*{position:relative}
+.wco-head small{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
+.wco-head h2{font-family:"Anton","Arial Narrow",sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(30px,6vw,42px);line-height:1;margin-top:8px}
+.wco-x{width:40px;height:40px;flex:none;display:grid;place-items:center;background:#F5F9FD;color:#3B526C;font-size:22px;line-height:1}
+.wco-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:22px 24px 30px}
+.wco-sec{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.7;margin:24px 0 12px;display:flex;align-items:center;gap:10px}
+.wco-sec:first-child{margin-top:0}
+.wco-sec::after{content:"";flex:1;height:1px;background:rgba(45,66,88,.2)}
+.wco-items{display:grid;gap:10px}
+.wco-it{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:10px;background:#F5F9FD;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.wco-it img{width:64px;height:76px;object-fit:contain;background:linear-gradient(180deg,#C6D7E7,#AFC5DB);mix-blend-mode:multiply}
+.wco-it b{display:block;font-weight:500;font-size:12.5px;line-height:1.35}
+.wco-it small{display:block;font-size:11px;opacity:.75;margin-top:3px;letter-spacing:.04em}
+.wco-qty{display:inline-flex;align-items:center;margin-top:8px;box-shadow:inset 0 0 0 1px rgba(45,66,88,.35)}
+.wco-qty button{width:30px;height:30px;font-size:16px}
+.wco-qty output{min-width:24px;text-align:center;font-size:12px}
+.wco-amt{text-align:right;font-size:13px;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.wco-rm{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;border-bottom:1px solid currentColor}
+.wco-rm:hover{opacity:1}
+.wco-empty{padding:26px 18px;text-align:center;background:#F5F9FD;font-size:12px;letter-spacing:.08em;line-height:1.8}
+.wco-empty button{margin-top:10px;border-bottom:1px solid currentColor;text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+.wco-f{display:grid;gap:6px;margin-bottom:12px}
+.wco-f label,.wco-f .lb{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.wco-f input,.wco-f textarea{width:100%;height:46px;padding:0 13px;border:1px solid rgba(45,66,88,.35);background:rgba(255,255,255,.7);color:#2D4258;font:inherit;font-size:14px;border-radius:0;transition:border-color .25s,background .25s;-webkit-appearance:none;appearance:none}
+.wco-f textarea{height:78px;padding:11px 13px;resize:vertical}
+.wco-f input:focus,.wco-f textarea:focus{outline:none;border-color:#3B526C;background:#fff}
+.wco-f .er{display:none;font-size:11.5px;color:#A4402A;letter-spacing:.02em}
+.wco-f.bad input,.wco-f.bad textarea{border-color:#A4402A}
+.wco-f.bad .er{display:block}
+.wco-r2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.wco-r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+.wco-pays{display:grid;gap:8px}
+.wco-pays label{display:flex;align-items:center;gap:12px;padding:14px;background:#F5F9FD;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(45,66,88,.2);font-size:12.5px;letter-spacing:.04em;transition:box-shadow .25s}
+.wco-pays input{width:18px;height:18px;accent-color:#3B526C;flex:none}
+.wco-pays label:has(input:checked){box-shadow:inset 0 0 0 2px #3B526C}
+.wco-pays small{margin-left:auto;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;background:#DCE8F3;white-space:nowrap}
+.wco-pays small.save{background:#3B526C;color:#F5F9FD}
+.wco-hint{font-size:12px;line-height:1.6;margin-top:10px;padding:10px 12px;background:#DCE8F3}
+.wco-hint button{border-bottom:1px solid currentColor;font-size:12px}
+.wco-foot{flex:none;padding:16px 24px calc(16px + env(safe-area-inset-bottom));background:#F5F9FD;box-shadow:0 -12px 30px -18px rgba(30,48,70,.5)}
+.wco-tot{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.wco-tot b{font-family:"Anton","Arial Narrow",sans-serif;font-weight:400;font-size:30px;letter-spacing:.01em}
+.wco-brk{font-size:11px;opacity:.75;margin-top:2px}
+.wco-go{width:100%;height:56px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:12px;background:#3B526C;color:#F5F9FD;font-size:12px;letter-spacing:.18em;text-transform:uppercase;transition:background .3s}
+.wco-go:hover{background:#2D4258}
+.wco-go:disabled{opacity:.6;cursor:progress}
+.wco-err{color:#A4402A;font-size:12px;margin-top:8px;min-height:0}
+.wco-err:empty{display:none}
+.wco-fine{font-size:10.5px;opacity:.65;margin-top:8px;letter-spacing:.04em;line-height:1.6}
+/* done */
+.wco-done{text-align:center;padding-top:6px}
+.wco-tick{width:68px;height:68px;margin:6px auto 16px;display:grid;place-items:center;background:#3B526C;color:#F5F9FD;font-size:30px;clip-path:polygon(50% 0,79% 10%,98% 35%,98% 65%,79% 90%,50% 100%,21% 90%,2% 65%,2% 35%,21% 10%);animation:wcoPop .6s var(--ease-out)}
+@keyframes wcoPop{from{transform:scale(.4) rotate(-40deg);opacity:0}}
+.wco-done h3{font-family:"Anton","Arial Narrow",sans-serif;font-weight:400;text-transform:uppercase;font-size:28px;line-height:1.05}
+.wco-done p{font-size:12.5px;line-height:1.7;margin-top:10px}
+.wco-id{display:inline-block;margin-top:6px;padding:6px 10px;background:#F5F9FD;font-size:11.5px;word-break:break-all}
+.wco-link{display:flex;gap:8px;margin-top:14px}
+.wco-link input{flex:1;min-width:0;height:42px;padding:0 10px;border:1px solid rgba(45,66,88,.35);background:#fff;font:inherit;font-size:12px;color:#2D4258;border-radius:0}
+.wco-sm{height:42px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:inset 0 0 0 1px #2D4258;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;transition:background .25s,color .25s}
+.wco-sm:hover{background:#2D4258;color:#F5F9FD}
+.wco-sm.solid{background:#3B526C;color:#F5F9FD;box-shadow:none}
+.wco-acts{display:grid;gap:8px;margin-top:18px}
+.wco-due{margin-top:14px;padding:12px;background:#DCE8F3;font-size:12.5px}
+.wco-pay{margin-top:18px;text-align:left;background:#F5F9FD;padding:16px}
+.wco-pay .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.wco-pay .hd b{font-family:"Anton","Arial Narrow",sans-serif;font-weight:400;font-size:26px;letter-spacing:.01em}
+.wco-pay .bd{display:grid;grid-template-columns:180px 1fr;gap:16px;margin-top:12px;align-items:start}
+.wco-qr{background:#fff;padding:8px;text-align:center}
+.wco-qr img,.wco-qr svg{width:100%;height:auto;display:block}
+.wco-qr small{display:block;font-size:10.5px;margin-top:6px}
+.wco-pay .sd{display:grid;gap:8px;font-size:11.5px}
+.wco-pay .sd p{line-height:1.6}
+.wco-pay .cp-paid{display:grid;gap:6px;margin-top:4px}
+.wco-pay .cp-paid.glow{animation:wcoGlow 1.4s 2}
+@keyframes wcoGlow{50%{box-shadow:0 0 0 3px #8FA9C4}}
+.wco-pay .sd input{height:40px;padding:0 10px;border:1px solid rgba(45,66,88,.35);font:inherit;font-size:13px;border-radius:0}
+@media (max-width:560px){
+  .wco-head,.wco-body,.wco-foot{padding-left:16px;padding-right:16px}
+  .wco-r3{grid-template-columns:1fr 1fr}.wco-r3 .wco-f:last-child{grid-column:1/-1}
+  .wco-r2{grid-template-columns:1fr}
+  .wco-pay .bd{grid-template-columns:1fr}.wco-qr{max-width:220px;margin:0 auto}
+  .wco-link{flex-wrap:wrap}.wco-link input{flex-basis:100%}
+}
+@media (max-width:360px){.wco-r3{grid-template-columns:1fr}.wco-it{grid-template-columns:52px 1fr auto}.wco-it img{width:52px;height:64px}}
+@media (prefers-reduced-motion:reduce){.wco[open],.wco-head::before,.wco-tick{animation:none}}
+
 @media (max-width:760px){
   .w-bar a:not(.lg){display:none}.w-bar>div{gap:10px;padding-left:14px}
   .wp-in{grid-template-columns:1fr;overflow-y:auto}.wp-info{overflow:visible;padding:22px 20px 24px}.wp-main{min-height:0}.wp-main img{max-height:38vh}
@@ -250,7 +345,7 @@ body.ready .w-hero>*{opacity:1;transform:none}
 <header class="w-bar"><div>
   <a class="lg" href="/" data-out aria-label="Back to 52 Alive home"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8H2M7 3 2 8l5 5"/></svg>52 Alive</a>
   <a href="/#shop" data-out>Full shop</a><a href="/#fit" data-out>Size guide</a><a href="/track/" data-out>Track order</a>
-  <a class="w-bagb" id="wBagTop" href="/#order" data-out><span>Bag</span><b id="wBagN">0</b></a>
+  <button type="button" class="w-bagb" id="wBagTop" data-checkout><span>Bag</span><b id="wBagN">0</b></button>
 </div></header>
 <!-- Shows products whose "collection" is "winter" in the catalogue block of the main page (set from the make4yu dashboard). -->
 <main class="winter" id="winter" aria-labelledby="wTitle">
@@ -321,12 +416,78 @@ body.ready .w-hero>*{opacity:1;transform:none}
       <p id="wpCrumb" style="opacity:.7"></p><h3 id="wpName"></h3><p class="wp-price" id="wpPrice"></p>
       <p class="h">Colour</p><div class="wp-opts" id="wpCols" role="group" aria-label="Colour"></div>
       <p class="h">Size</p><div class="wp-opts" id="wpSizes" role="group" aria-label="Size"></div><p class="wp-left" id="wpLeft" aria-live="polite"></p>
-      <div class="wp-acts"><button type="button" class="wp-btn" id="wpAdd">Add to bag</button><a class="wp-btn alt" href="/#order" data-out>Bag &amp; order →</a></div>
+      <div class="wp-acts"><button type="button" class="wp-btn" id="wpAdd">Add to bag</button><button type="button" class="wp-btn alt" data-checkout>Checkout →</button></div>
       <div class="wp-desc" id="wpDesc"></div>
     </div>
   </div>
 </dialog>
 <div class="w-toast" role="status" aria-live="polite"></div>
+<dialog class="wco" id="wco" aria-labelledby="wcoTitle">
+  <div class="wco-head"><div><small id="wcoStep">[ Winter checkout ] <span id="wcoOid"></span></small><h2 id="wcoTitle">Your winter bag</h2></div><button type="button" class="wco-x" id="wcoX" aria-label="Close checkout">×</button></div>
+  <form class="wco-form" id="wcoForm" novalidate data-nowora="manual" style="display:contents">
+    <div class="wco-body" id="wcoBody">
+      <p class="wco-sec">Bag</p>
+      <div class="wco-items" id="wcoItems" aria-live="polite"></div>
+      <div id="wcoFields">
+        <p class="wco-sec">Delivery details</p>
+        <div class="wco-r2">
+          <div class="wco-f" id="cf-name"><label for="c-name">Full name</label><input id="c-name" autocomplete="name" placeholder="Your name"><span class="er">Please enter your name.</span></div>
+          <div class="wco-f" id="cf-phone"><label for="c-phone">Phone / WhatsApp</label><input id="c-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit mobile number" maxlength="14"><span class="er">Enter a valid 10-digit mobile number.</span></div>
+        </div>
+        <div class="wco-f" id="cf-address"><label for="c-address">Address</label><textarea id="c-address" autocomplete="street-address" placeholder="House no., street, area, landmark"></textarea><span class="er">Please enter your delivery address.</span></div>
+        <div class="wco-r3">
+          <div class="wco-f" id="cf-city"><label for="c-city">City</label><input id="c-city" autocomplete="address-level2" placeholder="City"><span class="er">Enter your city.</span></div>
+          <div class="wco-f" id="cf-state"><label for="c-state">State</label><input id="c-state" autocomplete="address-level1" placeholder="State"><span class="er">Enter your state.</span></div>
+          <div class="wco-f" id="cf-pin"><label for="c-pin">PIN code</label><input id="c-pin" inputmode="numeric" autocomplete="postal-code" placeholder="6 digits" maxlength="6"><span class="er">Enter a 6-digit PIN.</span></div>
+        </div>
+        <p class="wco-sec">Payment</p>
+        <div class="wco-pays" role="radiogroup" aria-label="Payment">
+          <label><input type="radio" name="cpay" value="Cash on Delivery" checked><span>Cash on delivery</span><small id="codTag">+₹99</small></label>
+          <label><input type="radio" name="cpay" value="UPI (prepaid)"><span>UPI / GPay</span><small class="save">no extra fee</small></label>
+        </div>
+        <p class="wco-hint" id="cNudge" hidden>Cash on delivery adds a <b id="cNudgeFee">₹99</b> handling charge. <button type="button" id="cToUpi">Pay by UPI instead and save →</button></p>
+        <p class="wco-hint" id="cUpiHint" hidden>Pay <b id="cUpiAmt"></b> with GPay or any UPI app right after you place the order — the payment screen opens here.</p>
+        <div class="wco-f" style="margin-top:14px"><label for="c-note">Note <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="c-note" placeholder="Gift wrap, delivery time, fit question…"></div>
+      </div>
+      <div class="wco-done" id="wcoDone" hidden>
+        <div class="wco-tick" aria-hidden="true">✓</div>
+        <h3 id="cdTitle">Order placed — thank you!</h3>
+        <p>Your order ID<br><span class="wco-id" id="cdId"></span></p>
+        <p>We'll pack it within 48 hours. Your tracking link is also on its way to your WhatsApp (<b id="cdWa"></b>).</p>
+        <div class="wco-link"><input id="cdUrl" readonly aria-label="Your tracking link"><button type="button" class="wco-sm" id="cdCopy">Copy link</button><a class="wco-sm solid" id="cdWaBtn" target="_blank" rel="noopener">Send to my WhatsApp</a></div>
+        <p class="wco-due" id="cdDue" hidden></p>
+        <div class="wco-pay" id="cdPay" hidden>
+          <div class="hd"><span>Pay now to confirm</span><b id="cpAmt"></b></div>
+          <div class="bd">
+            <div class="wco-qr" id="cpQr"><img src="/images/upi-qr.jpg" alt="UPI QR code for the 52 Alive payment account" width="200" height="225" loading="lazy"></div>
+            <div class="sd">
+              <a class="wco-sm solid" id="cpGpay" rel="noopener">Pay with GPay</a>
+              <a class="wco-sm" id="cpUpi" rel="noopener">Other UPI app</a>
+              <p>UPI ID: <b id="cpId"></b> <button type="button" class="wco-rm" id="cpCopy">Copy</button></p>
+              <div id="cpPaid" class="cp-paid">
+                <label for="cpUtr" style="font-size:11px;line-height:1.5">Paid? Enter the 12-digit UPI reference (UTR) from your payment app (optional)</label>
+                <input id="cpUtr" inputmode="numeric" maxlength="16" placeholder="e.g. 431289765432" autocomplete="off">
+                <button type="button" class="wco-sm solid" id="cpDone">I've paid — track my order →</button>
+                <p class="wco-err" id="cpErr" role="alert"></p>
+              </div>
+              <p style="opacity:.7">On a computer? Scan the QR with your phone — the amount is already filled in. Order <b id="cpRef"></b> is in the payment note.</p>
+            </div>
+          </div>
+        </div>
+        <div class="wco-acts"><a class="wco-sm solid" id="cdTrack" href="/track/">Track this order</a><button type="button" class="wco-sm" id="cdCopyId">Copy order ID</button><button type="button" class="wco-sm" id="cdMore">Keep browsing winter</button></div>
+      </div>
+    </div>
+    <div class="wco-foot" id="wcoFoot">
+      <div class="wco-tot"><span id="cTotLabel">0 items</span><b id="cTot">₹0</b></div>
+      <p class="wco-brk" id="cBrk" hidden></p>
+      <button type="submit" class="wco-go" id="cGo">Place order →</button>
+      <p class="wco-err" id="cErr" role="alert"></p>
+      <p class="wco-fine">Pay by UPI right after ordering, or cash when it arrives. You'll get an order ID to track it.</p>
+    </div>
+  </form>
+</dialog>
+
+<script src="https://make4yu.vercel.app/t.js" data-site="7LvyjnQvzQ" defer></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -341,8 +502,8 @@ addEventListener("pageshow",e=>{ if(e.persisted){ out.classList.remove("on"); $(
 /* bag is shared with the main site through localStorage */
 const BAG="52a_bag";
 const readBag=()=>{ try{ const b=JSON.parse(localStorage.getItem(BAG)||"[]"); return Array.isArray(b)?b:[]; }catch(e){ return []; } };
-const bagCount=()=>{ const n=readBag().reduce((a,b)=>a+(+b.qty||0),0); $("#wBagN").textContent=n; $("#wBagTop").setAttribute("aria-label",`Your bag, ${n} item${n===1?"":"s"} — go to order`); return n; };
-const toastEl=$(".w-toast"); let tt; const toast=(m,link)=>{ toastEl.innerHTML=`<span>${esc(m)}</span>`+(link?`<a href="/#order" data-out>Bag &amp; order →</a>`:""); toastEl.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>toastEl.classList.remove("show"),3600); };
+const bagCount=()=>{ const n=readBag().reduce((a,b)=>a+(+b.qty||0),0); $("#wBagN").textContent=n; $("#wBagTop").setAttribute("aria-label",`Your bag, ${n} item${n===1?"":"s"} — open checkout`); return n; };
+const toastEl=$(".w-toast"); let tt; const toast=(m,link)=>{ toastEl.innerHTML=`<span>${esc(m)}</span>`+(link?`<button type="button" data-checkout style="border-bottom:1px solid currentColor;white-space:nowrap;font:inherit;letter-spacing:inherit;text-transform:inherit">Checkout →</button>`:""); toastEl.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>toastEl.classList.remove("show"),3600); };
 bagCount(); addEventListener("storage",bagCount);
 /* snowfall: small soft flakes on a canvas above the page, never catching clicks */
 (()=>{ if(reduced) return; const cv=$("#snow"), ctx=cv.getContext("2d"); let W,H,dpr,flakes=[],raf=0,last=0;
@@ -442,7 +603,95 @@ fetch("/",{cache:"no-cache"}).then(r=>r.text()).then(html=>{
   if(cats.length>1){ chip("all","All"); cats.forEach(c=>chip(c,CATS[c]||c)); }
   $("#wNavCats").innerHTML=cats.slice(0,4).map(c=>`<a href="#wGrid" data-wc="${esc(c)}">[ ${esc(CATS[c]||c)} ]</a>`).join("");
   $$("[data-wc]").forEach(a=>a.addEventListener("click",()=>{ const b=[...chips.children].find(x=>x.textContent===(CATS[a.dataset.wc]||a.dataset.wc)); if(b) b.click(); }));
-  draw(); lift();
+  draw();
+  /* ---------- winter checkout: same order system as the main page (/api/order + make4yu dashboard) ---------- */
+  const SITE=(()=>{ try{ const s=/window\.SITE\s*=\s*(\{[\s\S]*?\});/.exec(html); return s?Function('"use strict";return ('+s[1]+')')():{}; }catch(e){ return {}; } })();
+  const COD_FEE=Math.max(0,Number(SITE.codFee)||0), UPI=String(SITE.upi||"").trim(), UPI_NAME=SITE.upiName||SITE.brand||"52 Alive";
+  $("#codTag").textContent=COD_FEE?"+"+inr(COD_FEE):"no extra fee"; $("#cNudgeFee").textContent=inr(COD_FEE);
+  if(!UPI){ const u=$('input[name=cpay][value="UPI (prepaid)"]'); u.closest("label").hidden=true; }
+  const co=$("#wco"), cf=$("#wcoForm"), newId=()=>"52A-"+(crypto.randomUUID?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{ const r=Math.random()*16|0; return (c==="x"?r:(r&3|8)).toString(16); }));
+  let oid=newId(), placing=false;
+  const lines=()=>readBag().filter(b=>b&&P[b.key]&&P[b.key].colours[b.colour]&&sizesFor(b.key,b.colour).includes(b.size)).map(b=>({key:b.key,colour:b.colour,size:b.size,qty:Math.max(1,Math.min(10,+b.qty||1))}));
+  const saveLines=ls=>{ try{ localStorage.setItem(BAG,JSON.stringify(ls)); }catch(e){} bagCount(); };
+  const isCod=()=>(cf.querySelector("input[name=cpay]:checked")||{}).value==="Cash on Delivery";
+  const itemsTotal=ls=>ls.reduce((a,b)=>a+P[b.key].price*b.qty,0);
+  const totals=()=>{ const ls=lines(), n=ls.reduce((a,b)=>a+b.qty,0), t=itemsTotal(ls), fee=isCod()&&n?COD_FEE:0;
+    $("#cTot").textContent=inr(t+fee); $("#cTotLabel").textContent=`${n} item${n===1?"":"s"}`;
+    $("#cBrk").hidden=!fee; if(fee) $("#cBrk").textContent=`Items ${inr(t)} + cash on delivery handling ${inr(fee)}`;
+    $("#cNudge").hidden=!(fee&&UPI); const up=!isCod()&&UPI&&n; $("#cUpiHint").hidden=!up; if(up) $("#cUpiAmt").textContent=inr(t);
+    $("#cGo").disabled=!n||placing; };
+  const drawItems=()=>{ const ls=lines(), box=$("#wcoItems"); box.innerHTML="";
+    if(!ls.length){ box.innerHTML=`<div class="wco-empty">Your bag is empty.<br><button type="button" id="cBrowse">Pick a winter piece</button></div>`; $("#cBrowse").onclick=()=>co.close(); totals(); return; }
+    ls.forEach((b,i)=>{ const p=P[b.key], d=document.createElement("div"); d.className="wco-it";
+      d.innerHTML=`<img src="${abs(shot(b.key,b.colour))}" alt=""><div><b>${esc(p.name)}</b><small>${esc(b.colour)} · ${esc(b.size)}</small><span class="wco-qty"><button type="button" aria-label="One less">−</button><output>${b.qty}</output><button type="button" aria-label="One more">+</button></span></div><div class="wco-amt"><span>${inr(p.price*b.qty)}</span><button type="button" class="wco-rm">Remove</button></div>`;
+      const set=q=>{ const all=lines(); if(q<1) all.splice(i,1); else all[i].qty=Math.min(10,q); saveLines(all); drawItems(); };
+      const [mi,pl]=d.querySelectorAll(".wco-qty button"); mi.onclick=()=>set(b.qty-1); pl.onclick=()=>set(b.qty+1); d.querySelector(".wco-rm").onclick=()=>set(0);
+      box.appendChild(d); });
+    totals(); };
+  const rules={ name:v=>v.trim().length>=2, phone:v=>/^[6-9]\d{9}$/.test(v.replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,"")), address:v=>v.trim().length>=8, city:v=>v.trim().length>=2, state:v=>v.trim().length>=2, pin:v=>/^[1-9]\d{5}$/.test(v.trim()) };
+  Object.keys(rules).forEach(id=>{ const el=$("#c-"+id); el.addEventListener("input",()=>{ if(id==="pin") el.value=el.value.replace(/\D/g,""); if($("#cf-"+id).classList.contains("bad")&&rules[id](el.value)) $("#cf-"+id).classList.remove("bad"); }); });
+  cf.addEventListener("change",e=>{ if(e.target.name==="cpay") totals(); });
+  $("#cToUpi").onclick=()=>{ const r=$('input[name=cpay][value="UPI (prepaid)"]'); r.checked=true; totals(); toast(`Switched to UPI — you save ${inr(COD_FEE)}`); };
+  const showForm=()=>{ $("#wcoFields").hidden=false; $("#wcoDone").hidden=true; $("#wcoFoot").hidden=false; $$(".wco-sec").forEach(x=>x.hidden=false); $("#wcoTitle").textContent="Your winter bag"; $("#wcoOid").textContent=""; drawItems(); };
+  const openCo=()=>{ if(wp.open) wp.close(); toastEl.classList.remove("show"); if($("#wcoDone").hidden) showForm(); if(!co.open) co.showModal(); $("#wcoBody").scrollTop=0; };
+  window.openWinterCheckout=openCo;
+  document.addEventListener("click",e=>{ if(e.target.closest("[data-checkout]")){ e.preventDefault(); openCo(); } });
+  $("#wcoX").onclick=()=>{ if(!placing) co.close(); };
+  co.addEventListener("click",e=>{ if(e.target===co&&!placing) co.close(); });
+  co.addEventListener("cancel",e=>{ if(placing) e.preventDefault(); });
+  addEventListener("storage",e=>{ if(e.key===BAG&&co.open&&$("#wcoDone").hidden) drawItems(); });
+  function upiLinks(amount,ref){ const q="pa="+UPI.replace(/[^\w.@-]/g,"")+"&pn="+encodeURIComponent(UPI_NAME)+"&am="+Number(amount).toFixed(2)+"&cu=INR&tn="+encodeURIComponent(("52 Alive "+ref).slice(0,40));
+    const ua=navigator.userAgent, android=/Android/i.test(ua), ios=/iPhone|iPad|iPod/i.test(ua);
+    return { any:"upi://pay?"+q, gpay:android?"intent://pay?"+q+"#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end":ios?"gpay://upi/pay?"+q:"upi://pay?"+q, mobile:android||ios }; }
+  const loadQr=()=>window.qrcode?Promise.resolve(window.qrcode):(loadQr.p=loadQr.p||new Promise((res,rej)=>{ const sc=document.createElement("script"); sc.src="/js/qrcode.min.js"; sc.onload=()=>window.qrcode?res(window.qrcode):rej(); sc.onerror=rej; document.head.appendChild(sc); }));
+  const drawQr=(link,amount)=>{ const box=$("#cpQr"), fb=box.innerHTML; loadQr().then(qrcode=>{ const q=qrcode(0,"M"); q.addData(link); q.make(); const n=q.getModuleCount(); let d="";
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(q.isDark(r,c)) d+=`M${c} ${r}h1v1h-1z`;
+    box.innerHTML=`<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" role="img" aria-label="UPI QR code to pay ${inr(amount)}"><path d="${d}" fill="#111"/></svg><small>Scan to pay <b>${inr(amount)}</b></small>`; }).catch(()=>{ box.innerHTML=fb; }); };
+  const copy=(t,msg)=>{ try{ navigator.clipboard.writeText(t).then(()=>toast(msg),()=>toast(t)); }catch(_){ toast(t); } };
+  cf.addEventListener("submit",async e=>{ e.preventDefault(); if(placing||!$("#wcoDone").hidden) return;
+    const ls=lines(); if(!ls.length){ toast("Your bag is empty"); return; }
+    let bad=null; Object.keys(rules).forEach(id=>{ const ok=rules[id]($("#c-"+id).value); $("#cf-"+id).classList.toggle("bad",!ok); if(!ok&&!bad) bad=$("#cf-"+id); });
+    if(bad){ toast("Please fill the highlighted fields"); bad.scrollIntoView({behavior:reduced?"auto":"smooth",block:"center"}); setTimeout(()=>bad.querySelector("input,textarea").focus({preventScroll:true}),reduced?0:400); return; }
+    const v=id=>$("#c-"+id).value.trim(), phone=$("#c-phone").value.replace(/\D/g,"").slice(-10), pay=cf.querySelector("input[name=cpay]:checked").value, note=v("note");
+    const btn=$("#cGo"), err=$("#cErr"); err.textContent=""; placing=true; btn.disabled=true; btn.textContent="Placing your order…";
+    let res=null;
+    try{ const r=await fetch("/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderId:oid,name:v("name"),phone,address:v("address"),city:v("city"),state:v("state"),pin:v("pin"),payment:pay,note,items:ls.map(b=>({key:b.key,colour:b.colour,size:b.size,qty:b.qty}))})});
+      res=await r.json().catch(()=>({ok:false,error:"Something went wrong — please try again."})); }
+    catch(_){ res={ok:false,error:"Couldn't reach us — check your internet and try again."}; }
+    placing=false; btn.textContent="Place order →"; totals();
+    if(!res||!res.ok){ err.textContent=(res&&res.error)||"Couldn't place the order — please try again."; toast(err.textContent); return; }
+    const placed=oid, paid=itemsTotal(ls), url=location.origin+"/track/?id="+encodeURIComponent(placed);
+    (window.noworaQ=window.noworaQ||[]).push(["Orders",{"Order ID":placed,"Name":v("name"),"Phone":"+91 "+phone,"Address":v("address").replace(/\s*\n\s*/g,", "),"City":v("city"),"State":v("state"),"PIN code":v("pin"),"Payment":pay,"Note":note,
+      "Tracking link":url,...(pay==="Cash on Delivery"&&COD_FEE?{"COD charge":String(COD_FEE)}:{}),"Total":String(paid+(pay==="Cash on Delivery"?COD_FEE:0))},
+      ls.map(b=>({name:P[b.key].name,colour:b.colour,size:b.size,qty:b.qty,price:P[b.key].price}))]);
+    try{ localStorage.setItem("52a_last_order",JSON.stringify({id:placed,ts:Date.now()})); }catch(_){}
+    saveLines([]);
+    $("#wcoFields").hidden=true; $("#wcoFoot").hidden=true; $$(".wco-sec").forEach(x=>x.hidden=true); $("#wcoItems").innerHTML=""; $("#wcoDone").hidden=false;
+    $("#wcoTitle").textContent="Order placed"; $("#wcoOid").textContent="";
+    $("#cdId").textContent=placed; $("#cdWa").textContent="+91 "+phone; $("#cdUrl").value=url; $("#cdTrack").href="/track/?id="+encodeURIComponent(placed);
+    $("#cdWaBtn").href="https://wa.me/91"+phone+"?text="+encodeURIComponent("My 52 Alive order "+placed+"\nTrack it here: "+url);
+    $("#cdCopy").onclick=()=>copy(url,"Tracking link copied"); $("#cdCopyId").onclick=()=>copy(placed,"Order ID copied");
+    const due=$("#cdDue"); due.hidden=pay!=="Cash on Delivery"; if(!due.hidden) due.innerHTML=`Keep <b>${inr(paid+COD_FEE)}</b> ready — pay in cash when your order arrives${COD_FEE?` (includes ${inr(COD_FEE)} cash handling)`:""}.`;
+    const pb=$("#cdPay");
+    if(UPI&&pay==="UPI (prepaid)"){ const L=upiLinks(paid,placed.slice(0,12));
+      $("#cdTitle").textContent="Order placed — now pay to confirm"; $("#cpAmt").textContent=inr(paid); $("#cpId").textContent=UPI; $("#cpRef").textContent=placed.slice(0,12);
+      $("#cpGpay").href=L.gpay; $("#cpUpi").href=L.any; $("#cpGpay").hidden=$("#cpUpi").hidden=!L.mobile; drawQr(L.any,paid); $("#cpCopy").onclick=()=>copy(UPI,"UPI ID copied"); pb.hidden=false;
+      let went=false; [$("#cpGpay"),$("#cpUpi")].forEach(a=>a.onclick=()=>{ went=true; });
+      const back=()=>{ if(document.visibilityState==="visible"&&went){ went=false; const f=$("#cpPaid"); f.classList.remove("glow"); void f.offsetWidth; f.classList.add("glow"); f.scrollIntoView({behavior:reduced?"auto":"smooth",block:"center"}); setTimeout(()=>$("#cpUtr").focus({preventScroll:true}),400); } };
+      document.addEventListener("visibilitychange",back);
+      const paidGo=()=>{ const utr=$("#cpUtr").value.replace(/\s/g,"");
+        if(utr&&!/^\d{12}$/.test(utr)){ $("#cpErr").textContent="The UPI reference is 12 digits — check your payment app, or leave it empty."; return; }
+        $("#cpErr").textContent=""; (window.noworaQ=window.noworaQ||[]).push(["UPI payments",{"Order ID":placed,"Amount":String(paid),"UPI reference (UTR)":utr||"not entered","Paid to":UPI,"Customer":v("name"),"Phone":"+91 "+phone}]);
+        try{ localStorage.setItem("52a_paid_"+placed,"1"); }catch(_){} document.removeEventListener("visibilitychange",back);
+        $("#cpDone").disabled=true; $("#cpDone").textContent="Opening your tracking…"; setTimeout(()=>{ location.href="/track/?id="+encodeURIComponent(placed)+"&paid=1"; },700); };
+      $("#cpDone").onclick=paidGo; $("#cpUtr").onkeydown=ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); paidGo(); } };
+    } else { pb.hidden=true; $("#cdTitle").textContent="Order placed — thank you!"; }
+    $("#wcoBody").scrollTop=0;
+    $("#cdMore").onclick=()=>{ oid=newId(); cf.reset(); Object.keys(rules).forEach(id=>$("#cf-"+id).classList.remove("bad")); $("#cdPay").hidden=true; showForm(); co.close(); };
+  });
+
+  if(location.hash==="#checkout") openCo();
+  lift();
 }).catch(()=>{ $(".w-panel").innerHTML=`<p class="w-msg">The winter section couldn't load. <a href="/#shop" data-out>Open the full shop →</a></p>`; lift(); });
 </script>
 </body>
