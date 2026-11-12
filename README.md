@@ -64,3 +64,7 @@ Courier charges come out of the Shiprocket wallet.
   catalogue, creates it in Shiprocket and saves it to the make4yu dashboard. No WhatsApp redirect.
 - **Tracking page:** `/track/?id=52A-…` (old `/?track=…` links redirect there).
 - **WhatsApp order alert to the shop** comes from make4yu (repo Sarthak-B/make4yu, workflow `whatsapp.yml`), for every client site.
+
+## Winter section
+
+`#winter` in `public/index.html` shows every product whose `"collection"` is `"winter"` in the catalogue block (they stay in the main shop too). Set it from the make4yu dashboard: Shop → Products → open a product → **Show in → Winter section** → Publish. With no winter products the section and its menu link hide themselves.
