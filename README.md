@@ -65,6 +65,6 @@ Courier charges come out of the Shiprocket wallet.
 - **Tracking page:** `/track/?id=52A-…` (old `/?track=…` links redirect there).
 - **WhatsApp order alert to the shop** comes from make4yu (repo Sarthak-B/make4yu, workflow `whatsapp.yml`), for every client site.
 
-## Winter section
+## Winter page
 
-`#winter` in `public/index.html` shows every product whose `"collection"` is `"winter"` in the catalogue block (they stay in the main shop too). Set it from the make4yu dashboard: Shop → Products → open a product → **Show in → Winter section** → Publish. With no winter products the section and its menu link hide themselves.
+`public/winter/index.html` (the `/winter/` page, opened from the banner on the home page) shows every product whose `"collection"` is `"winter"` in the catalogue block (they stay in the main shop too). Set it from the make4yu dashboard: Shop → Products → open a product → **Show in → Winter section** → Publish. It reads the catalogue from the home page, so there is one place to edit. Pieces added there go into the same bag (kept in the browser as `52a_bag`). With no winter products the banner and its menu link hide themselves.
