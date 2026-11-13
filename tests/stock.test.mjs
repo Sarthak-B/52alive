@@ -5,7 +5,7 @@ import {test, beforeEach} from 'node:test';
 import worker, {catalogFromHtml, buildPayload, applyDispatch, _resetTokenCache, _resetLoginFail} from '../src/worker.js';
 
 const page = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
-const block = d => `<script type="application/json" id="nowora-products">\n${JSON.stringify(d, null, 1)}\n</script>`;
+const block = d => `<script type="application/json" id="make4yu-products">\n${JSON.stringify(d, null, 1)}\n</script>`;
 const cat = () => ({categories: [{id: 'jackets', name: 'Jackets'}], products: [
   {id: 'puffer', name: 'Puffer', category: 'jackets', price: 1999, sizes: ['S', 'M', 'L'], colours: [
     {name: 'Blush Pink', hex: '#D9AFA4', photos: ['a.jpg'], stock: {S: 2, M: 0, L: 1}},
@@ -68,7 +68,7 @@ function stand() {
   };
 }
 const hook = (body, key = 'tok-123') => worker.fetch(new Request('https://52.example/api/courier-updates', {method: 'POST', headers: {'x-api-key': key, 'Content-Type': 'application/json'}, body: JSON.stringify(body)}), env, {waitUntil: p => p});
-const stockNow = () => JSON.parse(repo.html.match(/id="nowora-products">([\s\S]*?)<\/script>/)[1]);
+const stockNow = () => JSON.parse(repo.html.match(/id="make4yu-products">([\s\S]*?)<\/script>/)[1]);
 beforeEach(() => _resetTokenCache());
 
 test('shipped webhook takes the order off stock, commits, and counts each order once', async () => {

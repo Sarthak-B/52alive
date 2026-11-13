@@ -775,7 +775,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
 </style>
 </head>
 <body>
-<script type="application/json" id="nowora-products">
+<script type="application/json" id="make4yu-products">
 {
  "v": 1,
  "note": "Managed from the make4yu client dashboard (Shop → Products). Edit there so photos, colours and categories stay in step.",
@@ -1446,7 +1446,7 @@ dialog.trk-dlg{width:min(640px,calc(100vw - 32px));overflow:auto;overscroll-beha
     </div>
 
     <div class="oform" data-reveal>
-      <form id="orderForm" novalidate data-nowora="manual">
+      <form id="orderForm" novalidate data-make4yu="manual">
         <h3>Your order <small id="oid"></small></h3>
         <fieldset class="fs">
           <legend class="sr-only">Choose your piece</legend>
@@ -1674,9 +1674,9 @@ const inr=n=>"₹"+n.toLocaleString("en-IN");
 
 /* Keep in sync with CATALOG in src/worker.js (names, prices, sizes, colours) — tests/shiprocket.test.mjs checks it.
    imgs: photo per colour, used for the bag thumbnail. */
-/* Products come from the catalogue block (#nowora-products) — the make4yu dashboard edits it, and the
+/* Products come from the catalogue block (#make4yu-products) — the make4yu dashboard edits it, and the
    Shiprocket endpoint reads the same block from the live page, so prices are always checked server-side. */
-const DATA=(()=>{ try{ return JSON.parse(document.getElementById("nowora-products").textContent); }catch(e){ return {categories:[],products:[]}; } })();
+const DATA=(()=>{ try{ return JSON.parse(document.getElementById("make4yu-products").textContent); }catch(e){ return {categories:[],products:[]}; } })();
 const P={};
 (DATA.products||[]).forEach(p=>{
   if(!p||!p.id||p.hidden||!(+p.price>0)||!Array.isArray(p.colours)) return;
@@ -1884,7 +1884,7 @@ form.addEventListener("submit",async e=>{
   if(!res.ok){ err.textContent=res.error||"Couldn't place the order — please try again."; toast(err.textContent); return; }
 
   /* the order went through: save it to the shop's make4yu dashboard (t.js picks it up even if it loads a moment later) */
-  (window.noworaQ=window.noworaQ||[]).push(["Orders",{
+  (window.make4yuQ=window.make4yuQ||[]).push(["Orders",{
     "Order ID":orderId, "Name":$("#name").value.trim(), "Phone":"+91 "+phone,
     "Address":$("#address").value.trim().replace(/\s*\n\s*/g,", "), "City":$("#city").value.trim(), "State":$("#state").value.trim(),
     "PIN code":$("#pin").value.trim(), "Payment":pay, "Note":note,
@@ -1910,7 +1910,7 @@ form.addEventListener("submit",async e=>{
       const utr=$("#pbUtr").value.replace(/\s/g,"");
       if(utr&&!/^\d{12}$/.test(utr)){ $("#pbErr").textContent="The UPI reference is 12 digits — check your payment app, or leave it empty."; return; }
       $("#pbErr").textContent="";
-      (window.noworaQ=window.noworaQ||[]).push(["UPI payments",{"Order ID":placed,"Amount":String(paid),"UPI reference (UTR)":utr||"not entered","Paid to":UPI,"Customer":$("#name").value.trim(),"Phone":"+91 "+phone}]);
+      (window.make4yuQ=window.make4yuQ||[]).push(["UPI payments",{"Order ID":placed,"Amount":String(paid),"UPI reference (UTR)":utr||"not entered","Paid to":UPI,"Customer":$("#name").value.trim(),"Phone":"+91 "+phone}]);
       try{ localStorage.setItem("52a_paid_"+placed,"1"); }catch(_){}
       document.removeEventListener("visibilitychange",back);
       $("#pbDone").disabled=true; $("#pbDone").textContent="Opening your tracking…";
@@ -2056,6 +2056,6 @@ renderOptions(false); renderBag();
 })();
 </script>
 <!-- make4yu visitor stats (no cookies) -->
-<script src="https://make4yu.com/t.js" data-site="7LvyjnQvzQ" defer></script>
+<script src="https://make4yu.com/t.js?v=2" data-site="7LvyjnQvzQ" defer></script>
 </body>
 </html>

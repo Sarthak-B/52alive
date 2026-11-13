@@ -19,7 +19,7 @@ beforeEach(() => { _resetTokenCache(); _resetLoginFail(); _resetCatalogCache(); 
 
 test('page shows exactly the products Shiprocket prices from', () => {
   const src = html.match(/const DATA=[\s\S]*?\nconst FIRST_KEY=[^\n]*/)[0];
-  const block = html.match(/<script type="application\/json" id="nowora-products">([\s\S]*?)<\/script>/)[1];
+  const block = html.match(/<script type="application\/json" id="make4yu-products">([\s\S]*?)<\/script>/)[1];
   const ctx = {document: {getElementById: () => ({textContent: block})}}; vm.createContext(ctx);
   vm.runInContext(src + '\nthis.P=P;', ctx);
   assert.deepEqual(Object.keys(ctx.P), Object.keys(CATALOG));
@@ -39,7 +39,7 @@ test('catalogue skips hidden and unpriced products and rejects a missing block',
     {id: 'c', name: 'C', price: 0, colours: [{name: 'Red'}]},
     {id: 'bad id!', name: 'D', price: 5, colours: [{name: 'Red'}]},
   ]};
-  const cat = catalogFromHtml(`<script type="application/json" id="nowora-products">${JSON.stringify(data)}</script>`);
+  const cat = catalogFromHtml(`<script type="application/json" id="make4yu-products">${JSON.stringify(data)}</script>`);
   assert.deepEqual(Object.keys(cat), ['a']);
   assert.equal(cat.a.weight, 0.5);
   assert.throws(() => catalogFromHtml('<html></html>'));
@@ -115,7 +115,7 @@ test('blocks other origins and works without secrets', async () => {
   assert.equal((await worker.fetch(req('https://evil.example'), env)).status, 403);
   const noSr = await worker.fetch(req('https://52alive.example'), {...env, SHIPROCKET_EMAIL: ''});
   assert.equal(noSr.status, 200); assert.equal((await noSr.json()).shiprocket, false);   /* the order still goes through */
-  assert.ok((await (await worker.fetch(new Request('https://52alive.example/'), env)).text()).includes('nowora-products'));
+  assert.ok((await (await worker.fetch(new Request('https://52alive.example/'), env)).text()).includes('make4yu-products'));
   assert.equal(await (await worker.fetch(new Request('https://52alive.example/style.css'), env)).text(), 'asset');
 });
 
