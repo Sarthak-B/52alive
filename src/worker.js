@@ -545,7 +545,7 @@ export async function handleCourierUpdate(request, env, ctx) {
 }
 
 /* ============================== store dashboard: orders → ship ==============================
- * POST /api/store  — from the make4yu dashboard (Origin make4yu.com, or the old make4yu.vercel.app / nowora.vercel.app, or DASHBOARD_ORIGINS), or with x-store-key
+ * POST /api/store  — from the make4yu dashboard (Origin make4yu.com, or DASHBOARD_ORIGINS), or with x-store-key
  * Used by the make4yu client dashboard (Shop → Orders), which runs on another domain, so CORS is open
  * and the key is the gate: shipping spends Shiprocket wallet money.
  *   {action:"list"}                         → latest Shiprocket orders, each with a stage
@@ -667,8 +667,8 @@ export async function storeShip(input, env, ctx) {
 
 export function dashboardOrigin(request, env) {
   let host = ""; try { host = new URL(request.headers.get("Origin") || "").host; } catch (e) { return false; }
-  /* make4yu's dashboard lives on make4yu.com (old make4yu.vercel.app / nowora.vercel.app addresses still allowed); DASHBOARD_ORIGINS adds more */
-  const allowed = ["make4yu.com", "www.make4yu.com", "make4yu.pages.dev", "make4yu.vercel.app", "nowora.vercel.app"].concat(String(env.DASHBOARD_ORIGINS || "").split(",").map(x => x.trim()).filter(Boolean));
+  /* make4yu's dashboard lives on make4yu.com; DASHBOARD_ORIGINS adds more */
+  const allowed = ["make4yu.com", "www.make4yu.com", "make4yu.pages.dev"].concat(String(env.DASHBOARD_ORIGINS || "").split(",").map(x => x.trim()).filter(Boolean));
   return host === new URL(request.url).host || allowed.includes(host);
 }
 export async function handleStore(request, env, ctx) {
