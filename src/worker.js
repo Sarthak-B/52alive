@@ -415,7 +415,7 @@ export async function handleTrack(request, env) {
     return json({ ok: true, order: order });
   } catch (e) {
     console.error("[track]", e.message);
-    return json({ ok: false, error: e.status === 400 ? e.message : "Tracking is busy right now — please try again in a minute." }, e.status === 400 ? 400 : 502);
+    return json({ ok: false, error: e.status === 400 ? e.message : "Tracking is busy right now — please try again in a minute." }, e.status === 400 ? 400 : 200);
   }
 }
 
@@ -696,7 +696,9 @@ export async function handleStore(request, env, ctx) {
     }
   } catch (e) {
     console.error("[store]", b.action, e.message);
-    return cjson({ ok: false, error: String(e.message || "Shiprocket error").slice(0, 240) }, e.status && e.status < 600 ? e.status : 502);
+    // Courier-side failures go back as 200 + ok:false: on the make4yu.com zone Cloudflare replaces a 502 body with its own
+    // "error code: 502" page, and the dashboard would read that as "shipping isn't set up" and hide the Orders panel.
+    return cjson({ ok: false, upstream: !(e.status >= 400 && e.status < 500), error: String(e.message || "Shiprocket error").slice(0, 240) }, e.status >= 400 && e.status < 500 ? e.status : 200);
   }
 }
 
