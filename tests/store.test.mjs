@@ -33,6 +33,7 @@ test('the make4yu dashboard needs no key; others do; preflight is open', async (
   const plain = (origin, key) => worker.fetch(new Request('https://52.example/api/store', {method: 'POST', headers: {...(origin ? {Origin: origin} : {}), ...(key ? {'x-store-key': key} : {})}, body: '{"action":"list"}'}), env);
   assert.equal((await plain('https://nowora.vercel.app')).status, 200);
   assert.equal((await plain('https://make4yu.vercel.app')).status, 200);
+  assert.equal((await plain('https://make4yu.com')).status, 200);
   assert.equal((await plain('https://52.example')).status, 200);
   calls = [];
   assert.equal((await plain('https://evil.example')).status, 401);
