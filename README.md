@@ -54,7 +54,7 @@ Use a dedicated Shiprocket API user (Settings → API → Configure), not the ma
 
 `POST /api/store` lets the client dashboard (Shop → Orders) list Shiprocket orders and press **Ship now**:
 it books the courier (AWB), schedules the pickup, returns the label and invoice links and takes the
-items off the website's stock. The make4yu dashboard (Origin make4yu.com, or the old make4yu.vercel.app / nowora.vercel.app, or DASHBOARD_ORIGINS) needs no key;
+items off the website's stock. The make4yu dashboard (Origin make4yu.com, or DASHBOARD_ORIGINS) needs no key;
 anything else must send `x-store-key` = `STORE_KEY` or `SHIPROCKET_WEBHOOK_TOKEN`.
 Courier charges come out of the Shiprocket wallet.
 

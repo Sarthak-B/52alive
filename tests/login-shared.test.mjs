@@ -10,7 +10,7 @@ globalThis.fetch = async url => {
   if (url.endsWith('/auth/login')) { logins++; return fail ? Response.json({message: 'Invalid'}, {status: 401}) : Response.json({token: 'T'}); }
   return Response.json({data: []});
 };
-const list = () => worker.fetch(new Request('https://52.example/api/store', {method: 'POST', headers: {Origin: 'https://nowora.vercel.app'}, body: '{"action":"list"}'}), env);
+const list = () => worker.fetch(new Request('https://52.example/api/store', {method: 'POST', headers: {Origin: 'https://make4yu.com'}, body: '{"action":"list"}'}), env);
 
 test('a fresh instance reuses the shared token instead of logging in again', async () => {
   store.clear(); logins = 0;
