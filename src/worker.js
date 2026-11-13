@@ -16,13 +16,13 @@
  *   SHIPROCKET_FALLBACK_EMAIL  – email sent as billing_email (the form doesn't ask customers for one)
  */
 
-/* The product list lives in the page itself: <script type="application/json" id="nowora-products"> in
+/* The product list lives in the page itself: <script type="application/json" id="make4yu-products"> in
  * public/index.html, edited from the make4yu client dashboard. The endpoint reads that block from the
  * deployed site (cached for a minute), so names and prices always match what customers see and never
  * come from the browser. */
 const DEFAULT_WEIGHT = 0.5;
 export function catalogFromHtml(html) {
-  const m = /<script[^>]*id=["']nowora-products["'][^>]*>([\s\S]*?)<\/script>/i.exec(String(html || ""));
+  const m = /<script[^>]*id=["']make4yu-products["'][^>]*>([\s\S]*?)<\/script>/i.exec(String(html || ""));
   if (!m) throw new Error("Product catalogue not found on the page");
   const data = JSON.parse(m[1]);
   const out = {};
@@ -470,7 +470,7 @@ export async function handleHealth(request, env) {
 const GH = "https://api.github.com";
 const b64encode = text => { const bytes = new TextEncoder().encode(text); let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); };
 const b64decode = b64 => { const bin = atob(String(b64).replace(/\s/g, "")); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); };
-const CAT_BLOCK = /(<script[^>]*id=["']nowora-products["'][^>]*>)([\s\S]*?)(<\/script>)/i;
+const CAT_BLOCK = /(<script[^>]*id=["']make4yu-products["'][^>]*>)([\s\S]*?)(<\/script>)/i;
 const SLUG = t => String(t).toUpperCase().replace(/[^A-Z0-9]+/g, "");
 const DISPATCH_STEP = s => /PICKED|SHIPPED|TRANSIT|OUT FOR DELIVERY|DELIVERED|REACHED|DESTINATION/i.test(s) && !/RTO|RETURN|CANCEL|UNDELIVERED|NOT PICKED|PICKUP EXCEPTION/i.test(s);
 

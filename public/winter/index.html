@@ -438,7 +438,7 @@ body.ready .w-hero>*{opacity:1;transform:none}
 <div class="w-toast" role="status" aria-live="polite"></div>
 <dialog class="wco" id="wco" aria-labelledby="wcoTitle">
   <div class="wco-head"><div><small id="wcoStep">[ Winter checkout ] <span id="wcoOid"></span></small><h2 id="wcoTitle">Your winter bag</h2></div><button type="button" class="wco-x" id="wcoX" aria-label="Close checkout">×</button></div>
-  <form class="wco-form" id="wcoForm" novalidate data-nowora="manual" style="display:contents">
+  <form class="wco-form" id="wcoForm" novalidate data-make4yu="manual" style="display:contents">
     <div class="wco-body" id="wcoBody">
       <p class="wco-sec">Bag</p>
       <div class="wco-items" id="wcoItems" aria-live="polite"></div>
@@ -501,7 +501,7 @@ body.ready .w-hero>*{opacity:1;transform:none}
   </form>
 </dialog>
 
-<script src="https://make4yu.com/t.js" data-site="7LvyjnQvzQ" defer></script>
+<script src="https://make4yu.com/t.js?v=2" data-site="7LvyjnQvzQ" defer></script>
 <script>
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -544,7 +544,7 @@ const watch=el=>io?io.observe(el):el.classList.add("in"); $$("[data-rv]").forEac
 const started=performance.now();
 const lift=()=>{ const wait=Math.max(0,(reduced?0:1150)-(performance.now()-started)); setTimeout(()=>{ $(".w-cur").classList.add("up"); document.body.classList.add("ready"); },wait); };
 fetch("/",{cache:"no-cache"}).then(r=>r.text()).then(html=>{
-  const m=/<script[^>]*id=["']nowora-products["'][^>]*>([\s\S]*?)<\/script>/i.exec(html); const DATA=JSON.parse(m[1]);
+  const m=/<script[^>]*id=["']make4yu-products["'][^>]*>([\s\S]*?)<\/script>/i.exec(html); const DATA=JSON.parse(m[1]);
   const P={};
 (DATA.products||[]).forEach(p=>{
   if(!p||!p.id||p.hidden||!(+p.price>0)||!Array.isArray(p.colours)) return;
@@ -675,7 +675,7 @@ fetch("/",{cache:"no-cache"}).then(r=>r.text()).then(html=>{
     placing=false; btn.textContent="Place order →"; totals();
     if(!res||!res.ok){ err.textContent=(res&&res.error)||"Couldn't place the order — please try again."; toast(err.textContent); return; }
     const placed=oid, paid=itemsTotal(ls), url=location.origin+"/track/?id="+encodeURIComponent(placed);
-    (window.noworaQ=window.noworaQ||[]).push(["Orders",{"Order ID":placed,"Name":v("name"),"Phone":"+91 "+phone,"Address":v("address").replace(/\s*\n\s*/g,", "),"City":v("city"),"State":v("state"),"PIN code":v("pin"),"Payment":pay,"Note":note,
+    (window.make4yuQ=window.make4yuQ||[]).push(["Orders",{"Order ID":placed,"Name":v("name"),"Phone":"+91 "+phone,"Address":v("address").replace(/\s*\n\s*/g,", "),"City":v("city"),"State":v("state"),"PIN code":v("pin"),"Payment":pay,"Note":note,
       "Tracking link":url,...(pay==="Cash on Delivery"&&COD_FEE?{"COD charge":String(COD_FEE)}:{}),"Total":String(paid+(pay==="Cash on Delivery"?COD_FEE:0))},
       ls.map(b=>({name:P[b.key].name,colour:b.colour,size:b.size,qty:b.qty,price:P[b.key].price}))]);
     try{ localStorage.setItem("52a_last_order",JSON.stringify({id:placed,ts:Date.now()})); }catch(_){}
@@ -695,7 +695,7 @@ fetch("/",{cache:"no-cache"}).then(r=>r.text()).then(html=>{
       document.addEventListener("visibilitychange",back);
       const paidGo=()=>{ const utr=$("#cpUtr").value.replace(/\s/g,"");
         if(utr&&!/^\d{12}$/.test(utr)){ $("#cpErr").textContent="The UPI reference is 12 digits — check your payment app, or leave it empty."; return; }
-        $("#cpErr").textContent=""; (window.noworaQ=window.noworaQ||[]).push(["UPI payments",{"Order ID":placed,"Amount":String(paid),"UPI reference (UTR)":utr||"not entered","Paid to":UPI,"Customer":v("name"),"Phone":"+91 "+phone}]);
+        $("#cpErr").textContent=""; (window.make4yuQ=window.make4yuQ||[]).push(["UPI payments",{"Order ID":placed,"Amount":String(paid),"UPI reference (UTR)":utr||"not entered","Paid to":UPI,"Customer":v("name"),"Phone":"+91 "+phone}]);
         try{ localStorage.setItem("52a_paid_"+placed,"1"); }catch(_){} document.removeEventListener("visibilitychange",back);
         $("#cpDone").disabled=true; $("#cpDone").textContent="Opening your tracking…"; setTimeout(()=>{ location.href="/track/?id="+encodeURIComponent(placed)+"&paid=1"; },700); };
       $("#cpDone").onclick=paidGo; $("#cpUtr").onkeydown=ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); paidGo(); } };
